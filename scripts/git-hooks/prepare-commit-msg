@@ -1,5 +1,5 @@
 #!/bin/sh
-# Strip Cursor co-author trailers so GitHub does not list cursoragent as a contributor.
+# Strip automated co-author trailers from commit messages.
 # Enable once per clone: git config core.hooksPath scripts/git-hooks
 COMMIT_MSG_FILE="$1"
 if [ -f "$COMMIT_MSG_FILE" ]; then
