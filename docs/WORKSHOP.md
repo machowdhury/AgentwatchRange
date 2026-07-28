@@ -4,11 +4,31 @@
 
 | Resource | URL |
 |----------|-----|
-| Attack Panel (run paths) | http://localhost:5001 → **// Workshop** |
+| Attack Panel (run paths) | http://localhost:5001 → **Workshop** tab (last menu item) |
 | Splunk (run hunts) | http://localhost:8000 → **Search** or app dashboards |
 | Banking app | http://localhost:5000 |
 
-**Companion docs:** [PREREQUISITES.md](PREREQUISITES.md) (install checklist) · [USER_GUIDE.md](USER_GUIDE.md) (dashboards) · [THREAT_SURFACES.md](THREAT_SURFACES.md) · [MAESTRO_WORKSHOP.md](MAESTRO_WORKSHOP.md) · [CISCO_INTEGRATION.md](CISCO_INTEGRATION.md) · [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) (AWS / Azure / GCP ports)
+**Companion docs:** [PREREQUISITES.md](PREREQUISITES.md) · [USER_GUIDE.md](USER_GUIDE.md) · [THREAT_SURFACES.md](THREAT_SURFACES.md) · [MAESTRO_WORKSHOP.md](MAESTRO_WORKSHOP.md) · [CISCO_INTEGRATION.md](CISCO_INTEGRATION.md) · [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md)
+
+---
+
+## Exercise map (follow in order)
+
+Use this as your checklist. Each level builds on the previous one.
+
+| Step | Where | What you do | Pass when |
+|------|-------|-------------|-----------|
+| **0.1** | Terminal | `docker compose --profile local up --build -d` | All containers running |
+| **0.2** | http://localhost:5001 | Open **Top 10 Scenarios** tab; check TARGET + LLM online | Both green |
+| **0.3** | Terminal | `./scripts/splunk_install_apps.sh` (after `package_splunk_app.sh`) | MLTK + Compliance app installed |
+| **0.4** | Terminal | `./scripts/splunk_local_bootstrap.sh` | HEC HTTP 200 |
+| **0.5** | http://localhost:8000 | Search: `index=acme_agentic_telemetry earliest=-15m \| stats count` | count > 0 |
+| **1** | Attack Panel | Run **Scenario 6**, then **5**, then **9** (or use **Workshop** tab → First Win) | Events in Splunk |
+| **2** | Splunk | Answer hunt questions Q201–Q203 in Level 2 below | SPL returns rows |
+| **3** | Attack Panel → Threat Chains | Run **KC-C001** | `incident_id` correlates in Splunk |
+| **4+** | Splunk dashboards | Technique Coverage, Control Attestation | Per level below |
+
+> **Tip:** Use the Attack Panel **Workshop** tab (last menu item) for one-click paths. Use **Top 10 Scenarios** for individual exercises.
 
 ---
 
@@ -228,7 +248,7 @@ Level 5  Architecture & GRC    (architect + compliance, ~90 min)
 
 **Where to run queries:** Always in **Splunk Search** (or copy from **Threat Hunting** / **MLTK Anomaly Hunting** dashboards). Do not skip Splunk — the workshop is designed to build SIEM muscle memory.
 
-**Where to fire attacks:** Attack Panel → **// Workshop** (or individual scenario buttons).
+**Where to fire attacks:** Attack Panel → **Workshop** tab (last menu item), or individual scenario buttons on **Top 10 Scenarios**.
 
 **Timing rule:** Wait **60 seconds** after each Attack Panel path before running SPL.
 
@@ -363,14 +383,16 @@ Press **Ctrl+C** when bored — services keep running.
 2. Go to: **http://localhost:5001**  
    *(Cloud VM: `http://<your-server-ip>:5001`)*
 
-3. Look at the **top bar** of the page (dark header). You should see two status lines:
+3. Look at the **top bar**. You should see:
 
    | Status text | Meaning | PASS |
    |-------------|---------|------|
    | **TARGET ONLINE** (green) | Banking app is reachable | ✅ |
    | **LLM ONLINE** (green) | AI model is ready | ✅ |
 
-4. If you see **TARGET OFFLINE** or **LLM OFFLINE** (red):
+4. The default tab is **Top 10 Scenarios**. Use **Workshop** (last tab) for guided paths.
+
+5. If you see **TARGET OFFLINE** or **LLM OFFLINE** (red):
 
    - Wait 2–3 more minutes and refresh the page (F5).  
    - Confirm Step 0.1 finished and Ollama pulled the model.  
@@ -378,85 +400,53 @@ Press **Ctrl+C** when bored — services keep running.
 
 **PASS:** Both **TARGET ONLINE** and **LLM ONLINE** are green.
 
-You should also see tabs such as **// Workshop** and **// Top 10 Scenarios**. Stay on **// Workshop** for later levels.
+You should see tabs in this order: **Top 10 Scenarios** (default) → All 45 Techniques → Threat Chains → Custom Payload → **Workshop** (last). Use **Workshop** for guided paths in Level 1+.
 
 ---
 
-### Step 0.3 — Install the Splunk dashboard app
+### Step 0.3 — Install Splunk apps (MLTK + Compliance)
 
-**Who does this:** Facilitator or anyone with Splunk admin on the lab instance.  
-**What this does:** Adds the **GenAI Compliance Monitor** menus and dashboards inside Splunk.
+**Who does this:** Facilitator or anyone with Splunk admin on the lab instance.
 
-#### Path A — Local Splunk in Docker
-
-1. In terminal, from the `OrchestraACME` folder, build the install package (one time):
+1. Build the compliance app package (one time):
 
    ```bash
    chmod +x scripts/package_splunk_app.sh
    ./scripts/package_splunk_app.sh
    ```
 
-   **PASS:** File exists: `dist/acme_genai_compliance-2.4.0.tar.gz` (version number may differ slightly).
+   **PASS:** File exists: `dist/acme_genai_compliance-*.tar.gz`.
 
-2. Copy the app into Splunk and install it:
-
-   ```bash
-   chmod +x scripts/splunk_install_app.sh
-   ./scripts/splunk_install_app.sh
-   ```
-
-   Or manually with `-u splunk`:
+2. Install MLTK + compliance app:
 
    ```bash
-   docker cp dist/acme_genai_compliance-2.4.0.tar.gz acme_splunk:/tmp/
-   docker compose exec -u splunk splunk /opt/splunk/bin/splunk install app \
-     /tmp/acme_genai_compliance-2.4.0.tar.gz -update 1 -auth admin:ACMEPassword2026!
-   docker compose exec -u splunk splunk /opt/splunk/bin/splunk restart
+   chmod +x scripts/splunk_install_apps.sh
+   ./scripts/splunk_install_apps.sh
    ```
 
-   When prompted about the certificate or restart, accept defaults. Splunk restarts in **1–3 minutes**.
+   This installs **Splunk ML Toolkit** from `splunk_app/splunk-ai-toolkit_600.tgz` (if present) and **GenAI Compliance Monitor**.
 
-3. Open Splunk in your browser: **http://localhost:8000**
+3. Open Splunk: **http://localhost:8000** → log in (`admin` / `ACMEPassword2026!`).
 
-4. Log in:
+4. **PASS:** App picker shows **GenAI Compliance Monitor** and **Splunk ML Toolkit**.
 
-   | Field | Default lab value |
-   |-------|-------------------|
-   | Username | `admin` |
-   | Password | `ACMEPassword2026!` |
+**Legacy alias:** `./scripts/splunk_install_app.sh` calls the same combined installer.
 
-   *(Change this password in real deployments — see [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md).)*
-
-5. After login, open the app picker (top left). **PASS:** You see **GenAI Compliance Monitor** (or `acme_genai_compliance`).
-
-6. Click **GenAI Compliance Monitor → Setup Guide** and skim the first page — it explains index and HEC in more detail.
-
-**Full install reference:** [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) Section 4.
+**Full reference:** [splunk_app/INSTALL.md](../splunk_app/INSTALL.md)
 
 #### Path B — Splunk Cloud or company Splunk
 
-1. Ask your Splunk admin to install `dist/acme_genai_compliance-2.4.0.tar.gz` and create:
-
-   - Index: `acme_agentic_telemetry`  
-   - HEC token with sourcetype `otel:agentic:json`  
-
-2. Admin puts the HEC URL and token into your lab machine’s `.env` file (`SPLUNK_HEC_ENDPOINT`, `SPLUNK_HEC_TOKEN`).
-
-3. Start lab with external Splunk (Step 0.1 command Path B).
-
-4. Log in to **your Splunk Cloud URL** (not localhost:8000). **PASS:** **GenAI Compliance Monitor** app appears.
-
-**Full install reference:** [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) Section 2.
+Ask your Splunk admin to install both tarballs and create index `acme_agentic_telemetry` with HEC sourcetype `otel:agentic:json`. Put HEC URL/token in `.env`.
 
 ---
 
 ### Step 0.4 — Confirm logs can reach Splunk (HEC)
 
-**What HEC means:** HTTP Event Collector — the pipe that sends security events from the lab into Splunk. You configure this once.
+**What HEC means:** HTTP Event Collector — the pipe that sends security events from the lab into Splunk.
 
 #### Path A — Local Splunk (default `.env`)
 
-`docker compose up` starts Splunk but **does not** enable HEC or create the index automatically. Run the bootstrap script once:
+`docker compose up` starts Splunk but **does not** always enable HEC on first boot. Run once:
 
 ```bash
 chmod +x scripts/splunk_local_bootstrap.sh
@@ -467,17 +457,14 @@ chmod +x scripts/splunk_local_bootstrap.sh
 
 **Quick UI check (optional):**
 
-1. In Splunk (http://localhost:8000), go to **Settings → Data inputs → HTTP Event Collector**.  
-2. **PASS:** HEC is **enabled**, and token `orchestra-acme-otel` exists.
+1. Splunk → **Settings → Data inputs → HTTP Event Collector** — HEC enabled, token `orchestra-acme-otel` exists.
+2. **GenAI Compliance Monitor → Setup Guide** — index `acme_agentic_telemetry`, sourcetype `otel:agentic:json`.
 
-3. Open **GenAI Compliance Monitor → Setup Guide** inside Splunk (after Step 0.3).  
-4. **PASS:** Index `acme_agentic_telemetry` and sourcetype `otel:agentic:json`.
-
-If events never appear after Step 0.5, re-run the bootstrap script and verify `SPLUNK_HEC_TOKEN` in `.env` — see [USER_GUIDE.md](USER_GUIDE.md) “Splunk quick checklist”.
+If events never appear after Step 0.5, re-run bootstrap and verify `SPLUNK_HEC_TOKEN` in `.env` — see [USER_GUIDE.md](USER_GUIDE.md).
 
 #### Path B — Splunk Cloud
 
-Your admin confirms `.env` on the lab machine has the correct **Splunk Cloud HEC URL** (starts with `https://http-inputs-`) and token. **PASS:** Facilitator runs a test ingest or you complete Step 0.5 and see events in Splunk Cloud Search.
+Admin confirms `.env` has correct **Splunk Cloud HEC URL** and token. **PASS:** test ingest or Step 0.5 shows events in Search.
 
 ---
 
@@ -558,10 +545,10 @@ Next: [Level 1 — Pipeline proof](#level-1--pipeline-proof-everyone) (**▶ RUN
 | Splunk **Overview** shows 0 events | HEC not configured or too soon | Run `./scripts/splunk_local_bootstrap.sh`; wait 60s after Step 0.5 |
 | OTel logs `connection reset by peer` on 8088 | HEC disabled or index missing | `./scripts/splunk_local_bootstrap.sh` |
 | OTel logs `permission denied` on `otel-raw-genai.jsonl` | Shared volume permissions | Bootstrap script fixes this; `docker compose restart otel_collector` |
-| Bootstrap `Permission denied` on `/opt/splunk/...` | Splunk CLI run as root | `./scripts/splunk_local_bootstrap.sh` (REST) or `./scripts/splunk_install_app.sh` (`-u splunk`) |
+| Bootstrap `Permission denied` on `/opt/splunk/...` | Splunk CLI run as root | `./scripts/splunk_local_bootstrap.sh` (REST) or `./scripts/splunk_install_apps.sh` |
 | Browser can’t open `:5001` on cloud VM | Firewall | Open ports per [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) |
 | `permission denied` on scripts | Script not executable | `chmod +x scripts/*.sh` |
-| Splunk app install `bundle_tmp` error | Root-owned paths in container | `./scripts/splunk_install_app.sh` after `git pull` |
+| Splunk app install `bundle_tmp` error | Root-owned paths in container | `./scripts/splunk_install_apps.sh` after `git pull` |
 | Everything slow | Not enough RAM | Close other apps; use machine with 16+ GB RAM |
 
 **Still stuck?** Collect for your facilitator: output of `docker compose ps`, screenshot of Attack Panel header, and screenshot of Splunk Overview.

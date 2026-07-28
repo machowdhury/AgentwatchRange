@@ -155,6 +155,10 @@ services:
       - "4317:4317"
       - "4318:4318"
       - "8889:8889"
+    depends_on:
+      splunk_hec_init:
+        condition: service_completed_successfully
+        required: false
     restart: unless-stopped
     # No Docker healthcheck — contrib image is distroless (no wget/curl).
     # Collector health extension listens on :13133 inside the mesh only.
@@ -163,6 +167,28 @@ services:
   # ---------------------------------------------------------------------------
   # SPLUNK — Local SIEM (profile: local — skipped in external mode)
   # ---------------------------------------------------------------------------
+  splunk_hec_init:
+    image: curlimages/curl:8.5.0
+    container_name: acme_splunk_hec_init
+    profiles:
+      - local
+    networks:
+      - acme_mesh
+    depends_on:
+      splunk:
+        condition: service_healthy
+    environment:
+      - SPLUNK_HOST=splunk
+      - SPLUNK_PASSWORD=${SPLUNK_PASSWORD:-ACMEPassword2026!}
+      - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
+      - SPLUNK_HEC_INDEX=${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}
+      - SPLUNK_HEC_SOURCETYPE=${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}
+      - SPLUNK_HEC_INPUT_NAME=${SPLUNK_HEC_INPUT_NAME:-orchestra-acme-otel}
+    volumes:
+      - ./scripts/splunk_hec_init.sh:/splunk_hec_init.sh:ro
+    entrypoint: ["/bin/sh", "/splunk_hec_init.sh"]
+    restart: "no"
+
   splunk:
     image: ${SPLUNK_IMAGE:-splunk/splunk:9.2.1}
     container_name: acme_splunk
@@ -178,7 +204,7 @@ services:
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=${SPLUNK_PASSWORD:-ACMEPassword2026!}
-      - SPLUNK_HEC_TOKEN=${SPLUNK_LOCAL_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
+      - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
       - SPLUNK_ENABLE_LISTEN=9997
     restart: unless-stopped
     healthcheck:

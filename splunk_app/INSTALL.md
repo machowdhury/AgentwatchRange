@@ -131,12 +131,35 @@ $SPLUNK_HOME/bin/splunk restart
 When using the bundled Splunk container:
 
 ```bash
-# Recommended — packages, repairs permissions, copies into etc/apps
-chmod +x scripts/splunk_install_app.sh
-./scripts/splunk_install_app.sh
+# Recommended — compliance app + MLTK from splunk_app/
+chmod +x scripts/package_splunk_app.sh scripts/splunk_install_apps.sh
+./scripts/package_splunk_app.sh
+./scripts/splunk_install_apps.sh
 ```
 
+Then enable HEC and create the index:
+
+```bash
+chmod +x scripts/splunk_local_bootstrap.sh
+./scripts/splunk_local_bootstrap.sh
+docker compose restart otel_collector   # if OTel started before HEC
+```
+
+**Legacy alias:** `./scripts/splunk_install_app.sh` calls the same combined installer.
+
 This avoids `splunk install app` tarball extraction issues (`bundle_tmp` errors) common when the CLI was previously run as root.
+
+### MLTK (Machine Learning Toolkit)
+
+Required for **MLTK Anomaly Hunting** and CTSM token forecasting panels.
+
+**Local lab (bundled tarball):**
+
+Place `splunk-ai-toolkit_600.tgz` under `splunk_app/` (included in this repo when provided). `splunk_install_apps.sh` extracts it to `Splunk_ML_Toolkit` in the container.
+
+**Splunk Cloud / Enterprise:** Install MLTK from Splunkbase, or upload the same tarball if your admin allows sideloading.
+
+---
 
 Or manually:
 
@@ -222,7 +245,7 @@ See **[splunk_app/CLOUD_VETTING.md](CLOUD_VETTING.md)** for the full checklist a
 - Same `.tar.gz` installs on **Splunk Cloud** and **Splunk Enterprise**
 - No `bin/` scripts — SPL dashboards and CSV lookups only
 - Scheduled detection searches ship **disabled**; enable after macro + HEC are configured
-- No MLTK required for core dashboards
+- MLTK recommended for **MLTK Anomaly Hunting** / CTSM panels — install via `splunk_install_apps.sh`
 - Colors follow the [Splunk UI Design System](https://splunkui.splunk.com/DesignSystem/Accessibility/Color) — see [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
 - Optional Cisco + MLTK: [docs/CISCO_INTEGRATION.md](../docs/CISCO_INTEGRATION.md)
 
@@ -236,9 +259,8 @@ See **[splunk_app/CLOUD_VETTING.md](CLOUD_VETTING.md)** for the full checklist a
 | No data in dashboards | Verify `acme_genai_index` macro matches your index/sourcetype |
 | HEC 403 errors | Token index/sourcetype permissions; verify token is active |
 | Bootstrap Permission denied on `/opt/splunk` | Re-run after `git pull` — bootstrap uses REST API, not `splunk` CLI as root |
-| App install `bundle_tmp` / Permission denied | Prior root `splunk` CLI | `./scripts/splunk_install_app.sh` (repairs ownership + copies to `etc/apps`) |
-| Fields not extracted | Confirm sourcetype is `otel:agentic:json`; check `default/props.conf` loaded |
-| MLTK panels empty | Install Machine Learning Toolkit from Splunkbase (optional) |
+| App install `bundle_tmp` / Permission denied | Prior root `splunk` CLI | `./scripts/splunk_install_apps.sh` (repairs ownership + copies to `etc/apps`) |
+| MLTK panels empty | MLTK not installed | Run `./scripts/splunk_install_apps.sh` or install MLTK from Splunkbase |
 
 ---
 

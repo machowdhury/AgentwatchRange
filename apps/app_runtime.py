@@ -160,46 +160,48 @@ DASHBOARD_HTML = """
 <title>ACME Banking — Multi-Agent Fabric v3</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#0a0e1a;color:#cdd6f4;min-height:100vh}
-header{background:linear-gradient(135deg,#1e3a5f,#0d47a1,#006064);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #00b0ff55}
-header h1{font-size:1.3rem;color:#fff;font-weight:700}
-.live-badge{background:#00e67622;border:1px solid #00e676;color:#00e676;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6f9;color:#1f2328;min-height:100vh}
+header{background:linear-gradient(135deg,#1565c0,#1976d2);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #0d47a1;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+header h1{font-size:1.25rem;color:#fff;font-weight:700}
+.live-badge{background:#e8f5e9;border:1px solid #2e7d32;color:#1b5e20;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600}
 .live-badge::before{content:'● ';animation:blink 1.5s infinite}
 @keyframes blink{50%{opacity:0}}
 .container{max-width:1280px;margin:0 auto;padding:24px 20px}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
-.card{background:#161b2e;border:1px solid #2a3a5c;border-radius:10px;padding:18px}
-.card h2{font-size:.75rem;color:#7986cb;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-.stat{font-size:1.8rem;font-weight:700;color:#00e5ff}
-.tag{font-size:.68rem;background:#1a2035;border:1px solid #2a3a5c;color:#546e7a;padding:2px 8px;border-radius:4px;margin-right:4px}
-.agent-card{background:#0f1420;border:1px solid #1e2a4a;border-radius:8px;padding:12px;margin-bottom:8px}
-.agent-name{font-weight:600;color:#90caf9;font-size:.85rem}
-.agent-meta{font-size:.7rem;color:#546e7a;margin-top:3px}
-.section-title{font-size:.9rem;font-weight:700;color:#90caf9;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1e2a4a}
-.input-area{width:100%;background:#0a0e1a;border:1px solid #2a3a5c;border-radius:6px;padding:12px;color:#cdd6f4;font-family:inherit;font-size:.9rem;resize:vertical;min-height:100px}
-.input-area:focus{outline:none;border-color:#00b0ff}
-.btn{background:linear-gradient(135deg,#1565c0,#0288d1);color:#fff;border:none;border-radius:6px;padding:10px 22px;cursor:pointer;font-size:.85rem;font-weight:600;transition:opacity .2s;margin-top:10px}
-.btn:hover{opacity:.85}
+.card{background:#fff;border:1px solid #d0d7de;border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h2{font-size:.75rem;color:#57606a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.stat{font-size:1.8rem;font-weight:700;color:#0969da}
+.tag{font-size:.68rem;background:#f6f8fa;border:1px solid #d0d7de;color:#57606a;padding:2px 8px;border-radius:4px;margin-right:4px}
+.agent-card{background:#f6f8fa;border:1px solid #d0d7de;border-radius:8px;padding:12px;margin-bottom:8px}
+.agent-name{font-weight:600;color:#1f2328;font-size:.9rem}
+.agent-meta{font-size:.75rem;color:#57606a;margin-top:3px}
+.section-title{font-size:.95rem;font-weight:700;color:#1f2328;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #d0d7de}
+.input-area{width:100%;background:#fff;border:1px solid #d0d7de;border-radius:6px;padding:12px;color:#1f2328;font-family:inherit;font-size:.9rem;resize:vertical;min-height:100px}
+.input-area:focus{outline:none;border-color:#0969da;box-shadow:0 0 0 3px rgba(9,105,218,.15)}
+.btn{background:#0969da;color:#fff;border:none;border-radius:6px;padding:10px 22px;cursor:pointer;font-size:.85rem;font-weight:600;transition:background .2s;margin-top:10px}
+.btn:hover{background:#0550ae}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-warn{background:linear-gradient(135deg,#b71c1c,#c62828)}
-.resp{background:#050810;border:1px solid #1e2a4a;border-radius:8px;padding:14px;font-family:monospace;font-size:.75rem;color:#a5d6a7;min-height:80px;max-height:400px;overflow-y:auto;margin-top:12px;white-space:pre-wrap;word-break:break-all}
-.blocked{color:#ff5252 !important;border-color:#ff525244 !important}
+.btn-warn{background:#cf222e}
+.btn-warn:hover{background:#a40e26}
+.resp{background:#f6f8fa;border:1px solid #d0d7de;border-radius:8px;padding:14px;font-family:ui-monospace,monospace;font-size:.8rem;color:#1f2328;min-height:80px;max-height:400px;overflow-y:auto;margin-top:12px;white-space:pre-wrap;word-break:break-all}
+.blocked{color:#cf222e !important;border-color:#cf222e44 !important;background:#fff5f5 !important}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700}
-.badge-ok{background:#00c853;color:#000}
-.badge-warn{background:#ff6d00;color:#fff}
-.badge-crit{background:#d50000;color:#fff}
-table{width:100%;border-collapse:collapse;font-size:.78rem}
-th{background:#1a2035;color:#7986cb;text-align:left;padding:8px 10px;font-weight:600;text-transform:uppercase;font-size:.68rem}
-td{padding:8px 10px;border-bottom:1px solid #1e2a4a;color:#b0bec5;vertical-align:top}
-.mono{font-family:monospace;font-size:.7rem;color:#00b0ff}
-.spinner{display:none;width:18px;height:18px;border:2px solid #1e2a4a;border-top:2px solid #00e5ff;border-radius:50%;animation:spin .8s linear infinite;margin-left:10px;vertical-align:middle}
+.badge-ok{background:#dafbe1;color:#1a7f37}
+.badge-warn{background:#fff8c5;color:#9a6700}
+.badge-crit{background:#ffebe9;color:#cf222e}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:#f6f8fa;color:#57606a;text-align:left;padding:8px 10px;font-weight:600;text-transform:uppercase;font-size:.7rem;border-bottom:1px solid #d0d7de}
+td{padding:8px 10px;border-bottom:1px solid #eaeef2;color:#1f2328;vertical-align:top}
+.mono{font-family:ui-monospace,monospace;font-size:.75rem;color:#0550ae}
+.spinner{display:none;width:18px;height:18px;border:2px solid #d0d7de;border-top:2px solid #0969da;border-radius:50%;animation:spin .8s linear infinite;margin-left:10px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
+select#agent-select{background:#fff;border:1px solid #d0d7de;color:#1f2328;padding:8px;border-radius:5px;font-size:.85rem}
 </style>
 </head>
 <body>
 <header>
-  <h1>🏦 ACME Banking — Multi-Agent Fabric <span style="color:#00e5ff;font-size:.85rem">v3 · Real LLM</span></h1>
+  <h1>🏦 ACME Banking — Multi-Agent Fabric <span style="color:#bbdefb;font-size:.85rem">v3 · Real LLM</span></h1>
   <span class="live-badge">Ollama {{ model }} Live</span>
 </header>
 
@@ -210,17 +212,17 @@ td{padding:8px 10px;border-bottom:1px solid #1e2a4a;color:#b0bec5;vertical-align
     <div class="card">
       <h2>Model Runtime</h2>
       <div class="stat" style="font-size:1.1rem" id="s-model">{{ model }}</div>
-      <div style="font-size:.7rem;color:#546e7a;margin-top:4px" id="s-url">{{ ollama_url }}</div>
+      <div style="font-size:.7rem;color:#57606a;margin-top:4px" id="s-url">{{ ollama_url }}</div>
     </div>
     <div class="card">
       <h2>Ollama Status</h2>
       <div class="stat" id="s-ollama">Checking...</div>
-      <div style="font-size:.7rem;color:#546e7a;margin-top:4px" id="s-model-loaded"></div>
+      <div style="font-size:.7rem;color:#57606a;margin-top:4px" id="s-model-loaded"></div>
     </div>
     <div class="card">
       <h2>Sessions Processed</h2>
       <div class="stat" id="s-sessions">{{ recent_sessions|length }}</div>
-      <div style="font-size:.7rem;color:#546e7a;margin-top:4px">In-memory ring buffer (last 50)</div>
+      <div style="font-size:.7rem;color:#57606a;margin-top:4px">In-memory ring buffer (last 50)</div>
     </div>
   </div>
 
@@ -229,7 +231,7 @@ td{padding:8px 10px;border-bottom:1px solid #1e2a4a;color:#b0bec5;vertical-align
     <!-- Input + Pipeline Runner -->
     <div class="card">
       <div class="section-title">Agent Pipeline — Submit Banking Request</div>
-      <div style="font-size:.75rem;color:#546e7a;margin-bottom:10px">
+      <div style="font-size:.75rem;color:#57606a;margin-bottom:10px">
         Input is routed through all 4 agents in sequence. Each agent calls the real LLM.
         DefenseClaw and CodeGuard middleware inspect every response.
       </div>
@@ -274,7 +276,7 @@ Examples:
           placeholder="Message to send to selected agent..."></textarea>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;min-width:200px">
-        <select id="agent-select" style="background:#0a0e1a;border:1px solid #2a3a5c;color:#cdd6f4;padding:8px;border-radius:5px;font-size:.8rem">
+        <select id="agent-select">
           {% for aid, agent in agents.items() %}
           <option value="{{ aid }}">{{ agent.name }}</option>
           {% endfor %}
@@ -305,7 +307,7 @@ Examples:
         </tbody>
       </table>
       {% else %}
-      <div style="color:#546e7a;font-size:.8rem;padding:12px">No sessions yet — submit a request above.</div>
+      <div style="color:#57606a;font-size:.8rem;padding:12px">No sessions yet — submit a request above.</div>
       {% endif %}
     </div>
     <button class="btn" style="margin-top:10px" onclick="refreshSessions()">↺ Refresh Sessions</button>
@@ -385,11 +387,36 @@ async function runSingleAgent() {
 }
 
 async function refreshSessions() {
+  const container = document.getElementById('sessions-table');
   try {
     const r = await fetch('/api/v1/sessions');
     const d = await r.json();
     document.getElementById('s-sessions').textContent = d.count;
-  } catch(e) {}
+    if (!d.sessions || d.sessions.length === 0) {
+      container.innerHTML = '<div style="color:#57606a;font-size:.85rem;padding:12px">No sessions yet — submit a request above.</div>';
+      return;
+    }
+    let html = '<table><thead><tr><th>Session ID</th><th>Input Preview</th><th>Agents</th><th>Blocked</th><th>Total Tokens</th></tr></thead><tbody>';
+    d.sessions.forEach(s => {
+      const agents = s.agents || [];
+      const tokens = agents.reduce((sum, a) => sum + (a.input_tokens || 0) + (a.output_tokens || 0), 0);
+      const blocked = s.pipeline_blocked
+        ? '<span class="badge badge-crit">BLOCKED</span>'
+        : '<span class="badge badge-ok">PASS</span>';
+      const preview = (s.user_input || '').slice(0, 50);
+      const suffix = (s.user_input || '').length > 50 ? '...' : '';
+      const sid = (s.session_id || '').slice(0, 12);
+      html += `<tr><td class="mono">${sid}...</td><td>${escHtml(preview)}${suffix}</td><td>${agents.length}</td><td>${blocked}</td><td>${tokens}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch (e) {
+    container.innerHTML = '<div style="color:#cf222e;font-size:.85rem;padding:12px">Could not load sessions: ' + escHtml(e.message) + '</div>';
+  }
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 async function checkOllama() {

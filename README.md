@@ -59,13 +59,15 @@ You walk away with **SPL you can adapt**, **dashboard screenshots**, and **archi
 | **Architecture review** | Optional MAESTRO path → attack predicted layers | Close the loop: threat model → exploit → prove (or disprove) in Splunk |
 | **Regression after control changes** | Re-fire the same scenario IDs | Same payload, comparable fields — did your guardrail change improve outcomes? |
 
-**Attack Panel** (`http://localhost:5001`) is for offense and ordered workshop paths. **Banking app** (`http://localhost:5000`) is for seeing legitimate multi-agent flow. **Splunk** (`http://localhost:8000`) is where you prove outcomes — after you configure the index, HEC token, and compliance app (documented below; not automatic on first boot).
+**Attack Panel** (`http://localhost:5001`) is for offense and ordered workshop paths. **Banking app** (`http://localhost:5000`) is for seeing legitimate multi-agent flow. **Splunk** (`http://localhost:8000`) is where you prove outcomes — after you configure apps, index, and HEC (documented below; not automatic on first boot).
+
+> **Easiest path:** Follow the **[Exercise map in WORKSHOP.md](docs/WORKSHOP.md#exercise-map-follow-in-order)** — numbered steps from `docker compose up` through your first Splunk hunt. You do not need to read this entire README first.
 
 ### How compliance mapping works
 
 Compliance here means **traceable runtime evidence**, not a certification stamp:
 
-1. **You run a scenario** (Attack Panel → Top 10 or Workshop path).
+1. **You run a scenario** (Attack Panel → **Top 10 Scenarios**, or **Workshop** tab for guided paths).
 2. **The framework layer enriches each OTel event** with technique IDs (MITRE ATLAS), OWASP LLM/ASI tags, optional MAESTRO layers, and NIST control IDs from `control_matrix.yaml`.
 3. **`control_validator` evaluates pass/fail** per scenario — e.g. MCP scope violation blocked, jailbreak HARD_DENY, token depth within budget.
 4. **Splunk ingests `otel:agentic:json`** and dashboards roll up:
@@ -82,7 +84,7 @@ Optional **CSA MAESTRO** adds design-time threats (L2–L6) you then validate wi
 
 The **[Workshop curriculum](docs/WORKSHOP.md)** turns the lab into a **teaching system**: ordered Levels 0–5, role tracks (junior SOC → detection engineer → architect → GRC), and BOTS-style hunt questions (Q101–Q503). Most teams do not need to read every file in the repo — they need a path that answers:
 
-- *“What do I click first?”* → Level 0–1, 15-Minute First Win on the Attack Panel  
+- *“What do I click first?”* → [WORKSHOP.md Exercise map](docs/WORKSHOP.md#exercise-map-follow-in-order): Level 0, then **Top 10 Scenarios** tab; use **Workshop** (last tab) for one-click paths  
 - *“What SPL proves the control worked?”* → Q201+ with macros and field glossary  
 - *“How do I brief my manager?”* → Actor Chain Story + Control Attestation exports  
 
@@ -285,7 +287,7 @@ We document these on purpose so expectations stay realistic:
 
 1. **Regex defenses miss and over-block.** Novel jailbreaks may succeed; benign text may match financial regexes. Tune patterns in `llm_client.py` for your demos.
 2. **Small models behave inconsistently.** Attack success rates vary run-to-run. Use results to test *detections*, not to score model safety scientifically.
-3. **Splunk setup is manual.** Local Docker: run `./scripts/splunk_local_bootstrap.sh` for HEC + index, then install the app. Splunk Cloud: index, HEC token, app install, and MLTK are your steps.
+3. **Splunk setup is manual.** Local Docker: run `./scripts/splunk_install_apps.sh` (compliance app + MLTK from `splunk_app/`), then `./scripts/splunk_local_bootstrap.sh` for HEC + index. Splunk Cloud: index, HEC token, app upload, and MLTK are your steps.
 4. **No auto model routing.** All four agents share one `OLLAMA_MODEL`.
 5. **Default credentials are public in this repo.** Fine for localhost labs only.
 6. **Framework mappings include control attestation** — NIST pass/fail is emitted per event; not a certified compliance attestation.
@@ -358,8 +360,8 @@ docker compose --profile local up --build -d
 
 | Dashboard | URL |
 |-----------|-----|
-| Banking App (defend) | http://localhost:5000 |
-| Attack Panel (offense) | http://localhost:5001 |
+| Attack Panel (offense) | http://localhost:5001 — default tab **Top 10 Scenarios**; **Workshop** is last |
+| Banking App (defend) | http://localhost:5000 — light UI; use **↺ Refresh Sessions** after pipeline runs |
 | Splunk (monitor) | http://localhost:8000 (`admin` / `ACMEPassword2026!`) |
 
 Use this lab to:
@@ -369,7 +371,7 @@ Use this lab to:
 - Enforce **layered runtime controls** — see [USER_GUIDE](docs/USER_GUIDE.md)
 - Validate **Splunk ES detection rules** against `otel:agentic:json` telemetry
 
-> **First boot:** LLM works after Ollama pulls the model. Splunk dashboards work only after you install the compliance app and create the index — not automatically on `docker compose up`.
+> **First boot:** LLM works after Ollama pulls the model. Splunk dashboards work only after you install apps (compliance + MLTK) and configure HEC — not automatically on `docker compose up`. Start with **[WORKSHOP.md → Exercise map](docs/WORKSHOP.md#exercise-map-follow-in-order)**.
 
 ---
 
@@ -691,14 +693,7 @@ First startup takes **5–15 minutes** because:
 - Ollama pulls the `llama3.2:1b` model (~1.3 GB)
 - Splunk initializes and accepts the license
 
-**Splunk HEC (required for events in Splunk):**
-
-```bash
-chmod +x scripts/splunk_local_bootstrap.sh
-./scripts/splunk_local_bootstrap.sh
-```
-
-Without index + HEC, the OTel collector logs `connection reset by peer` on port 8088 — banking app and baseline traffic still run; Splunk stays empty until HEC is configured.
+**Splunk HEC (required for events in Splunk):** Configure in **Step 6** after installing apps. Until then, banking app and baseline traffic still run; Splunk stays empty and OTel may log `connection reset by peer` on port 8088.
 
 ### Step 2b — Cloud VM (optional)
 
@@ -742,18 +737,24 @@ Expected state: all services `running` / `healthy`.
 | Splunk Web | Open http://localhost:8000 |
 | Ollama (internal) | `docker compose exec ollama ollama list` |
 
-### Step 5 — Install the Splunk compliance app
+### Step 5 — Install Splunk apps (compliance + MLTK)
 
-> **Prerequisite:** Step 2 bootstrap (`./scripts/splunk_local_bootstrap.sh`) must have run so HEC and index exist. This step adds dashboards.
-
-**Option A — Local Docker (recommended):**
+> **Prerequisite:** Splunk container is running (`docker compose ps` shows `acme_splunk` healthy).
 
 ```bash
-chmod +x scripts/splunk_install_app.sh
-./scripts/splunk_install_app.sh
+chmod +x scripts/package_splunk_app.sh scripts/splunk_install_apps.sh
+./scripts/package_splunk_app.sh
+./scripts/splunk_install_apps.sh
 ```
 
-Manual install (must use `-u splunk`):
+This installs:
+
+- **GenAI Compliance Monitor** (`acme_genai_compliance`) — dashboards and hunts  
+- **Splunk ML Toolkit** from `splunk_app/splunk-ai-toolkit_600.tgz` when present (required for MLTK Anomaly Hunting / CTSM panels)
+
+**Legacy alias:** `./scripts/splunk_install_app.sh` calls the same combined installer.
+
+Manual compliance-only install (must use `-u splunk`):
 
 ```bash
 ./scripts/package_splunk_app.sh
@@ -766,18 +767,21 @@ docker compose exec -u splunk splunk /opt/splunk/bin/splunk restart
 
 **Option B — Splunk Cloud / Enterprise (no local Splunk):**
 
-See **[splunk_app/INSTALL.md](splunk_app/INSTALL.md)** — build the package, upload to Splunk Cloud, configure HEC, then run OrchestraACME in external mode.
+See **[splunk_app/INSTALL.md](splunk_app/INSTALL.md)** — build the package, upload to Splunk Cloud, install MLTK from Splunkbase, configure HEC, then run OrchestraACME in external mode.
 
-For local Docker, HEC and index are created by `./scripts/splunk_local_bootstrap.sh` (Step 2). Manual UI path: **Settings → Indexes** and **Settings → HTTP Event Collector**.
-
-### Step 6 — Install MLTK (for advanced analytics panels)
-
-In Splunk Web → **Apps** → **Find More Apps** → search **Machine Learning Toolkit** → Install.
-
-Or via CLI inside the Splunk container:
+### Step 6 — Enable HEC and create the index
 
 ```bash
-docker compose exec -u splunk splunk /opt/splunk/bin/splunk install app Splunk_ML_Toolkit -update 1 -auth admin:ACMEPassword2026!
+chmod +x scripts/splunk_local_bootstrap.sh
+./scripts/splunk_local_bootstrap.sh
+```
+
+**PASS:** Script prints `HEC returned HTTP 200`. Without index + HEC, the OTel collector logs `connection reset by peer` on port 8088.
+
+If OTel was already running before bootstrap:
+
+```bash
+docker compose restart otel_collector
 ```
 
 ### Post-install checklist (do not skip)
@@ -787,9 +791,8 @@ Use this to confirm the full pipeline end-to-end:
 - [ ] `docker compose ps` — all services `running` / `healthy`
 - [ ] `curl http://localhost:5000/health` — banking app up
 - [ ] `docker compose exec ollama ollama list` — shows your `OLLAMA_MODEL`
+- [ ] `./scripts/splunk_install_apps.sh` — compliance app + MLTK installed
 - [ ] `./scripts/splunk_local_bootstrap.sh` — HEC enabled, index `acme_agentic_telemetry` exists
-- [ ] HEC token allows sourcetype `otel:agentic:json` into that index
-- [ ] `acme_genai_compliance` app installed and Splunk restarted
 - [ ] Run one attack on :5001, then in Splunk: `index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 5`
 - [ ] Open **GenAI Compliance Monitor** — events appear (may take 1–2 min for batching)
 
@@ -880,7 +883,7 @@ Navigate in Splunk Web: **GenAI Compliance Monitor**
 ```text
 1. cp .env.example .env && docker compose --profile local up --build -d
 2. Wait for all services healthy
-3. Install splunk_compliance_app + MLTK + create acme_agentic_telemetry index
+3. Install apps via `./scripts/splunk_install_apps.sh` (compliance + MLTK) and create index `acme_agentic_telemetry` via `./scripts/splunk_local_bootstrap.sh`
 4. Open Attack Panel → fire Prompt Injection, Tool Escape, and Rogue Agent scenarios
 5. Open Splunk → confirm otel:agentic:json events ingested
 6. Open Compliance Overview → verify DefenseClaw denials increment
@@ -920,8 +923,8 @@ After install, open **GenAI Compliance Monitor → Setup Guide** for health chec
 ### Local Docker Quick Setup (Pattern A)
 
 1. **Start stack** — `docker compose --profile local up --build -d`
-2. **Bootstrap HEC** — `./scripts/splunk_local_bootstrap.sh`
-3. **Install app** — `./scripts/splunk_install_app.sh`
+2. **Install apps** — `./scripts/package_splunk_app.sh` then `./scripts/splunk_install_apps.sh`
+3. **Bootstrap HEC** — `./scripts/splunk_local_bootstrap.sh`
 4. **Verify** — `index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 20`
 
 ### Splunk Cloud Quick Setup
@@ -1019,7 +1022,7 @@ docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -
 | OTel `permission denied` on jsonl file | Shared volume permissions | Bootstrap script; `docker compose restart otel_collector` |
 | DefenseClaw never fires | Attack too mild | Try Runtime Prompt Injection, MCP Tool Escape, or Rogue Agent scenarios |
 | Compliance dashboard empty | App not installed | Install `splunk_compliance_app` (HEC/index via bootstrap first) |
-| CTSM panel shows error | MLTK not installed | Install Machine Learning Toolkit |
+| CTSM panel shows error | MLTK not installed | Run `./scripts/splunk_install_apps.sh` (includes MLTK from `splunk_app/splunk-ai-toolkit_600.tgz`) |
 | Ollama GPU error | No NVIDIA driver | Remove `deploy` GPU block in compose |
 | Splunk slow to start | Normal on first boot | Wait 3–5 min; check `docker compose logs splunk` |
 

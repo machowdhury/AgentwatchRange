@@ -67,7 +67,7 @@ Reference: [CSA MAESTRO Getting Started](https://github.com/CloudSecurityAllianc
 
 **Option A — Attack Panel workshop (recommended)**
 
-1. Open http://localhost:5001 → **// Workshop**
+1. Open http://localhost:5001 → **Workshop** tab (last menu item)
 2. Click **▶ RUN MAESTRO VALIDATE PATH**
 3. Step 1 copies the architecture to your clipboard and pauses for MAESTRO analysis
 
@@ -111,7 +111,7 @@ Run the **MAESTRO Validate** workshop path (Scenarios **6 → 8 → 9 → 10**):
 | 9 — RAG exfil probe | L2 | Data operations / retrieval |
 | 10 — Memory / SOC bypass | L6 | Security & compliance controls |
 
-Or fire manually from **// Top 10 Scenarios**.
+Or fire manually from **Top 10 Scenarios** tab.
 
 Wait **60 seconds** for Splunk ingest.
 

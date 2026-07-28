@@ -12,7 +12,7 @@ cp .env.example .env
 # Enable Cisco overlay (teach mode — scans log only, attacks unchanged)
 docker compose -f docker-compose.yml -f docker-compose.cisco.yml --profile local up --build -d
 
-# Attack panel → Workshop → **Cisco + MLTK Anomaly Hunt**
+# Attack panel → Workshop tab (last) → **Cisco + MLTK Anomaly Hunt**
 ```
 
 On Splunk:

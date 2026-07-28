@@ -25,25 +25,32 @@ docker compose --profile local up --build -d
 
 > **Cloud VM (AWS EC2 / Azure / Google Compute Engine):** See [docs/CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) for which ports to open on security groups / firewalls (`5000`, `5001`, `8000` restricted — never expose `8088`, `11434`, or OTel ports to the internet).
 
-Wait for Ollama (`docker compose logs -f ollama`). Configure Splunk HEC and install the compliance app — [splunk_app/INSTALL.md](../splunk_app/INSTALL.md).
+Wait for Ollama (`docker compose logs -f ollama`). Then install Splunk apps and configure HEC — see checklist below or [WORKSHOP.md Exercise map](WORKSHOP.md#exercise-map-follow-in-order).
 
 Confirm the panel header shows **TARGET ONLINE** and **LLM ONLINE** before firing attacks.
 
 **Splunk quick checklist** (do once after `docker compose up`):
 
-1. `./scripts/splunk_local_bootstrap.sh` — enables HEC, creates index `acme_agentic_telemetry`, creates token matching `.env`
-2. `./scripts/splunk_install_app.sh` — packages and installs the compliance app (runs as `splunk` user)
-3. Verify: `` index=acme_agentic_telemetry earliest=-15m | stats count ``
+1. `./scripts/package_splunk_app.sh` — build compliance app tarball
+2. `./scripts/splunk_install_apps.sh` — installs compliance app + MLTK from `splunk_app/splunk-ai-toolkit_600.tgz`
+3. `./scripts/splunk_local_bootstrap.sh` — enables HEC, creates index `acme_agentic_telemetry`, creates token matching `.env`
+4. Verify: `` index=acme_agentic_telemetry earliest=-15m | stats count ``
+5. If OTel was running before HEC: `docker compose restart otel_collector`
+
+Open http://localhost:5001 — default tab is **Top 10 Scenarios**. Check header **TARGET ONLINE** and **LLM ONLINE** before firing attacks.
+
+**Banking app** (http://localhost:5000): after **Run Through All Agents**, click **↺ Refresh Sessions** to reload the pipeline history table.
 
 ---
 
 ## The Workshop
 
-> **Full curriculum + verbose overview:** **[WORKSHOP.md](WORKSHOP.md)** — why teams run it, deliverables, daily-work skills by role, Levels 0–5, hunt questions Q101–Q503.
+> **Start here:** **[WORKSHOP.md → Exercise map](WORKSHOP.md#exercise-map-follow-in-order)** — numbered checklist from install through first hunt.  
+> **Full curriculum:** **[WORKSHOP.md](WORKSHOP.md)** — Levels 0–5, hunt questions Q101–Q503, role tracks.
 
-The OrchestraACME Workshop is a **hands-on lab**, not theory-only training: learners attack a live multi-agent banking app, observe runtime controls (block / allow / detect-only), and **prove outcomes in Splunk**. Skills transfer directly to SOC triage, detection engineering, architecture reviews, and GRC evidence — see [About the OrchestraACME Workshop](WORKSHOP.md#about-the-orchestraacme-workshop) for full detail.
+The OrchestraACME Workshop is a **hands-on lab**, not theory-only training: learners attack a live multi-agent banking app, observe runtime controls (block / allow / detect-only), and **prove outcomes in Splunk**.
 
-The Attack Panel **// Workshop** tab runs guided attack paths. **Splunk Search** is where learners answer hunt questions — same pattern as [Splunk BOTS](https://github.com/splunk/botsv3). See [Splunk vs Jupyter](WORKSHOP.md#splunk-vs-jupyter--recommendation).
+Use the Attack Panel **Workshop** tab (**last menu item**) for one-click guided paths. Use **Top 10 Scenarios** (default tab) for individual exercises. **Splunk Search** is where learners answer hunt questions — same pattern as [Splunk BOTS](https://github.com/splunk/botsv3).
 
 ### Quick map
 
@@ -143,7 +150,7 @@ Workshop button (Attack Panel :5001)
 | Component | Role in Workshop | Path / artifact |
 |-----------|------------------|-----------------|
 | **Attack Panel** (`apps/exploit_ui.py`) | UI, Workshop sequencer, terminal feed | http://localhost:5001 |
-| **Workshop definitions** | Step lists, delays, Splunk checklist (client-side `WORKSHOPS` object) | Attack Panel `// Workshop` tab |
+| **Workshop definitions** | Step lists, delays, Splunk checklist (client-side `WORKSHOPS` object) | Attack Panel **Workshop** tab (last) |
 | **Banking app** (`apps/app_runtime.py`, `agents/agent_router.py`) | Agent APIs, pipeline, OTel export | http://localhost:5000 |
 | **Attack payloads** (`apps/framework/attack_payloads.py`) | Scenarios 1–10 adversarial strings + metadata | Used by `/api/exploit/<n>` |
 | **Workflow guard** (`apps/framework/workflow_guard.py`) | Pre-LLM policy — orchestration, MCP, A2A, memory | Scenarios 2, 6, 8, 10 |
@@ -187,38 +194,27 @@ Saying this out loud in a workshop builds trust and mirrors how production range
 
 ## Attack Panel — all options
 
-Everything at **http://localhost:5001**. Five tabs on the left; **Real-Time Attack Feed** on the right.
+Everything at **http://localhost:5001**. Five tabs on the left (light theme for readability); **Real-Time Attack Feed** on the right.
+
+**Tab order:** Top 10 Scenarios (default) → All 45 Techniques → Threat Chains → Custom Payload → **Workshop (last)**
 
 ```
-Click (Workshop / Scenario / Chain) → Banking app → Ollama → OTel → Splunk → Dashboard
+Click (Scenario / Chain / Workshop path) → Banking app → Ollama → OTel → Splunk → Dashboard
 ```
 
-### Tab 0 — `// Workshop` (guided learning paths)
-
-| Button | Duration | What runs | Splunk dashboards to open | Learning goal |
-|--------|----------|-----------|---------------------------|---------------|
-| **▶ RUN FIRST WIN PATH** | ~15 min | Scenarios 6 → 5 → 9 | Control Attestation, Detection Efficacy, Overview | Three control philosophies: pre-LLM block, output deny, detect-only |
-| **▶ RUN STANDARD WORKSHOP** | ~25 min | First Win + chain **KC-C001** | + Actor Chain Story | Single surface vs multi-stage `incident_id` correlation |
-| **▶ RUN DEEP WORKSHOP** | ~45+ min | Standard + **RUN ALL 45** | + Technique Coverage Matrix | Measurable MITRE coverage (OBSERVED vs NOT_OBSERVED) |
-| **▶ FIRE ALL 10 SCENARIOS** | ~5 min | Scenarios 1–10 sequential | Control Attestation, NIST AI RMF, Heatmap | All eight agentic surfaces in one pass |
-
-Progress and a Splunk checklist appear in the panel after each path completes.
-
----
-
-### Tab 1 — `// Top 10 Scenarios`
+### Tab 1 — Top 10 Scenarios (default)
 
 | Button | What it does |
 |--------|----------------|
-| **▶ FIRE SCENARIO n → … AGENT** | One adversarial payload to one agent (fastest demo). |
-| **⚡ Full Pipeline** | Same payload through all **4 agents** in sequence. |
-| **👁 Preview Payload** | Raw attack string (does not fire). |
+| **Run scenario n** | One adversarial payload to one agent (fastest demo). |
+| **Full Pipeline** | Same payload through all **4 agents** in sequence. |
+| **Preview Payload** | Raw attack string (does not fire). |
 
-Cards are labeled **SCENARIO n — SURFACE** (e.g. Scenario 6 — TOOLS SURFACE). See [THREAT_SURFACES.md](THREAT_SURFACES.md) for the conceptual map.
+Cards are labeled **Scenario n — SURFACE** (e.g. Scenario 6 — TOOLS SURFACE). See [THREAT_SURFACES.md](THREAT_SURFACES.md).
 
 ---
 
-### Tab 2 — `// All 45 Techniques`
+### Tab 2 — All 45 Techniques
 
 | Button | What it does |
 |--------|----------------|
@@ -234,7 +230,7 @@ Cards are labeled **SCENARIO n — SURFACE** (e.g. Scenario 6 — TOOLS SURFACE)
 
 ---
 
-### Tab 3 — `// Threat Chains`
+### Tab 3 — Threat Chains
 
 | Button | What it does |
 |--------|----------------|
@@ -250,9 +246,24 @@ Cards are labeled **SCENARIO n — SURFACE** (e.g. Scenario 6 — TOOLS SURFACE)
 
 ---
 
-### Tab 4 — `// Custom Payload`
+### Tab 4 — Custom Payload
 
-Custom string, agent picker, optional **Full Pipeline**, **▶ EXECUTE**.
+Custom string, agent picker, optional **Full Pipeline**, **Execute**.
+
+---
+
+### Tab 5 — Workshop (last — guided learning paths)
+
+| Button | Duration | What runs | Splunk dashboards to open |
+|--------|----------|-----------|---------------------------|
+| **RUN FIRST WIN PATH** | ~15 min | Scenarios 6 → 5 → 9 | Control Attestation, Detection Efficacy, Overview |
+| **RUN STANDARD WORKSHOP** | ~25 min | First Win + chain **KC-C001** | + Actor Chain Story |
+| **RUN DEEP WORKSHOP** | ~45+ min | Standard + **RUN ALL 45** | + Technique Coverage Matrix |
+| **FIRE ALL 10 SCENARIOS** | ~5 min | Scenarios 1–10 sequential | Control Attestation, NIST AI RMF |
+| **MAESTRO VALIDATE PATH** | varies | Architecture + scenarios 6,8,9,10 | MAESTRO layer coverage |
+| **CISCO + MLTK PATH** | ~30 min | Preflight + 1,6,7,9 | MLTK Anomaly Hunting |
+
+Progress and a Splunk checklist appear in the panel after each path completes.
 
 ---
 
@@ -266,7 +277,7 @@ After each action: wait **30–60 seconds**.
 
 | Your goal | What to click | Dashboard | Why it populates |
 |-----------|---------------|-----------|------------------|
-| Prove telemetry | Workshop **First Win** or any **▶ FIRE SCENARIO n** | **Overview** | `gen_ai.agent.*` on `otel:agentic:json` events |
+| Prove telemetry | **Workshop** tab → First Win, or **Top 10** → any scenario | **Overview** | `gen_ai.agent.*` on `otel:agentic:json` events |
 | Input/output blocking | **Scenario 3** or **5** | **Control Attestation** | `codeguard_blocked`, `defenseclaw.action`, `control.status` |
 | Workflow-surface blocks | **Scenario 2**, **6**, or **8** | **Detection Efficacy** | `workflow.block_reason` (orchestration, MCP, A2A) |
 | All 10 surfaces | **FIRE ALL 10 SCENARIOS** (Workshop) | **Control Attestation** | Scenarios 1–10 + NIST fields |
@@ -277,7 +288,7 @@ After each action: wait **30–60 seconds**.
 
 ### Minimum viable check (2 minutes)
 
-1. Workshop → **▶ RUN FIRST WIN PATH** (or **▶ FIRE SCENARIO 6**)
+1. **Workshop** tab (last) → **RUN FIRST WIN PATH** (or **Top 10** → Scenario 6)
 2. Splunk:
 
 ```spl
@@ -297,7 +308,7 @@ If Search has data but dashboards are empty, edit macro **`acme_genai_index`** t
 ## GenAI Compliance Monitor — dashboard & visualization guide
 
 **App name in Splunk:** GenAI Compliance Monitor (`acme_genai_compliance` v2.3+)  
-**Install:** `./scripts/splunk_install_app.sh` (local Docker) or `./scripts/package_splunk_app.sh` → upload to Splunk Cloud  
+**Install:** `./scripts/splunk_install_apps.sh` (local Docker — compliance + MLTK) or `./scripts/package_splunk_app.sh` → upload to Splunk Cloud  
 **Validate (Cloud/Enterprise):** `./scripts/validate_splunk_app.sh` — see [splunk_app/CLOUD_VETTING.md](../splunk_app/CLOUD_VETTING.md)
 
 All dashboards read `` `acme_genai_index` `` (default: `index=acme_agentic_telemetry sourcetype="otel:agentic:json"`). Empty panels mean no telemetry yet — run a Workshop path first.

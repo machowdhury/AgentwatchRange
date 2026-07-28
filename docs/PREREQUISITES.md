@@ -18,7 +18,7 @@ Complete this checklist **before** `docker compose up` or the workshop. Use it o
 | 6 | **Inbound ports** open (cloud VM only) | `5000`, `5001`, optionally `8000` — see [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) |
 | 7 | Stack started | `docker compose --profile local up --build -d` |
 | 8 | **Ollama model** pulled | `docker compose logs ollama` shows `llama3.2:1b` |
-| Splunk one-time | App + index + **HEC** — **not** automatic on `docker compose up` | Run `./scripts/splunk_local_bootstrap.sh` then install app — [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) |
+| Splunk one-time | Apps + index + **HEC** — **not** automatic on `docker compose up` | `./scripts/splunk_install_apps.sh` then `./scripts/splunk_local_bootstrap.sh` — [WORKSHOP.md Exercise map](WORKSHOP.md#exercise-map-follow-in-order) |
 | 10 | **Attack Panel** shows TARGET + LLM **ONLINE** | http://localhost:5001 |
 
 ---
@@ -197,29 +197,28 @@ Full firewall examples: [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md).
 
 ## Splunk prerequisites (one-time)
 
-`docker compose up` does **not** install the compliance app or create the index.
+`docker compose up` does **not** install Splunk apps or create the index.
 
-**Quick path (local Docker Splunk):**
+**Quick path (local Docker Splunk) — follow in order:**
 
 ```bash
-chmod +x scripts/splunk_local_bootstrap.sh
+chmod +x scripts/package_splunk_app.sh scripts/splunk_install_apps.sh scripts/splunk_local_bootstrap.sh
+./scripts/package_splunk_app.sh
+./scripts/splunk_install_apps.sh
 ./scripts/splunk_local_bootstrap.sh
+docker compose restart otel_collector   # if OTel started before HEC was ready
 ```
 
-This enables HEC, creates index `acme_agentic_telemetry`, creates a token matching `.env`, fixes shared volume permissions for the OTel file exporter, and tests ingest.
+| Step | Action | PASS |
+|------|--------|------|
+| 1 | Package compliance app | `dist/acme_genai_compliance-*.tar.gz` exists |
+| 2 | Install apps (compliance + MLTK) | `./scripts/splunk_install_apps.sh` completes; Splunk shows **GenAI Compliance Monitor** and **Splunk ML Toolkit** |
+| 3 | HEC + index | `./scripts/splunk_local_bootstrap.sh` prints `HEC returned HTTP 200` |
+| 4 | Verify ingest | `` index=acme_agentic_telemetry earliest=-15m \| stats count `` → count > 0 |
 
-| Step | Action | Doc |
-|------|--------|-----|
-| 0 | **HEC + index** (local Docker) | `./scripts/splunk_local_bootstrap.sh` |
-| 1 | Install compliance app (local Docker) | `./scripts/splunk_install_app.sh` |
-| 2 | Package only (Cloud/Enterprise upload) | `./scripts/package_splunk_app.sh` |
-| 3 | Create index `acme_agentic_telemetry` | *(skip if bootstrap ran)* |
-| 4 | Create HEC token matching `.env` | *(skip if bootstrap ran)* |
-| 5 | Verify ingest | `` index=acme_agentic_telemetry earliest=-15m \| stats count `` |
+**MLTK:** Bundled at `splunk_app/splunk-ai-toolkit_600.tgz` and installed by `splunk_install_apps.sh`. Required for **CTSM token anomaly** and **MLTK Anomaly Hunting** dashboard.
 
-**MLTK (optional):** Required for **CTSM token anomaly** panel — install Splunk **Machine Learning Toolkit** app.
-
-Detail: [splunk_app/INSTALL.md](../splunk_app/INSTALL.md).
+Detail: [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) · Full workshop steps: [WORKSHOP.md Level 0](WORKSHOP.md#level-0--environment-everyone).
 
 ---
 
@@ -286,7 +285,7 @@ Expect `BASELINE_TRAFFIC` after a few minutes even if you have not attacked yet.
 | `.env` file missing | Never committed (gitignored) | `./scripts/restore_env.sh` |
 | **Start lab from scratch** | Broken Splunk / lost config | `./scripts/lab_fresh_start.sh` (destroys volumes) |
 | `connection reset by peer` on port 8088 | HEC disabled or index missing | `./scripts/splunk_local_bootstrap.sh` |
-| App install `bundle_tmp` / Permission denied | Prior `splunk` CLI as root | `git pull` then `./scripts/splunk_install_app.sh` (copies to `etc/apps`, repairs ownership) |
+| App install `bundle_tmp` / Permission denied | Prior `splunk` CLI as root | `git pull` then `./scripts/splunk_install_apps.sh` (copies to `etc/apps`, repairs ownership) |
 | `permission denied` on `otel-raw-genai.jsonl` | Shared volume permissions | Bootstrap script `chmod 1777` on `/var/log/defenseclaw`; restart otel |
 | `permission denied` on scripts | Scripts not executable | `chmod +x scripts/*.sh` |
 | Out of disk | Model + Splunk growth | `df -h`; expand volume or `docker system prune` |
@@ -328,6 +327,7 @@ docker exec -it acme_ollama ollama list
 
 ## Next steps
 
-1. **[WORKSHOP.md](WORKSHOP.md) Level 0** — confirm baseline traffic and Splunk ingest  
-2. **[WORKSHOP.md](WORKSHOP.md) Level 1** — 15-Minute First Win on Attack Panel  
+1. **[WORKSHOP.md](WORKSHOP.md#exercise-map-follow-in-order) Exercise map** — numbered checklist (fastest on-ramp)  
+2. **[WORKSHOP.md](WORKSHOP.md) Level 0** — confirm baseline traffic and Splunk ingest  
+3. **[WORKSHOP.md](WORKSHOP.md) Level 1** — 15-Minute First Win on Attack Panel (**Workshop** tab, last menu item)  
 3. **[USER_GUIDE.md](USER_GUIDE.md)** — dashboards, fields, hunt SPL  
