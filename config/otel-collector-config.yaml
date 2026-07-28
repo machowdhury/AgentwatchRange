@@ -80,6 +80,7 @@ exporters:
       num_consumers: 4
       queue_size: 1000
     timeout: 15s
+    idle_conn_timeout: 10s
     heartbeat:
       interval: 30s
 
@@ -106,17 +107,20 @@ service:
       processors: [memory_limiter, resource, attributes, batch]
       exporters: [splunk_hec, debug, file]
 
-    # Traces: distributed spans across agent-to-agent calls
+    # Traces: distributed spans across agent-to-agent calls (exported as HEC events)
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
       exporters: [splunk_hec, debug, file]
 
-    # Metrics: token counts, latency histograms, error rates
+    # Metrics: token/latency counters — keep local/debug only.
+    # GenAI security hunts use log fields (gen_ai.usage.*) on the event index,
+    # not Splunk metrics indexes. Sending OTLP metrics to HEC /collector/event
+    # adds noise and retry pressure without helping dashboards.
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [splunk_hec, debug]
+      exporters: [debug]
 
   telemetry:
     logs:

@@ -67,6 +67,15 @@ else
   echo "[bootstrap] HEC enable returned HTTP ${hec_global_code} (may already be enabled)."
 fi
 
+echo "[bootstrap] Disabling HEC SSL (OTel uses plain HTTP)..."
+ssl_code="$(splunk_http_code POST "/services/data/inputs/http/http" -d "enableSSL=0" 2>/dev/null || echo "000")"
+if [[ "$ssl_code" == "200" || "$ssl_code" == "201" ]]; then
+  echo "[bootstrap] HEC SSL disabled."
+else
+  echo "[bootstrap] enableSSL=0 returned HTTP ${ssl_code} (may already be set)."
+fi
+sleep 3
+
 echo "[bootstrap] Creating index '${HEC_INDEX}' (if missing)..."
 index_code="$(splunk_http_code GET "/services/data/indexes/${HEC_INDEX}" 2>/dev/null || echo "404")"
 if [[ "$index_code" == "200" ]]; then
@@ -125,6 +134,6 @@ fi
 
 echo ""
 echo "[bootstrap] Next steps:"
-echo "  1. Install compliance app: ./scripts/splunk_install_app.sh"
+echo "  1. Install Splunk apps: ./scripts/splunk_install_apps.sh"
 echo "  2. Splunk Search: index=${HEC_INDEX} earliest=-15m | stats count"
 echo "  3. Open http://localhost:8000 (admin / password from .env)"

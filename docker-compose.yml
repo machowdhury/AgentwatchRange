@@ -158,7 +158,6 @@ services:
     depends_on:
       splunk_hec_init:
         condition: service_completed_successfully
-        required: false
     restart: unless-stopped
     # No Docker healthcheck — contrib image is distroless (no wget/curl).
     # Collector health extension listens on :13133 inside the mesh only.
@@ -205,6 +204,7 @@ services:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=${SPLUNK_PASSWORD:-ACMEPassword2026!}
       - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
+      - SPLUNK_HEC_SSL=0
       - SPLUNK_ENABLE_LISTEN=9997
     restart: unless-stopped
     healthcheck:

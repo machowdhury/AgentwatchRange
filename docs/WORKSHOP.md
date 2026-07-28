@@ -543,7 +543,7 @@ Next: [Level 1 — Pipeline proof](#level-1--pipeline-proof-everyone) (**▶ RUN
 | Attack Panel **TARGET OFFLINE** | Banking container not up | `docker compose ps` — restart: `docker compose --profile local up -d` |
 | Splunk login page won’t load | Splunk still starting (up to 8 min) | `docker compose logs -f splunk` — wait for “running” |
 | Splunk **Overview** shows 0 events | HEC not configured or too soon | Run `./scripts/splunk_local_bootstrap.sh`; wait 60s after Step 0.5 |
-| OTel logs `connection reset by peer` on 8088 | HEC disabled or index missing | `./scripts/splunk_local_bootstrap.sh` |
+| OTel logs `connection reset by peer` on 8088 | HEC disabled, SSL-only, or init skipped | Run `./scripts/splunk_local_bootstrap.sh` then `docker compose restart otel_collector`; check `docker compose logs splunk_hec_init` |
 | OTel logs `permission denied` on `otel-raw-genai.jsonl` | Shared volume permissions | Bootstrap script fixes this; `docker compose restart otel_collector` |
 | Bootstrap `Permission denied` on `/opt/splunk/...` | Splunk CLI run as root | `./scripts/splunk_local_bootstrap.sh` (REST) or `./scripts/splunk_install_apps.sh` |
 | Browser can’t open `:5001` on cloud VM | Firewall | Open ports per [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) |

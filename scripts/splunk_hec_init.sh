@@ -50,6 +50,15 @@ else
   log "HEC enable returned HTTP ${hec_code} (may already be enabled)."
 fi
 
+log "Disabling HEC SSL (OTel uses plain HTTP inside Docker mesh)..."
+ssl_code="$(mgmt_code POST "/services/data/inputs/http/http" -d "enableSSL=0")"
+if [ "$ssl_code" = "200" ] || [ "$ssl_code" = "201" ]; then
+  log "HEC SSL disabled."
+else
+  log "HEC enableSSL=0 returned HTTP ${ssl_code} (may already be set)."
+fi
+sleep 3
+
 log "Ensuring index '${HEC_INDEX}' exists..."
 index_code="$(mgmt_code GET "/services/data/indexes/${HEC_INDEX}")"
 if [ "$index_code" = "200" ]; then
@@ -89,14 +98,23 @@ else
 fi
 
 log "Testing HEC ingest on ${HEC_URL}..."
-test_code="$(curl -s -o /tmp/hec_test.json -w "%{http_code}" \
-  "${HEC_URL}" \
-  -H "Authorization: Splunk ${HEC_TOKEN}" \
-  -d "{\"event\":{\"hec_init\":true,\"sourcetype\":\"${HEC_SOURCETYPE}\"}}" || echo "000")"
-if [ "$test_code" = "200" ]; then
-  log "PASS — HEC returned HTTP 200."
-else
-  log "ERROR: HEC test returned HTTP ${test_code}"
+test_code="000"
+attempt=1
+while [ "$attempt" -le 15 ]; do
+  test_code="$(curl -s -o /tmp/hec_test.json -w "%{http_code}" \
+    "${HEC_URL}" \
+    -H "Authorization: Splunk ${HEC_TOKEN}" \
+    -d "{\"event\":{\"hec_init\":true,\"sourcetype\":\"${HEC_SOURCETYPE}\"}}" || echo "000")"
+  if [ "$test_code" = "200" ]; then
+    log "PASS — HEC returned HTTP 200 (attempt ${attempt})."
+    break
+  fi
+  log "HEC test attempt ${attempt}/15 returned HTTP ${test_code}; retrying in 4s..."
+  attempt=$((attempt + 1))
+  sleep 4
+done
+if [ "$test_code" != "200" ]; then
+  log "ERROR: HEC test failed after retries (last HTTP ${test_code})"
   cat /tmp/hec_test.json 2>/dev/null || true
   exit 1
 fi
