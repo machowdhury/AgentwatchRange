@@ -156,8 +156,11 @@ services:
       - "4318:4318"
       - "8889:8889"
     depends_on:
+      splunk:
+        condition: service_healthy
       splunk_hec_init:
         condition: service_completed_successfully
+        required: false
     restart: unless-stopped
     # No Docker healthcheck — contrib image is distroless (no wget/curl).
     # Collector health extension listens on :13133 inside the mesh only.
@@ -186,7 +189,7 @@ services:
     volumes:
       - ./scripts/splunk_hec_init.sh:/splunk_hec_init.sh:ro
     entrypoint: ["/bin/sh", "/splunk_hec_init.sh"]
-    restart: "no"
+    restart: on-failure:3
 
   splunk:
     image: ${SPLUNK_IMAGE:-splunk/splunk:9.2.1}

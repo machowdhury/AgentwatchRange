@@ -13,34 +13,74 @@ HEC_SOURCETYPE="${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}"
 HEC_INPUT_NAME="${SPLUNK_HEC_INPUT_NAME:-orchestra-acme-otel}"
 AUTH="admin:${SPLUNK_PASSWORD}"
 MGMT_URL="https://${SPLUNK_HOST}:8089"
-HEC_URL="http://${SPLUNK_HOST}:8088/services/collector/event"
+HEC_URL_HTTP="http://${SPLUNK_HOST}:8088/services/collector/event"
+HEC_URL_HTTPS="https://${SPLUNK_HOST}:8088/services/collector/event"
+TMP_BODY="/tmp/hec_init_body.txt"
 
 log() { printf '[hec-init] %s\n' "$*"; }
+
+mgmt_request() {
+  method="$1"
+  path="$2"
+  shift 2
+  curl -sk -u "$AUTH" -X "$method" "${MGMT_URL}${path}" "$@" 2>/dev/null || true
+}
 
 mgmt_code() {
   method="$1"
   path="$2"
   shift 2
-  curl -sk -o /dev/null -w "%{http_code}" -u "$AUTH" -X "$method" "${MGMT_URL}${path}" "$@" || echo "000"
+  mgmt_request "$method" "$path" -o /dev/null -w "%{http_code}" "$@" | tail -c 3
 }
 
-log "Waiting for Splunk management API (${SPLUNK_HOST}:8089)..."
-ready=0
-i=1
-while [ "$i" -le 60 ]; do
-  code="$(mgmt_code GET "/services/server/info")"
-  if [ "$code" = "200" ]; then
-    ready=1
-    break
-  fi
-  i=$((i + 1))
-  sleep 5
-done
-if [ "$ready" -ne 1 ]; then
-  log "ERROR: Splunk management API not ready after 5 minutes."
-  exit 1
-fi
-log "Splunk management API is up."
+wait_for_mgmt_api() {
+  log "Waiting for Splunk management API (${SPLUNK_HOST}:8089)..."
+  i=1
+  while [ "$i" -le 90 ]; do
+    code="$(mgmt_code GET "/services/server/info")"
+    if [ "$code" = "200" ]; then
+      log "Splunk management API is up."
+      return 0
+    fi
+    if [ "$code" = "401" ]; then
+      log "ERROR: Splunk returned HTTP 401 — SPLUNK_PASSWORD in .env does not match this Splunk volume."
+      log "       Fix: ./scripts/splunk_reset_admin_password.sh  OR  reset Splunk volume."
+      return 1
+    fi
+    i=$((i + 1))
+    sleep 5
+  done
+  log "ERROR: Splunk management API not ready after 7.5 minutes."
+  return 1
+}
+
+wait_after_restart() {
+  i=1
+  while [ "$i" -le 60 ]; do
+    code="$(mgmt_code GET "/services/server/info")"
+    if [ "$code" = "200" ]; then
+      log "Splunk management API is back after restart."
+      return 0
+    fi
+    i=$((i + 1))
+    sleep 5
+  done
+  log "ERROR: Splunk did not come back after restart."
+  return 1
+}
+
+test_hec_url() {
+  url="$1"
+  curl -s -o "${TMP_BODY}" -w "%{http_code}" \
+    "${url}" \
+    -H "Authorization: Splunk ${HEC_TOKEN}" \
+    -d "{\"event\":{\"hec_init\":true,\"sourcetype\":\"${HEC_SOURCETYPE}\"}}" 2>/dev/null || echo "000"
+}
+
+wait_for_mgmt_api || exit 1
+
+# Splunk UI health can pass before inputs/HEC modules are ready.
+sleep 10
 
 log "Enabling HTTP Event Collector..."
 hec_code="$(mgmt_code POST "/services/data/inputs/http/http/enable")"
@@ -53,11 +93,28 @@ fi
 log "Disabling HEC SSL (OTel uses plain HTTP inside Docker mesh)..."
 ssl_code="$(mgmt_code POST "/services/data/inputs/http/http" -d "enableSSL=0")"
 if [ "$ssl_code" = "200" ] || [ "$ssl_code" = "201" ]; then
-  log "HEC SSL disabled."
+  log "HEC SSL disabled — restarting splunkd to apply..."
+  restart_code="$(mgmt_code POST "/services/admin/server/control/restart_splunkd")"
+  if [ "$restart_code" = "200" ] || [ "$restart_code" = "201" ]; then
+    sleep 20
+    wait_after_restart || exit 1
+    mgmt_code POST "/services/data/inputs/http/http/enable" >/dev/null || true
+    sleep 5
+  else
+    log "WARN: splunkd restart returned HTTP ${restart_code}; continuing."
+  fi
 else
   log "HEC enableSSL=0 returned HTTP ${ssl_code} (may already be set)."
 fi
-sleep 3
+
+# Splunk Docker image may already have created HEC from SPLUNK_HEC_TOKEN — test before mutating inputs.
+log "Checking if HEC already accepts events (Splunk image auto-config)..."
+early_code="$(test_hec_url "${HEC_URL_HTTP}")"
+if [ "$early_code" = "200" ]; then
+  log "PASS — HEC already working (HTTP 200). Skipping token recreate."
+  exit 0
+fi
+log "HEC not ready yet (HTTP ${early_code}); continuing bootstrap..."
 
 log "Ensuring index '${HEC_INDEX}' exists..."
 index_code="$(mgmt_code GET "/services/data/indexes/${HEC_INDEX}")"
@@ -69,15 +126,18 @@ else
     log "Index created."
   else
     log "ERROR: failed to create index (HTTP ${create_code})"
+    mgmt_request GET "/services/data/indexes" -d "output_mode=json" | head -c 500 || true
     exit 1
   fi
 fi
 
 log "Configuring HEC token input '${HEC_INPUT_NAME}'..."
-delete_code="$(mgmt_code DELETE "/services/data/inputs/http/${HEC_INPUT_NAME}")"
-if [ "$delete_code" = "200" ]; then
-  log "Removed previous HEC input."
-fi
+for delete_name in "${HEC_INPUT_NAME}" "http%3A%2F%2F${HEC_INPUT_NAME}"; do
+  delete_code="$(mgmt_code DELETE "/services/data/inputs/http/${delete_name}")"
+  if [ "$delete_code" = "200" ]; then
+    log "Removed previous HEC input (${delete_name})."
+  fi
+done
 
 token_code="$(mgmt_code POST "/services/data/inputs/http" \
   -d "name=${HEC_INPUT_NAME}" \
@@ -89,34 +149,42 @@ if [ "$token_code" = "200" ] || [ "$token_code" = "201" ]; then
   log "HEC token configured."
 else
   log "WARN: HEC token create returned HTTP ${token_code}; checking existing inputs..."
-  if curl -sk -u "$AUTH" "${MGMT_URL}/services/data/inputs/http" | grep -q "${HEC_TOKEN}"; then
-    log "Found existing token — continuing."
+  if mgmt_request GET "/services/data/inputs/http" | grep -q "${HEC_TOKEN}"; then
+    log "Found existing HEC token in Splunk — continuing."
   else
     log "ERROR: no matching HEC token in Splunk."
+    mgmt_request GET "/services/data/inputs/http" -d "output_mode=json" | head -c 800 || true
     exit 1
   fi
 fi
 
-log "Testing HEC ingest on ${HEC_URL}..."
+log "Testing HEC ingest..."
 test_code="000"
 attempt=1
-while [ "$attempt" -le 15 ]; do
-  test_code="$(curl -s -o /tmp/hec_test.json -w "%{http_code}" \
-    "${HEC_URL}" \
-    -H "Authorization: Splunk ${HEC_TOKEN}" \
-    -d "{\"event\":{\"hec_init\":true,\"sourcetype\":\"${HEC_SOURCETYPE}\"}}" || echo "000")"
+while [ "$attempt" -le 20 ]; do
+  test_code="$(test_hec_url "${HEC_URL_HTTP}")"
   if [ "$test_code" = "200" ]; then
-    log "PASS — HEC returned HTTP 200 (attempt ${attempt})."
-    break
+    log "PASS — HEC HTTP returned 200 (attempt ${attempt})."
+    log "Splunk HEC bootstrap complete."
+    exit 0
   fi
-  log "HEC test attempt ${attempt}/15 returned HTTP ${test_code}; retrying in 4s..."
+  log "HEC HTTP attempt ${attempt}/20 returned HTTP ${test_code}; retrying in 5s..."
   attempt=$((attempt + 1))
-  sleep 4
+  sleep 5
 done
-if [ "$test_code" != "200" ]; then
-  log "ERROR: HEC test failed after retries (last HTTP ${test_code})"
-  cat /tmp/hec_test.json 2>/dev/null || true
+
+log "WARN: HEC HTTP failed (last HTTP ${test_code}). Trying HTTPS..."
+cat "${TMP_BODY}" 2>/dev/null || true
+https_code="$(test_hec_url "${HEC_URL_HTTPS}")"
+if [ "$https_code" = "200" ]; then
+  log "PASS on HTTPS but not HTTP — HEC SSL is still enabled on this Splunk volume."
+  log "Run from host: ./scripts/splunk_local_bootstrap.sh"
+  log "Or set SPLUNK_HEC_ENDPOINT=https://splunk:8088/services/collector/event in .env and recreate otel_collector."
   exit 1
 fi
 
-log "Splunk HEC bootstrap complete."
+log "ERROR: HEC test failed (HTTP ${test_code}, HTTPS ${https_code})."
+log "Run from host: ./scripts/splunk_local_bootstrap.sh"
+log "Then: docker compose restart otel_collector"
+cat "${TMP_BODY}" 2>/dev/null || true
+exit 1

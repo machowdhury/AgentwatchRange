@@ -48,6 +48,11 @@ for i in $(seq 1 60); do
     echo "[bootstrap] Splunk management API is up."
     break
   fi
+  if [[ "$code" == "401" ]]; then
+    echo "[bootstrap] ERROR: Splunk returned HTTP 401 — SPLUNK_PASSWORD in .env does not match this Splunk volume."
+    echo "[bootstrap] Fix: ./scripts/splunk_reset_admin_password.sh  OR  docker compose down -v (wipes Splunk data)"
+    exit 1
+  fi
   if [[ "$i" -eq 60 ]]; then
     echo "[bootstrap] ERROR: Splunk not ready after 5 minutes. Check: docker compose logs splunk"
     exit 1
@@ -70,11 +75,30 @@ fi
 echo "[bootstrap] Disabling HEC SSL (OTel uses plain HTTP)..."
 ssl_code="$(splunk_http_code POST "/services/data/inputs/http/http" -d "enableSSL=0" 2>/dev/null || echo "000")"
 if [[ "$ssl_code" == "200" || "$ssl_code" == "201" ]]; then
-  echo "[bootstrap] HEC SSL disabled."
+  echo "[bootstrap] HEC SSL disabled — restarting splunkd to apply..."
+  restart_code="$(splunk_http_code POST "/services/admin/server/control/restart_splunkd" 2>/dev/null || echo "000")"
+  if [[ "$restart_code" == "200" || "$restart_code" == "201" ]]; then
+    sleep 20
+    for j in $(seq 1 60); do
+      code="$(splunk_http_code GET "/services/server/info" 2>/dev/null || echo "000")"
+      if [[ "$code" == "200" ]]; then
+        echo "[bootstrap] Splunk management API is back after restart."
+        splunk_http_code POST "/services/data/inputs/http/http/enable" >/dev/null 2>&1 || true
+        sleep 5
+        break
+      fi
+      if [[ "$j" -eq 60 ]]; then
+        echo "[bootstrap] ERROR: Splunk did not come back after restart."
+        exit 1
+      fi
+      sleep 5
+    done
+  else
+    echo "[bootstrap] WARN: splunkd restart returned HTTP ${restart_code}; continuing."
+  fi
 else
   echo "[bootstrap] enableSSL=0 returned HTTP ${ssl_code} (may already be set)."
 fi
-sleep 3
 
 echo "[bootstrap] Creating index '${HEC_INDEX}' (if missing)..."
 index_code="$(splunk_http_code GET "/services/data/indexes/${HEC_INDEX}" 2>/dev/null || echo "404")"

@@ -1050,7 +1050,8 @@ docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -
 |---------|-------|-----|
 | Banking app returns 502 / timeout | Ollama not ready | `docker compose logs ollama` — wait for model pull |
 | No Splunk events | HEC/index not configured | `./scripts/splunk_local_bootstrap.sh` |
-| OTel `connection reset by peer` on 8088 | HEC disabled | `./scripts/splunk_local_bootstrap.sh` |
+| `splunk_hec_init` exit 1 | HEC SSL on old volume, wrong password, or Splunk not ready | `docker logs acme_splunk_hec_init` then `./scripts/splunk_local_bootstrap.sh` and `docker compose restart otel_collector` |
+| OTel `connection reset by peer` on 8088 | HEC disabled or SSL-only | `./scripts/splunk_local_bootstrap.sh` |
 | OTel `permission denied` on jsonl file | Shared volume permissions | Bootstrap script; `docker compose restart otel_collector` |
 | DefenseClaw never fires | Attack too mild | Try Runtime Prompt Injection, MCP Tool Escape, or Rogue Agent scenarios |
 | Compliance dashboard empty | App not installed | Install `splunk_compliance_app` (HEC/index via bootstrap first) |
