@@ -18,8 +18,9 @@ Complete this checklist **before** `docker compose up` or the workshop. Use it o
 | 6 | **Inbound ports** open (cloud VM only) | `5000`, `5001`, optionally `8000` — see [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) |
 | 7 | Stack started | `docker compose --profile local up --build -d` |
 | 8 | **Ollama model** pulled | `docker compose logs ollama` shows `llama3.2:1b` |
-| Splunk one-time | Apps + index + **HEC** — **not** automatic on `docker compose up` | `./scripts/splunk_install_apps.sh` then `./scripts/splunk_local_bootstrap.sh` — [WORKSHOP.md Exercise map](WORKSHOP.md#exercise-map-follow-in-order) |
-| 10 | **Attack Panel** shows TARGET + LLM **ONLINE** | http://localhost:5001 |
+| 9 | Splunk one-time | Apps + index + **HEC** — run `./scripts/splunk_install_apps.sh` then `./scripts/splunk_local_bootstrap.sh` |
+| 10 | **Baseline in Splunk** (before attacks) | Manual loan on :5000 *or* wait 2–3 min; `index=acme_agentic_telemetry earliest=-15m \| stats count` → > 0 |
+| 11 | **Attack Panel** shows TARGET + LLM **ONLINE** | http://localhost:5001 |
 
 ---
 

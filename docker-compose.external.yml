@@ -41,6 +41,10 @@ services:
   # In external mode, there is no local Splunk container to wait for.
   # The collector starts immediately and connects to the external HEC endpoint.
   # ---------------------------------------------------------------------------
+  splunk_hec_init:
+    profiles:
+      - disabled-external-mode-only
+
   otel_collector:
     depends_on: []
     # Explicitly re-confirm all HEC env vars flow from .env (no changes needed,

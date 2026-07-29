@@ -1,0 +1,19 @@
+# =============================================================================
+# OrchestraACME — Local Splunk overlay
+# =============================================================================
+# Merge with docker-compose.yml for local lab startup ordering.
+# Keeps profile-gated services (splunk, splunk_hec_init) out of the base file
+# so `docker compose ps` works without --profile when this overlay is not loaded.
+#
+# Usage (or set COMPOSE_FILE in .env — see .env.example):
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml --profile local up --build -d
+# =============================================================================
+
+services:
+  otel_collector:
+    depends_on:
+      splunk:
+        condition: service_healthy
+      splunk_hec_init:
+        condition: service_completed_successfully
+        required: false

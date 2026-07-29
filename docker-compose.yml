@@ -8,6 +8,7 @@
 #
 # Local mode:
 #   docker compose --profile local up --build -d
+#   (with .env from .env.example, COMPOSE_FILE includes docker-compose.local.yml)
 #
 # External Splunk mode:
 #   docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -d
@@ -155,15 +156,8 @@ services:
       - "4317:4317"
       - "4318:4318"
       - "8889:8889"
-    depends_on:
-      splunk:
-        condition: service_healthy
-      splunk_hec_init:
-        condition: service_completed_successfully
-        required: false
     restart: unless-stopped
-    # No Docker healthcheck — contrib image is distroless (no wget/curl).
-    # Collector health extension listens on :13133 inside the mesh only.
+    # Local Splunk startup ordering is in docker-compose.local.yml (merged via COMPOSE_FILE).
     # Verify via banking_app telemetry or: docker compose logs otel_collector
 
   # ---------------------------------------------------------------------------

@@ -8,7 +8,10 @@ Run the lab from the **Attack Panel**, generate telemetry, hunt in Splunk, and *
 
 > **Terminology:** The Attack Panel and workshop use **Scenario 1–10** (one per agentic threat surface). In Splunk telemetry the scenario index is stored in the numeric field `campaign_week` (values 1–10) — use that field in SPL, not the phrase “campaign week” in reports or training materials.
 
-**New here?** Complete [Prerequisites](#prerequisites), then read **[Workshop paths — where to start](#workshop-paths--where-to-start-what-to-run-where-to-end)** below (what to click, what SPL to run, where to end).
+**New here?** Complete [Prerequisites](#prerequisites), verify [baseline in Splunk](../README.md#step-4--verify-telemetry-before-any-attack-3-min), then read:
+
+- **[Attack Panel tab guide](ATTACK_PANEL_GUIDE.md)** — what each tab means, OUTCOME, SPL + dashboard per scenario  
+- **[Workshop paths](#workshop-paths--where-to-start-what-to-run-where-to-end)** — guided button sequences
 
 ---
 
@@ -34,8 +37,15 @@ Confirm the panel header shows **TARGET ONLINE** and **LLM ONLINE** before firin
 1. `./scripts/package_splunk_app.sh` — build compliance app tarball
 2. `./scripts/splunk_install_apps.sh` — installs compliance app + MLTK from `splunk_app/splunk-ai-toolkit_600.tgz`
 3. `./scripts/splunk_local_bootstrap.sh` — enables HEC, creates index `acme_agentic_telemetry`, creates token matching `.env`
-4. Verify: `` index=acme_agentic_telemetry earliest=-15m | stats count ``
-5. If OTel was running before HEC: `docker compose restart otel_collector`
+4. **Verify baseline (before attacks):** submit one normal loan on http://localhost:5000 *or* wait 2–3 min for auto traffic, then:
+
+   ```spl
+   index=acme_agentic_telemetry earliest=-15m | stats count by testbed_mode
+   ```
+
+   **Pass:** count > 0 (`BASELINE_TRAFFIC` and/or `BANKING_LIVE`)
+
+5. If OTel was running before HEC: `docker compose --profile local restart otel_collector`
 
 Open http://localhost:5001 — default tab is **Top 10 Scenarios**. Check header **TARGET ONLINE** and **LLM ONLINE** before firing attacks.
 
@@ -325,7 +335,9 @@ Open **MLTK Anomaly Hunting** dashboard for CTSM forecast panels.
 
 ## Beyond the Workshop — expand your knowledge
 
-The Workshop is the **on-ramp**. The other Attack Panel tabs and Splunk dashboards are how you go deeper. Use this map to decide what to explore next and **why** each capability exists.
+The Workshop is the **on-ramp**. For **every tab, scenario, chain, and SPL query**, see **[ATTACK_PANEL_GUIDE.md](ATTACK_PANEL_GUIDE.md)**.
+
+Use this map to decide what to explore next and **why** each capability exists.
 
 ### Learning progression
 

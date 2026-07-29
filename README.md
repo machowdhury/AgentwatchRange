@@ -10,7 +10,7 @@
 > **Repository:** [github.com/machowdhury/OrchestraACME](https://github.com/machowdhury/OrchestraACME)  
 > **Author:** Mahamudul Alam Chowdhury ([@machowdhury](https://github.com/machowdhury))
 
-**End user?** Follow **[Start here](#start-here-your-first-30-minutes)** below — install, attack, prove in Splunk. Reference material is further down.
+**End user?** Follow **[Start here](#start-here-your-first-30-minutes)** below — install, verify baseline traffic, first attack, prove in Splunk. Reference material is further down.
 
 ---
 
@@ -20,19 +20,20 @@
 
 1. [Start here — your first 30 minutes](#start-here-your-first-30-minutes)
 2. [Workshop paths (what to run next)](#workshop-paths-what-to-run-next)
-3. [Three URLs](#three-urls)
-4. [Documentation map](#documentation-map)
+3. [Attack Panel guide (all tabs & SPL)](#attack-panel-guide-all-tabs--spl)
+4. [Three URLs](#three-urls)
+5. [Documentation map](#documentation-map)
 
 **Reference** (read when you need depth)
 
-5. [What is this?](#what-is-this)
-6. [How it works](#how-everything-works-plain-language)
-7. [Installation (detailed)](#installation)
-8. [Usage guide](#usage-guide)
-9. [Architecture](#architecture)
-10. [Requirements](#requirements)
-11. [Configuration & troubleshooting](#configuration-reference)
-12. [Security notes](#security-notes)
+6. [What is this?](#what-is-this)
+7. [How it works](#how-everything-works-plain-language)
+8. [Installation (detailed)](#installation)
+9. [Usage guide](#usage-guide)
+10. [Architecture](#architecture)
+11. [Requirements](#requirements)
+12. [Configuration & troubleshooting](#configuration-reference)
+13. [Security notes](#security-notes)
 
 ---
 
@@ -50,26 +51,41 @@ cp .env.example .env
 docker compose --profile local up --build -d
 ```
 
+> **Tip:** `.env.example` sets `COMPOSE_PROFILES=local` so plain `docker compose up` works after `cp .env.example .env`. On older clones, always pass `--profile local`.
+
 Wait for Ollama to pull the model (first boot only, ~1.3 GB):
 
 ```bash
-docker compose logs -f ollama    # Ctrl+C when llama3.2:1b appears
-docker compose ps                # all services running / healthy
+docker compose --profile local logs -f ollama    # Ctrl+C when llama3.2:1b appears
+docker compose --profile local ps              # all services running / healthy
 ```
 
-### Step 2 — Install Splunk apps and HEC (one time, ~5 min)
+**Optional:** check one-shot HEC init — `docker logs acme_splunk_hec_init` should end with `PASS — HEC returned HTTP 200`. If it failed, Step 2 fixes it.
 
-Splunk does **not** auto-configure on first boot. Run once:
+### Step 2 — Install Splunk apps and verify HEC (~5 min)
+
+Splunk UI starts without the compliance app or custom index. Run once:
 
 ```bash
 chmod +x scripts/package_splunk_app.sh scripts/splunk_install_apps.sh scripts/splunk_local_bootstrap.sh
 ./scripts/package_splunk_app.sh
 ./scripts/splunk_install_apps.sh      # compliance app + MLTK
-./scripts/splunk_local_bootstrap.sh   # index + HEC token
-docker compose restart otel_collector # if OTel started before HEC
+./scripts/splunk_local_bootstrap.sh   # index + HEC token (safe to re-run)
+docker compose --profile local restart otel_collector
 ```
 
 **Pass:** bootstrap prints `HEC returned HTTP 200`.
+
+Quick terminal check:
+
+```bash
+curl -s -o /dev/null -w "HEC HTTP %{http_code}\n" \
+  http://localhost:8088/services/collector/event \
+  -H "Authorization: Splunk acme-hec-token-0000-1111-2222-3333" \
+  -d '{"event":{"install_test":true}}'
+```
+
+Expected: `HEC HTTP 200` (not `000`).
 
 ### Step 3 — Open the lab and check status
 
@@ -77,18 +93,61 @@ docker compose restart otel_collector # if OTel started before HEC
 |-----|-----|----------------|
 | **Attack Panel** | http://localhost:5001 | Header: **TARGET ONLINE** + **LLM ONLINE** (green) |
 | **Banking app** | http://localhost:5000 | Loan pipeline UI loads |
-| **Splunk** | http://localhost:8000 | Login: `admin` / `ACMEPassword2026!` |
+| **Splunk** | http://localhost:8000 | Login: `admin` / password from `.env` (default `ACMEPassword2026!`) |
 
 Attack Panel tabs (left to right): **Top 10 Scenarios** (default) → All 45 → Threat Chains → Custom → **Workshop** (last).
 
-### Step 4 — Run your first attack (~5 min)
+### Step 4 — Verify telemetry before any attack (~3 min)
+
+**Do this before firing scenarios.** You want proof that **benign** traffic reaches Splunk — then attacks are easy to spot.
+
+**Option A — Automatic baseline (easiest)**
+
+The banking app sends harmless loan requests every 90–240 seconds once Ollama is healthy.
+
+1. Wait **2–3 minutes** after stack startup.
+2. Check the simulator: `curl -s http://localhost:5000/api/v1/traffic/status` — `"running": true`, `ticks_ok` increasing.
+3. In Splunk **Search**:
+
+```spl
+index=acme_agentic_telemetry earliest=-15m
+| stats count by testbed_mode
+```
+
+**Pass:** `count` ≥ 1. Often you see `BASELINE_TRAFFIC` (automatic) and/or `BANKING_LIVE` (manual UI).
+
+**Option B — One manual loan (recommended first time)**
+
+1. Open http://localhost:5000  
+2. Enter a normal message, for example:
+
+   ```text
+   I would like to apply for a small business loan. Annual revenue is $250,000.
+   ```
+
+3. Click **Run Through All Agents**  
+4. Click **↺ Refresh Sessions** — pipeline history should show your request  
+5. Wait **30–60 seconds**, then in Splunk:
+
+```spl
+index=acme_agentic_telemetry earliest=-15m
+| stats count by testbed_mode gen_ai.agent.name
+```
+
+**Pass:** count > 0; agents such as `acme-agent-intake-001` appear.
+
+> **Not zero?** Re-run `./scripts/splunk_local_bootstrap.sh`, restart OTel, wait another minute. See [Verification & Troubleshooting](#verification--troubleshooting).
+
+### Step 5 — Run your first attack (~5 min)
+
+Only after Step 4 shows events in Splunk.
 
 1. Open http://localhost:5001  
 2. Click the **Workshop** tab (last tab)  
 3. Click **RUN FIRST WIN PATH**  
 4. Wait for the path to finish (Scenarios 6 → 5 → 9)
 
-### Step 5 — Prove it in Splunk (~2 min)
+### Step 6 — Prove the attack in Splunk (~2 min)
 
 Wait **60 seconds**, then in Splunk **Search**:
 
@@ -97,15 +156,22 @@ index=acme_agentic_telemetry sourcetype="otel:agentic:json" earliest=-15m
 | stats count by campaign_week
 ```
 
-**Pass:** `count` > 0 and you see scenario numbers (e.g. `6`, `5`, `9`).
+**Pass:** `count` increased vs Step 4 and you see scenario numbers (e.g. `6`, `5`, `9`).
+
+To separate attacks from baseline noise:
+
+```spl
+index=acme_agentic_telemetry earliest=-15m NOT testbed_mode=BASELINE_TRAFFIC
+| stats count by campaign_week
+```
 
 Open **GenAI Compliance Monitor → Overview** — event count should be non-zero.
 
-### Step 6 — You're done with the basics
+### Step 7 — You're done with the basics
 
-You have a working **attack → telemetry → Splunk** loop. Pick your next path below.
+You have a working **baseline → attack → telemetry → Splunk** loop. Pick your next path below.
 
-**Stuck?** [Verification & Troubleshooting](#verification--troubleshooting) · OTel `connection reset` on 8088 → re-run `./scripts/splunk_local_bootstrap.sh`
+**Stuck?** [Verification & Troubleshooting](#verification--troubleshooting) · HEC `000` or OTel `connection reset` on 8088 → `./scripts/splunk_local_bootstrap.sh`
 
 ---
 
@@ -130,6 +196,20 @@ START → 15-Min First Win → Standard Workshop → Deep Workshop → Fire All 
 
 ---
 
+## Attack Panel guide (all tabs & SPL)
+
+Full reference: **[docs/ATTACK_PANEL_GUIDE.md](docs/ATTACK_PANEL_GUIDE.md)**
+
+| Tab | OUTCOME in one line |
+|-----|---------------------|
+| **Top 10 Scenarios** | One surface per click → `campaign_week` in Splunk + Control Attestation row |
+| **All 45 Techniques** | MITRE breadth → Technique Coverage Matrix fills in |
+| **Threat Chains** | Multi-stage story → one `incident_id` in Actor Chain Story |
+| **Custom Payload** | Your string → hunt latest events (no fixed scenario number) |
+| **Workshop** | Ordered path → dashboards + SPL listed per path in the guide |
+
+---
+
 ## Three URLs
 
 | Role | URL |
@@ -146,6 +226,7 @@ Cloud VM: replace `localhost` with your server IP — [docs/CLOUD_VM_DEPLOYMENT.
 
 | Read this | When |
 |-----------|------|
+| **[docs/ATTACK_PANEL_GUIDE.md](docs/ATTACK_PANEL_GUIDE.md)** | **Every Attack Panel tab** — outcomes, per-scenario SPL, Splunk dashboards |
 | **[docs/USER_GUIDE.md](docs/USER_GUIDE.md)** | Workshop buttons, SPL queries, dashboards, lifecycle |
 | **[docs/WORKSHOP.md](docs/WORKSHOP.md)** | Full curriculum, hunt questions Q101–Q503, facilitator runbook |
 | **[docs/PREREQUISITES.md](docs/PREREQUISITES.md)** | Docker install, permissions, Splunk checklist |
@@ -818,17 +899,18 @@ docker compose restart otel_collector
 
 ### Post-install checklist (do not skip)
 
-Use this to confirm the full pipeline end-to-end:
+Use this to confirm the full pipeline end-to-end **before any attack**:
 
-- [ ] `docker compose ps` — all services `running` / `healthy`
+- [ ] `docker compose --profile local ps` — all services `running` / `healthy`
 - [ ] `curl http://localhost:5000/health` — banking app up
 - [ ] `docker compose exec ollama ollama list` — shows your `OLLAMA_MODEL`
 - [ ] `./scripts/splunk_install_apps.sh` — compliance app + MLTK installed
-- [ ] `./scripts/splunk_local_bootstrap.sh` — HEC enabled, index `acme_agentic_telemetry` exists
-- [ ] Run one attack on :5001, then in Splunk: `index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 5`
-- [ ] Open **GenAI Compliance Monitor** — events appear (may take 1–2 min for batching)
+- [ ] `./scripts/splunk_local_bootstrap.sh` — HEC enabled, index `acme_agentic_telemetry` exists (HTTP 200)
+- [ ] **Baseline in Splunk:** `index=acme_agentic_telemetry earliest=-15m | stats count` → count > 0 (auto baseline and/or manual loan on :5000)
+- [ ] **Then** run one attack on :5001; Splunk: `index=acme_agentic_telemetry NOT testbed_mode=BASELINE_TRAFFIC earliest=-15m | stats count by campaign_week`
+- [ ] Open **GenAI Compliance Monitor → Overview** — events appear
 
-If the last two steps fail, see [HEC Token Alignment](#hec-token-alignment) and [Verification & Troubleshooting](#verification--troubleshooting).
+If baseline or attack steps fail, see [HEC Token Alignment](#hec-token-alignment) and [Verification & Troubleshooting](#verification--troubleshooting).
 
 ---
 
@@ -1050,6 +1132,7 @@ docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -
 |---------|-------|-----|
 | Banking app returns 502 / timeout | Ollama not ready | `docker compose logs ollama` — wait for model pull |
 | No Splunk events | HEC/index not configured | `./scripts/splunk_local_bootstrap.sh` |
+| `docker compose ps` → undefined service `splunk_hec_init` | Ran without local profile/overlay | Use `docker compose --profile local ps` or add `COMPOSE_PROFILES=local` + `COMPOSE_FILE=...local.yml` to `.env` (see `.env.example`) |
 | `splunk_hec_init` exit 1 | HEC SSL on old volume, wrong password, or Splunk not ready | `docker logs acme_splunk_hec_init` then `./scripts/splunk_local_bootstrap.sh` and `docker compose restart otel_collector` |
 | OTel `connection reset by peer` on 8088 | HEC disabled or SSL-only | `./scripts/splunk_local_bootstrap.sh` |
 | OTel `permission denied` on jsonl file | Shared volume permissions | Bootstrap script; `docker compose restart otel_collector` |
