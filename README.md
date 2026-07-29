@@ -10,99 +10,160 @@
 > **Repository:** [github.com/machowdhury/OrchestraACME](https://github.com/machowdhury/OrchestraACME)  
 > **Author:** Mahamudul Alam Chowdhury ([@machowdhury](https://github.com/machowdhury))
 
+**End user?** Follow **[Start here](#start-here-your-first-30-minutes)** below — install, attack, prove in Splunk. Reference material is further down.
+
 ---
 
-## What Is This?
+## Table of Contents
 
-**OrchestraACME** is an end-to-end **agentic AI security lab**: a realistic multi-agent banking application you can attack on purpose, defend with runtime controls, and monitor in Splunk — the same loop security teams need before production agents go live.
+**Do this first**
 
-Unlike theory-only training or scripted chatbot responses, this project runs **live LLM inference** (Ollama), **real HTTP attack traffic**, **workflow-surface policy enforcement** (tools, RAG, A2A, memory, orchestration), and **production-grade telemetry pipelines** — all in a single `docker compose --profile local up`.
+1. [Start here — your first 30 minutes](#start-here-your-first-30-minutes)
+2. [Workshop paths (what to run next)](#workshop-paths-what-to-run-next)
+3. [Three URLs](#three-urls)
+4. [Documentation map](#documentation-map)
 
-### Why this project exists
+**Reference** (read when you need depth)
 
-Enterprises are shipping **agent chains** — intake, extraction, risk, compliance — but most security programs still test **one chatbot prompt at a time**. That misses where agentic risk actually lives: tool gateways, retrieval stores, cross-agent trust, memory persistence, and orchestration overrides. WAFs and API gateways rarely see those layers.
+5. [What is this?](#what-is-this)
+6. [How it works](#how-everything-works-plain-language)
+7. [Installation (detailed)](#installation)
+8. [Usage guide](#usage-guide)
+9. [Architecture](#architecture)
+10. [Requirements](#requirements)
+11. [Configuration & troubleshooting](#configuration-reference)
+12. [Security notes](#security-notes)
 
-OrchestraACME exists so practitioners can **practice on a controlled range** instead of learning on production:
+---
 
-| Problem in the wild | What this lab lets you do |
-|---------------------|---------------------------|
-| No repeatable way to fire agentic attacks | Attack Panel sends real adversarial payloads through the same code paths production would use |
-| Controls claimed but never measured | Every scenario emits **PASS/FAIL control evidence** you can query in Splunk |
-| SIEM content written without GenAI telemetry | Hunts use live `otel:agentic:json` with `gen_ai.*`, `workflow.*`, and framework tags |
-| Compliance asks for “AI governance proof” | Events map to **NIST AI RMF**, OWASP LLM/ASI, MITRE ATLAS, and optional CSA MAESTRO layers |
+## Start here — your first 30 minutes
 
-The goal is not to certify your bank — it is to give detection engineers, architects, and GRC teams **evidence they can defend in a review**.
+You need **Docker Desktop** (or Docker Engine + Compose v2) and **~16 GB RAM** if Splunk runs locally.  
+Full hardware checklist: [docs/PREREQUISITES.md](docs/PREREQUISITES.md)
 
-### What it offers
+### Step 1 — Get the code and start containers (~5–15 min)
 
-| Capability | Value for your team |
-|------------|---------------------|
-| **Offense** | Ten Top 10 scenarios (Scenarios 1–10) plus 45-technique registry and kill chains — reproducible red-team inputs, not one-off demos |
-| **Defense** | Workflow guards (MCP, A2A, memory, orchestration) plus CodeGuard/DefenseClaw on every LLM call — see *where* a control fires (pre-LLM, post-LLM, detect-only) |
-| **Observability** | OpenTelemetry GenAI semantics end-to-end: tokens, latency, agent ID, block reason, trace/incident IDs |
-| **Detection engineering** | Splunk compliance app: coverage %, MTTD-style panels, actor-chain narrative, MLTK anomaly hunts (optional Cisco overlay) |
-| **Compliance narrative** | Control Attestation and NIST dashboards tie runtime events to framework controls — exportable for audit conversations |
-| **Honest gaps** | Some attacks **INJECT** despite controls — intentional. You learn what detections still need to be built |
-| **Continuous baseline** | Background benign loan traffic (`BASELINE_TRAFFIC`) keeps Splunk dashboards alive between workshop attacks — realistic signal/noise ratio |
+```bash
+git clone https://github.com/machowdhury/OrchestraACME.git
+cd OrchestraACME
+cp .env.example .env
+docker compose --profile local up --build -d
+```
 
-You walk away with **SPL you can adapt**, **dashboard screenshots**, and **architecture vocabulary** (block vs detect-only, surface vs prompt) — artifacts you can use in the SOC and in governance reviews the same week.
+Wait for Ollama to pull the model (first boot only, ~1.3 GB):
 
-### When to attack, defend, and explore
+```bash
+docker compose logs -f ollama    # Ctrl+C when llama3.2:1b appears
+docker compose ps                # all services running / healthy
+```
 
-| Moment | What to run | Why |
-|--------|-------------|-----|
-| **Before production agent rollout** | Scenarios 5–6 (output gateway + MCP tools) | Decide control placement while architecture is still flexible |
-| **During detection rule development** | Fire a scenario → hunt in Splunk within minutes | Validate correlation searches against real GenAI fields, not synthetic CSVs |
-| **Purple-team / coverage review** | Run All 45 Techniques → Technique Coverage Matrix | Quantify MITRE ATLAS OBSERVED vs NOT_OBSERVED for agentic techniques |
-| **Incident readiness drill** | Threat chain KC-C001 → Actor Chain Story | Practice multi-agent timelines and `incident_id` correlation |
-| **GRC / risk workshop** | Scenarios 1–10 → Control Attestation + NIST AI RMF | Show pass/fail per control with live telemetry, not policy PDFs alone |
-| **Architecture review** | Optional MAESTRO path → attack predicted layers | Close the loop: threat model → exploit → prove (or disprove) in Splunk |
-| **Regression after control changes** | Re-fire the same scenario IDs | Same payload, comparable fields — did your guardrail change improve outcomes? |
+### Step 2 — Install Splunk apps and HEC (one time, ~5 min)
 
-**Attack Panel** (`http://localhost:5001`) is for offense and ordered workshop paths. **Banking app** (`http://localhost:5000`) is for seeing legitimate multi-agent flow. **Splunk** (`http://localhost:8000`) is where you prove outcomes — after you configure apps, index, and HEC (documented below; not automatic on first boot).
+Splunk does **not** auto-configure on first boot. Run once:
 
-> **Easiest path:** Follow the **[Exercise map in WORKSHOP.md](docs/WORKSHOP.md#exercise-map-follow-in-order)** — numbered steps from `docker compose up` through your first Splunk hunt. You do not need to read this entire README first.
+```bash
+chmod +x scripts/package_splunk_app.sh scripts/splunk_install_apps.sh scripts/splunk_local_bootstrap.sh
+./scripts/package_splunk_app.sh
+./scripts/splunk_install_apps.sh      # compliance app + MLTK
+./scripts/splunk_local_bootstrap.sh   # index + HEC token
+docker compose restart otel_collector # if OTel started before HEC
+```
 
-### How compliance mapping works
+**Pass:** bootstrap prints `HEC returned HTTP 200`.
 
-Compliance here means **traceable runtime evidence**, not a certification stamp:
+### Step 3 — Open the lab and check status
 
-1. **You run a scenario** (Attack Panel → **Top 10 Scenarios**, or **Workshop** tab for guided paths).
-2. **The framework layer enriches each OTel event** with technique IDs (MITRE ATLAS), OWASP LLM/ASI tags, optional MAESTRO layers, and NIST control IDs from `control_matrix.yaml`.
-3. **`control_validator` evaluates pass/fail** per scenario — e.g. MCP scope violation blocked, jailbreak HARD_DENY, token depth within budget.
-4. **Splunk ingests `otel:agentic:json`** and dashboards roll up:
-   - **Control Attestation** — latest control status by scenario and `control.control_id`
-   - **NIST AI RMF Scoring** — GOVERN / MAP / MEASURE / MANAGE alignment from emitted evidence
-   - **Technique Coverage Matrix** — which of 45 techniques produced observable telemetry
-   - **Detection Efficacy** — blocks by workflow surface, scenario activity, chain completeness
+| App | URL | You should see |
+|-----|-----|----------------|
+| **Attack Panel** | http://localhost:5001 | Header: **TARGET ONLINE** + **LLM ONLINE** (green) |
+| **Banking app** | http://localhost:5000 | Loan pipeline UI loads |
+| **Splunk** | http://localhost:8000 | Login: `admin` / `ACMEPassword2026!` |
 
-Use this in reviews as: *“For Scenario 6 (MCP tools), the MCP scope control **failed closed** — here is the Splunk row with `workflow.block_reason` and `control.control_id`.”* Field `campaign_week` in SPL is the **scenario index** (1–10); use “Scenario N” in narratives and reports.
+Attack Panel tabs (left to right): **Top 10 Scenarios** (default) → All 45 → Threat Chains → Custom → **Workshop** (last).
 
-Optional **CSA MAESTRO** adds design-time threats (L2–L6) you then validate with attacks — see [docs/MAESTRO_WORKSHOP.md](docs/MAESTRO_WORKSHOP.md).
+### Step 4 — Run your first attack (~5 min)
 
-### Why the workshop
+1. Open http://localhost:5001  
+2. Click the **Workshop** tab (last tab)  
+3. Click **RUN FIRST WIN PATH**  
+4. Wait for the path to finish (Scenarios 6 → 5 → 9)
 
-The **[Workshop curriculum](docs/WORKSHOP.md)** turns the lab into a **teaching system**: ordered Levels 0–5, role tracks (junior SOC → detection engineer → architect → GRC), and BOTS-style hunt questions (Q101–Q503). Most teams do not need to read every file in the repo — they need a path that answers:
+### Step 5 — Prove it in Splunk (~2 min)
 
-- *“What do I click first?”* → [WORKSHOP.md Exercise map](docs/WORKSHOP.md#exercise-map-follow-in-order): Level 0, then **Top 10 Scenarios** tab; use **Workshop** (last tab) for one-click paths  
-- *“What SPL proves the control worked?”* → Q201+ with macros and field glossary  
-- *“How do I brief my manager?”* → Actor Chain Story + Control Attestation exports  
+Wait **60 seconds**, then in Splunk **Search**:
 
-Workshop paths are **one-click sequences** (First Win, Standard, Deep, Fire All 10, Cisco + MLTK, MAESTRO Validate) that chain attacks and tell you which Splunk dashboards to open next. That structure exists because agentic security spans offense, detection, and governance — and ad-hoc clicking does not build muscle memory.
+```spl
+index=acme_agentic_telemetry sourcetype="otel:agentic:json" earliest=-15m
+| stats count by campaign_week
+```
 
-### Documentation
+**Pass:** `count` > 0 and you see scenario numbers (e.g. `6`, `5`, `9`).
 
-| Doc | Use when you need… |
-|-----|-------------------|
-| [docs/PREREQUISITES.md](docs/PREREQUISITES.md) | Full install checklist — Docker, permissions, Splunk, verification |
-| [docs/WORKSHOP.md](docs/WORKSHOP.md) | Ordered curriculum, hunt questions, role quick-starts, why teams run it |
-| [docs/USER_GUIDE.md](docs/USER_GUIDE.md) | Splunk dashboards, field reference, troubleshooting |
-| [docs/THREAT_SURFACES.md](docs/THREAT_SURFACES.md) | Eight agentic attack surfaces (2025–2026) mapped to lab scenarios |
-| [docs/CISCO_INTEGRATION.md](docs/CISCO_INTEGRATION.md) | Optional AIBOM, MCP Scanner, Foundation-Sec-8B, CTSM overlay |
-| [docs/MAESTRO_WORKSHOP.md](docs/MAESTRO_WORKSHOP.md) | CSA MAESTRO threat modeling → attack → Splunk validation |
-| [docs/CLOUD_VM_DEPLOYMENT.md](docs/CLOUD_VM_DEPLOYMENT.md) | AWS / Azure / GCP ports and lab VM patterns |
+Open **GenAI Compliance Monitor → Overview** — event count should be non-zero.
 
-**Transparency goal:** This README explains what is real, what is simulated, what you must configure yourself, and what will *not* happen automatically. If something is unclear, that is a documentation bug — [open an issue](https://github.com/machowdhury/OrchestraACME/issues).
+### Step 6 — You're done with the basics
+
+You have a working **attack → telemetry → Splunk** loop. Pick your next path below.
+
+**Stuck?** [Verification & Troubleshooting](#verification--troubleshooting) · OTel `connection reset` on 8088 → re-run `./scripts/splunk_local_bootstrap.sh`
+
+---
+
+## Workshop paths (what to run next)
+
+Run paths from the Attack Panel **Workshop** tab. Full detail (SPL, pass criteria, maturity): **[docs/USER_GUIDE.md → Workshop paths](docs/USER_GUIDE.md#workshop-paths--where-to-start-what-to-run-where-to-end)**
+
+```text
+START → 15-Min First Win → Standard Workshop → Deep Workshop → Fire All 10 / MAESTRO
+              ↑                    ↑                  ↑
+           everyone            senior SOC         detection eng.
+```
+
+| Path | Time | You learn | First Splunk check |
+|------|------|-----------|-------------------|
+| **15-Minute First Win** | ~15 min | Pre-LLM block vs output deny vs detect-only | `` `acme_campaign_w6` earliest=-30m \| stats count by workflow.blocked `` |
+| **Standard Workshop** | ~25 min | Multi-stage kill chain (`incident_id`) | `` `acme_genai_index` incident_id=* \| stats dc(kill_chain.stage) BY incident_id `` |
+| **Deep Workshop** | ~45+ min | MITRE coverage (45 techniques) | **Technique Coverage Matrix** dashboard |
+| **Fire All 10** | ~10 min | Full GRC / NIST evidence | **Control Attestation** dashboard |
+| **MAESTRO Validate** | ~60 min | Threat model → attack → prove layers | [MAESTRO_WORKSHOP.md](docs/MAESTRO_WORKSHOP.md) |
+| **Cisco + MLTK** | ~30 min | AIBOM + token anomaly (optional) | [CISCO_INTEGRATION.md](docs/CISCO_INTEGRATION.md) |
+
+---
+
+## Three URLs
+
+| Role | URL |
+|------|-----|
+| **Attack** (fire scenarios) | http://localhost:5001 |
+| **Defend** (legitimate loan flow) | http://localhost:5000 |
+| **Monitor** (hunt & dashboards) | http://localhost:8000 |
+
+Cloud VM: replace `localhost` with your server IP — [docs/CLOUD_VM_DEPLOYMENT.md](docs/CLOUD_VM_DEPLOYMENT.md)
+
+---
+
+## Documentation map
+
+| Read this | When |
+|-----------|------|
+| **[docs/USER_GUIDE.md](docs/USER_GUIDE.md)** | Workshop buttons, SPL queries, dashboards, lifecycle |
+| **[docs/WORKSHOP.md](docs/WORKSHOP.md)** | Full curriculum, hunt questions Q101–Q503, facilitator runbook |
+| **[docs/PREREQUISITES.md](docs/PREREQUISITES.md)** | Docker install, permissions, Splunk checklist |
+| **[docs/THREAT_SURFACES.md](docs/THREAT_SURFACES.md)** | Eight agentic attack surfaces → Scenario 1–10 |
+| **[docs/MAESTRO_WORKSHOP.md](docs/MAESTRO_WORKSHOP.md)** | CSA MAESTRO threat modeling path |
+| **[docs/CISCO_INTEGRATION.md](docs/CISCO_INTEGRATION.md)** | Optional Cisco + MLTK overlay |
+
+---
+
+## What is this?
+
+**OrchestraACME** is a Docker lab where you attack a **multi-agent banking app** (live Ollama LLM), see **runtime controls** block or allow attacks, and **prove outcomes in Splunk** — the same loop security teams need before production agents ship.
+
+- **Real:** HTTP attacks, LLM inference, OpenTelemetry → Splunk HEC, NIST/OWASP/MITRE fields on events  
+- **Not real:** No production bank, no vendor appliance binaries — DefenseClaw/CodeGuard are open-source middleware in this repo  
+- **You configure:** Splunk apps, HEC, and index (Step 2 above) — not automatic on `docker compose up`
+
+For compliance mapping, limitations, and who should use this lab, see [Why it exists](#why-it-exists--the-agent-security-problem) and [Honest limitations](#honest-limitations).
 
 ---
 
@@ -152,7 +213,7 @@ Detail: [docs/MAESTRO_WORKSHOP.md](docs/MAESTRO_WORKSHOP.md)
 
 ## How Everything Works (Plain Language)
 
-Read this section first if you want the full picture without digging through code.
+Read this if you want the full picture after completing [Start here](#start-here-your-first-30-minutes).
 
 ### The 30-second version
 
@@ -351,47 +412,16 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 
 ## Quick Start
 
+> **Same steps as [Start here](#start-here-your-first-30-minutes)** — kept for deep links.
+
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git
-cd OrchestraACME
+git clone https://github.com/machowdhury/OrchestraACME.git && cd OrchestraACME
 cp .env.example .env
 docker compose --profile local up --build -d
+./scripts/package_splunk_app.sh && ./scripts/splunk_install_apps.sh && ./scripts/splunk_local_bootstrap.sh
 ```
 
-| Dashboard | URL |
-|-----------|-----|
-| Attack Panel (offense) | http://localhost:5001 — default tab **Top 10 Scenarios**; **Workshop** is last |
-| Banking App (defend) | http://localhost:5000 — light UI; use **↺ Refresh Sessions** after pipeline runs |
-| Splunk (monitor) | http://localhost:8000 (`admin` / `ACMEPassword2026!`) |
-
-Use this lab to:
-
-- Execute a **4-agent loan processing chain** with live LLM reasoning
-- Launch **ten adversarial scenarios** (Scenarios 1–10) across real workflow surfaces (tools, RAG, A2A, memory, orchestration)
-- Enforce **layered runtime controls** — see [USER_GUIDE](docs/USER_GUIDE.md)
-- Validate **Splunk ES detection rules** against `otel:agentic:json` telemetry
-
-> **First boot:** LLM works after Ollama pulls the model. Splunk dashboards work only after you install apps (compliance + MLTK) and configure HEC — not automatically on `docker compose up`. Start with **[WORKSHOP.md → Exercise map](docs/WORKSHOP.md#exercise-map-follow-in-order)**.
-
----
-
-## Table of Contents
-
-1. [Agentic Security Architecture](#agentic-security-architecture)
-2. [How Everything Works (Plain Language)](#how-everything-works-plain-language)
-2. [What This Project Is — and Is Not](#what-this-project-is--and-is-not)
-3. [Honest Limitations](#honest-limitations)
-4. [Why It Exists](#why-it-exists--the-agent-security-problem)
-5. [Architecture](#architecture)
-6. [Requirements](#requirements)
-7. [Project Structure](#project-structure)
-8. [Implementation Overview](#implementation-overview)
-9. [Installation](#installation)
-10. [Usage Guide](#usage-guide)
-11. [Splunk App Deployment](#splunk-app-deployment)
-12. [Configuration Reference](#configuration-reference)
-13. [Verification &amp; Troubleshooting](#verification--troubleshooting)
-14. [Security Notes](#security-notes)
+Then: http://localhost:5001 → **Workshop** → **RUN FIRST WIN PATH** → Splunk Search (Step 5 above).
 
 ---
 
@@ -670,6 +700,8 @@ python3 scripts/sync_splunk_lookups.py
 
 ## Installation
 
+> **Most users:** follow **[Start here](#start-here-your-first-30-minutes)** only. This section adds detail for cloud VMs, external Splunk, and post-install checks.
+
 ### Step 1 — Clone and configure
 
 > **Prerequisites (Docker install, permissions, hardware):** [docs/PREREQUISITES.md](docs/PREREQUISITES.md)
@@ -802,7 +834,7 @@ If the last two steps fail, see [HEC Token Alignment](#hec-token-alignment) and 
 
 ## Usage Guide
 
-> **Detailed guide:** [docs/USER_GUIDE.md](docs/USER_GUIDE.md) — scenarios, Splunk macros, troubleshooting.
+> **Workshop paths and SPL:** [docs/USER_GUIDE.md](docs/USER_GUIDE.md#workshop-paths--where-to-start-what-to-run-where-to-end) — start there for button-by-button guidance.
 
 ### A. Run a Legitimate Banking Transaction
 

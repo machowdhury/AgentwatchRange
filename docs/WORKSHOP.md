@@ -28,7 +28,8 @@ Use this as your checklist. Each level builds on the previous one.
 | **3** | Attack Panel → Threat Chains | Run **KC-C001** | `incident_id` correlates in Splunk |
 | **4+** | Splunk dashboards | Technique Coverage, Control Attestation | Per level below |
 
-> **Tip:** Use the Attack Panel **Workshop** tab (last menu item) for one-click paths. Use **Top 10 Scenarios** for individual exercises.
+> **Tip:** Use the Attack Panel **Workshop** tab (last menu item) for one-click paths. Use **Top 10 Scenarios** for individual exercises.  
+> **Plain-language guide for each button:** [USER_GUIDE.md → Workshop paths](USER_GUIDE.md#workshop-paths--where-to-start-what-to-run-where-to-end)
 
 ---
 

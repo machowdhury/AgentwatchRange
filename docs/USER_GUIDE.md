@@ -8,7 +8,7 @@ Run the lab from the **Attack Panel**, generate telemetry, hunt in Splunk, and *
 
 > **Terminology:** The Attack Panel and workshop use **Scenario 1–10** (one per agentic threat surface). In Splunk telemetry the scenario index is stored in the numeric field `campaign_week` (values 1–10) — use that field in SPL, not the phrase “campaign week” in reports or training materials.
 
-**New here?** Complete [Prerequisites](#prerequisites), then follow the ordered curriculum in **[WORKSHOP.md](WORKSHOP.md)** and run **Level 1 — First Win**.
+**New here?** Complete [Prerequisites](#prerequisites), then read **[Workshop paths — where to start](#workshop-paths--where-to-start-what-to-run-where-to-end)** below (what to click, what SPL to run, where to end).
 
 ---
 
@@ -52,30 +52,274 @@ The OrchestraACME Workshop is a **hands-on lab**, not theory-only training: lear
 
 Use the Attack Panel **Workshop** tab (**last menu item**) for one-click guided paths. Use **Top 10 Scenarios** (default tab) for individual exercises. **Splunk Search** is where learners answer hunt questions — same pattern as [Splunk BOTS](https://github.com/splunk/botsv3).
 
-### Quick map
+> **Rule:** Wait **60 seconds** after any Attack Panel path finishes before running SPL in Splunk.
 
-| Level | Audience | Attack Panel | Splunk |
-|-------|----------|--------------|--------|
-| 0–1 | Everyone | **First Win** | Overview, Control Attestation |
-| 2 | Junior → senior analyst | First Win + Scenario 8 | Threat Hunting, Q201–Q210 |
-| 3 | Senior analyst | **Standard Workshop** | Actor Chain Story |
-| 4 | Detection engineer | **Deep Workshop** / Cisco | Technique Coverage, MLTK |
-| 5 | Architect / GRC | **MAESTRO** / Fire All 10 | NIST AI RMF |
+---
 
-**Role quick-start:** [WORKSHOP.md § Role quick-start](WORKSHOP.md#role-quick-start-pick-one-row)
+## Workshop paths — where to start, what to run, where to end
 
-### Attack Panel paths
+This section is the **on-ramp**. It explains each Workshop button, the maturity level it maps to, the Splunk queries to prove success, and what to do next.
 
-| Button | Runs | Level |
-|--------|------|-------|
-| **15-Minute First Win** | Scenarios 6 → 5 → 9 | 1 |
-| **Standard Workshop** | First Win + KC-C001 | 3 |
-| **Deep Workshop** | Standard + RUN ALL 45 | 4 |
-| **Fire All 10** | Scenarios 1–10 | 5B |
-| **MAESTRO Validate** | Architecture + 6,8,9,10 | 5A |
-| **Cisco + MLTK** | Preflight + 1,6,7,9 | 4B |
+### Where everyone starts
 
-Wait **60s** after each path before running SPL. Hunt questions with copy-paste queries: **[WORKSHOP.md](WORKSHOP.md)**.
+| Step | Where | Action | Pass when |
+|------|-------|--------|-----------|
+| **0** | Terminal + Splunk | Install stack, apps, HEC — [Prerequisites](#prerequisites) | `index=acme_agentic_telemetry earliest=-15m \| stats count` > 0 |
+| **1** | Attack Panel → **Workshop** tab | Click **15-Minute First Win** | Q101–Q103 return rows (below) |
+
+**Do not skip Level 0.** Without HEC and the compliance app, Workshop buttons fire attacks but Splunk stays empty.
+
+### Maturity lifecycle (start → end)
+
+```text
+LEVEL 0  Install & verify ingest          ← START (everyone)
+   ↓
+LEVEL 1  15-Minute First Win              ← first attack path (everyone)
+   ↓
+LEVEL 2  SOC hunts (Q201–Q210)            ← junior / mid analyst depth
+   ↓
+LEVEL 3  Standard Workshop (KC-C001)    ← senior analyst / correlation
+   ↓
+LEVEL 4  Deep Workshop + optional Cisco   ← detection engineering / coverage
+   ↓
+LEVEL 5  MAESTRO Validate + Fire All 10    ← END (architect / GRC evidence)
+```
+
+| If you are… | Start at | Realistic end state |
+|-------------|----------|---------------------|
+| **Executive / taster** | Level 0 + First Win | Level 1 — prove pipeline works |
+| **Junior SOC analyst** | Level 0 + First Win | Level 2 — write basic hunts |
+| **Senior SOC / IR** | Level 1 | Level 3 — `incident_id` correlation |
+| **Detection engineer** | Level 1 | Level 4 — Technique Coverage Matrix |
+| **Architect** | Level 1 | Level 5A — MAESTRO validate path |
+| **GRC / compliance** | Level 1 | Level 5B — Fire All 10 + NIST dashboards |
+
+Full hunt questions and facilitator notes: **[WORKSHOP.md](WORKSHOP.md)**.
+
+---
+
+### 1. 15-Minute First Win
+
+| | |
+|--|--|
+| **Maturity** | Level 1 — Pipeline proof |
+| **Time** | ~15 minutes |
+| **Who** | **Everyone** — your first hands-on win |
+| **Attack Panel** | **Workshop** tab (last) → **RUN FIRST WIN PATH** |
+| **What runs** | Scenario **6** (MCP tools) → **5** (output gateway) → **9** (RAG detect-only) |
+| **What you learn** | Three control philosophies: block **before** LLM, block/deny **after** LLM, **detect-only** |
+| **Splunk dashboards** | Overview · Control Attestation · Detection Efficacy |
+
+**What to do**
+
+1. Confirm Attack Panel header: **TARGET ONLINE** + **LLM ONLINE**.
+2. Click **RUN FIRST WIN PATH**; wait for the path to finish (~3–5 min of attacks + delays).
+3. Wait **60 seconds**, then open Splunk Search.
+
+**Queries to run (pass criteria)**
+
+```spl
+`acme_genai_index` earliest=-30m campaign_week=6
+| stats count by workflow.blocked workflow.block_reason
+```
+**Pass:** `workflow.blocked=true` on Scenario 6 (pre-LLM tool block).
+
+```spl
+`acme_genai_index` earliest=-30m campaign_week=5
+| table defenseclaw.action defenseclaw_blocked workflow.blocked
+```
+**Pass:** You see `defenseclaw.action` (e.g. `HARD_DENY` or `ALLOW`) — output-side control fired or allowed.
+
+```spl
+`acme_campaign_w9` earliest=-30m
+| table workflow.blocked galileo_observe_alert control.status
+```
+**Pass:** Events exist; discuss detect-only (alert may fire without hard block).
+
+**Next step:** Level 2 hunts ([WORKSHOP.md Level 2](WORKSHOP.md#level-2--soc-hunts-junior--senior-analyst)) or jump to **Standard Workshop** if you are a senior analyst.
+
+---
+
+### 2. Standard Workshop
+
+| | |
+|--|--|
+| **Maturity** | Level 3 — Correlation |
+| **Time** | ~25 minutes |
+| **Who** | Senior SOC, incident responders |
+| **Prerequisite** | Level 1 (First Win) complete |
+| **Attack Panel** | **Workshop** tab → **RUN STANDARD WORKSHOP** |
+| **What runs** | First Win (6 → 5 → 9) + kill chain **KC-C001** (Fraudulent Loan Pipeline) |
+| **What you learn** | Single-surface attacks vs **multi-stage** stories tied by `incident_id` |
+| **Splunk dashboards** | Actor Chain Story · Kill-Chain Timeline · Detection Efficacy |
+
+**Queries to run**
+
+```spl
+`acme_genai_index` earliest=-1h incident_id=*
+| stats dc(kill_chain.stage) AS stages values(kill_chain.stage) BY incident_id
+```
+**Pass:** Multiple `kill_chain.stage` values for one `incident_id`.
+
+```spl
+`acme_genai_index` earliest=-1h incident_id=*
+| stats values(gen_ai.agent.name) AS agents BY incident_id
+```
+**Pass:** More than one agent name in the chain.
+
+```spl
+`acme_genai_index` earliest=-1h incident_id=*
+| stats count by incident_id workflow.blocked defenseclaw_blocked
+```
+**Pass:** You can narrate which stages blocked vs reached the model.
+
+**Next step:** **Deep Workshop** (coverage) or **Fire All 10** (GRC breadth).
+
+---
+
+### 3. Deep Workshop
+
+| | |
+|--|--|
+| **Maturity** | Level 4 — Detection engineering |
+| **Time** | ~45+ minutes (includes **RUN ALL 45 TECHNIQUES** ~10–20 min) |
+| **Who** | Detection engineers, purple team |
+| **Prerequisite** | Standard Workshop recommended |
+| **Attack Panel** | **Workshop** tab → **RUN DEEP WORKSHOP** |
+| **What runs** | Standard Workshop + full **45-technique registry** (LIVE + SIMULATED + HYBRID) |
+| **What you learn** | MITRE ATLAS **coverage math** — OBSERVED vs NOT_OBSERVED |
+| **Splunk dashboards** | Technique Coverage Matrix · Detection Efficacy · Threat Hunting |
+
+**Queries to run**
+
+Open **Technique Coverage Matrix** dashboard (preferred), or:
+
+```spl
+`acme_genai_index` earliest=-24h
+| stats count by technique_id
+| sort -count
+```
+**Pass:** Multiple `technique_id` values; dashboard shows OBSERVED % > 0.
+
+```spl
+`acme_genai_index` earliest=-24h
+| stats count by testbed_mode
+```
+**Pass:** Mix of live attack events and simulated technique events.
+
+**Next step:** Optional **Cisco + MLTK** overlay, or **MAESTRO Validate** for architects.
+
+---
+
+### 4. Fire All 10 Scenarios
+
+| | |
+|--|--|
+| **Maturity** | Level 5B — Compliance / GRC evidence |
+| **Time** | ~5–10 minutes (automated sequence) |
+| **Who** | GRC, risk, security leadership demos |
+| **Prerequisite** | Level 1 minimum; best after Level 3–4 |
+| **Attack Panel** | **Workshop** tab → **FIRE ALL 10 SCENARIOS** |
+| **What runs** | Scenarios **1–10** in order (all eight agentic surfaces) |
+| **What you learn** | Full control attestation and framework coverage in one pass |
+| **Splunk dashboards** | Control Attestation · NIST AI RMF Scoring · Technique Heatmap |
+
+**Queries to run**
+
+```spl
+`acme_genai_index` earliest=-1h
+| stats latest(control.status) AS control_status BY campaign_week control.control_id
+| sort campaign_week
+```
+**Pass:** Rows for scenarios 1–10 with PASS/FAIL control evidence.
+
+```spl
+`acme_genai_index` earliest=-1h
+| stats dc(campaign_week) AS scenarios_seen
+```
+**Pass:** `scenarios_seen=10`.
+
+**Next step:** Export dashboard screenshots for audit packs; re-run after control changes for regression.
+
+---
+
+### 5. MAESTRO Validate Path
+
+| | |
+|--|--|
+| **Maturity** | Level 5A — Architecture validation |
+| **Time** | ~60–90 minutes (includes external MAESTRO UI) |
+| **Who** | Security architects, threat modelers |
+| **Prerequisite** | Level 1; CSA MAESTRO running on **http://localhost:9002** — [MAESTRO_WORKSHOP.md](MAESTRO_WORKSHOP.md) |
+| **Attack Panel** | **Workshop** tab → **RUN MAESTRO VALIDATE PATH** |
+| **What runs** | Copies architecture blurb → you threat-model in MAESTRO → fires Scenarios **6, 8, 9, 10** |
+| **What you learn** | Design-time threats (MAESTRO layers L2–L6) vs runtime telemetry proof |
+| **Splunk dashboards** | Detection Efficacy · MAESTRO layer panels · Control Attestation |
+
+**What to do**
+
+1. Start MAESTRO on `:9002` (host, not Docker).
+2. Run **MAESTRO VALIDATE PATH**; paste architecture into MAESTRO when prompted.
+3. After attacks, prove predicted layers fired in Splunk.
+
+**Query to run**
+
+```spl
+`acme_genai_index` earliest=-30m
+| mvexpand framework.maestro_layers
+| search framework.maestro_layers=L*
+| stats dc(framework.maestro_layers) AS layers_at_risk
+| eval maestro_coverage_pct=round(layers_at_risk/7*100,1)
+```
+**Pass:** `maestro_coverage_pct` > 50 after validation scenarios.
+
+**Next step:** Document gaps where MAESTRO predicted risk but telemetry did not fire — detection backlog.
+
+---
+
+### 6. Cisco + MLTK Anomaly Hunt
+
+| | |
+|--|--|
+| **Maturity** | Level 4B — Optional overlay |
+| **Time** | ~30 minutes |
+| **Who** | Splunk practitioners, teams using Cisco AI Defense + MLTK |
+| **Prerequisite** | MLTK installed (`splunk_install_apps.sh`); Cisco overlay: `docker compose -f docker-compose.yml -f docker-compose.cisco.yml --profile local up -d` — [CISCO_INTEGRATION.md](CISCO_INTEGRATION.md) |
+| **Attack Panel** | **Workshop** tab → **RUN CISCO + MLTK PATH** |
+| **What runs** | Preflight checks + Scenarios **1, 6, 7, 9** |
+| **What you learn** | AIBOM drift, MCP scan telemetry, CTSM token anomaly patterns |
+| **Splunk dashboards** | MLTK Anomaly Hunting · Detection Efficacy · Threat Hunting |
+
+**Queries to run**
+
+```spl
+`acme_campaign_w1` earliest=-30m
+| table cisco_aibom_status agent.aibom_validated model_artifact_hash_expected model_artifact_hash_found
+```
+**Pass:** AIBOM fields populated after Scenario 1.
+
+```spl
+`acme_genai_index` earliest=-30m campaign_week=7
+| table gen_ai.usage.input_tokens gen_ai.usage.output_tokens cisco_tsm_anomaly_score mltk.ctsm_signal
+```
+**Pass:** Token usage + anomaly score fields for cost/DoS hunting.
+
+Open **MLTK Anomaly Hunting** dashboard for CTSM forecast panels.
+
+**Next step:** Return to **Deep Workshop** coverage or production rule tuning.
+
+---
+
+### Quick reference — all Workshop buttons
+
+| Button | Level | Runs | First SPL to run |
+|--------|-------|------|------------------|
+| **15-Minute First Win** | 1 | Scenarios 6 → 5 → 9 | `` `acme_campaign_w6` earliest=-30m \| stats count by workflow.blocked `` |
+| **Standard Workshop** | 3 | First Win + KC-C001 | `` `acme_genai_index` incident_id=* \| stats dc(kill_chain.stage) BY incident_id `` |
+| **Deep Workshop** | 4 | Standard + All 45 | Open **Technique Coverage Matrix** |
+| **Fire All 10** | 5B | Scenarios 1–10 | `` `acme_genai_index` \| stats dc(campaign_week) AS scenarios_seen `` |
+| **MAESTRO Validate** | 5A | Arch + 6,8,9,10 | MAESTRO layer coverage SPL (above) |
+| **Cisco + MLTK** | 4B | Preflight + 1,6,7,9 | `` `acme_campaign_w1` earliest=-30m \| table cisco_aibom_status `` |
 
 ---
 
