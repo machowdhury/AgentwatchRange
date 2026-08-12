@@ -48,7 +48,9 @@ def inspect_tool_invocation(user_input: str) -> McpGatewayResult:
             )
 
     for tool in APPROVED_TOOLS:
-        if tool in user_input.lower().replace("_", ""):
+        normalized_input = user_input.lower().replace("_", "")
+        normalized_tool = tool.lower().replace("_", "")
+        if normalized_tool in normalized_input:
             return McpGatewayResult(
                 blocked=False,
                 tool_name=tool,

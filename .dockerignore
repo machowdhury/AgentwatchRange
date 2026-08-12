@@ -1,0 +1,22 @@
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+.venv
+venv
+dist
+docs
+splunk_app
+*.md
+.env
+.env.*
+docker-compose*.yml
+config
+scripts
+prevbuild
+*.tar.gz
+.idea
+.vscode
+# Runtime scan output only — manifest JSON under data/ is needed by banking_app
+data/cisco_scans/*
+!data/cisco_scans/.gitkeep

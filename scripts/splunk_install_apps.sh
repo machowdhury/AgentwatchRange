@@ -81,7 +81,11 @@ COMPLIANCE_TARBALL="${1:-}"
 if [[ -z "$COMPLIANCE_TARBALL" ]]; then
   echo "[install] Packaging GenAI Compliance app..."
   ./scripts/package_splunk_app.sh
-  COMPLIANCE_TARBALL="$(ls -1 dist/acme_genai_compliance-*.tar.gz 2>/dev/null | sort -V | tail -1)"
+  if [[ -f dist/.last_package ]]; then
+    COMPLIANCE_TARBALL="$(cat dist/.last_package)"
+  else
+    COMPLIANCE_TARBALL="$(ls -1 dist/acme_genai_compliance-*.tar.gz 2>/dev/null | sort -V | tail -1)"
+  fi
 fi
 if [[ ! -f "$COMPLIANCE_TARBALL" ]]; then
   echo "[install] ERROR: compliance tarball not found: ${COMPLIANCE_TARBALL}" >&2

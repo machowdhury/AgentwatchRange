@@ -4,6 +4,7 @@ Framework and kill-chain API route registration for OrchestraACME banking fabric
 
 from __future__ import annotations
 
+import logging
 import os
 import threading
 import uuid
@@ -11,6 +12,8 @@ from typing import Any
 
 import requests
 from flask import Flask, jsonify, request
+
+logger = logging.getLogger(__name__)
 
 from framework.chain_engine import KILL_CHAINS, KILL_CHAIN_MAP, create_engine
 from framework.taxonomy import (
@@ -70,8 +73,12 @@ def register_framework_routes(app: Flask) -> None:
         from framework.technique_executor import create_executor
         if not get_technique(technique_id):
             return jsonify({"error": f"Unknown technique: {technique_id}"}), 404
-        result = create_executor().execute_technique(technique_id, force_mode="SIMULATED")
-        return jsonify(result), 200
+        try:
+            result = create_executor().execute_technique(technique_id, force_mode="SIMULATED")
+            return jsonify(result), 200
+        except Exception as exc:
+            logger.exception("framework_emit_technique failed for %s", technique_id)
+            return jsonify({"error": str(exc)}), 500
 
     @app.route("/api/v1/framework/playbooks", methods=["GET"])
     def framework_playbooks():
@@ -92,20 +99,28 @@ def register_framework_routes(app: Flask) -> None:
         if not get_technique(technique_id):
             return jsonify({"error": f"Unknown technique: {technique_id}"}), 404
         body = request.get_json(silent=True) or {}
-        result = create_executor().execute_technique(
-            technique_id,
-            incident_id=body.get("incident_id"),
-            force_mode=body.get("force_mode"),
-        )
-        return jsonify(result)
+        try:
+            result = create_executor().execute_technique(
+                technique_id,
+                incident_id=body.get("incident_id"),
+                force_mode=body.get("force_mode"),
+            )
+            return jsonify(result)
+        except Exception as exc:
+            logger.exception("framework_execute_technique failed for %s", technique_id)
+            return jsonify({"error": str(exc)}), 500
 
     @app.route("/api/v1/framework/execute-all", methods=["POST"])
     def framework_execute_all():
         from framework.technique_executor import create_executor
         body = request.get_json(silent=True) or {}
         delay = float(body.get("delay_seconds", 0.3))
-        result = create_executor().execute_all(delay_seconds=delay)
-        return jsonify(result)
+        try:
+            result = create_executor().execute_all(delay_seconds=delay)
+            return jsonify(result)
+        except Exception as exc:
+            logger.exception("framework_execute_all failed")
+            return jsonify({"error": str(exc)}), 500
 
     @app.route("/api/v1/framework/stats", methods=["GET"])
     def framework_stats():
@@ -156,6 +171,9 @@ def register_chain_routes(app: Flask) -> None:
             return jsonify({"error": str(exc)}), 404
         except requests.RequestException as exc:
             return jsonify({"error": f"Chain execution failed: {exc}"}), 502
+        except Exception as exc:
+            logger.exception("execute_chain failed for %s", chain_id)
+            return jsonify({"error": str(exc)}), 500
 
         with _results_lock:
             _chain_results[report["incident_id"]] = report

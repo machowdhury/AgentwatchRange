@@ -20,7 +20,11 @@ COPY apps/agents/ ./agents/
 COPY apps/framework/ ./framework/
 COPY data/ ./data/
 
-RUN mkdir -p /var/log/defenseclaw
+RUN useradd -m -u 1000 appuser \
+    && mkdir -p /var/log/defenseclaw \
+    && chown -R appuser:appuser /app /var/log/defenseclaw
+
+USER appuser
 
 EXPOSE 5000
 CMD ["python", "app_runtime.py"]

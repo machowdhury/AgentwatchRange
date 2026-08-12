@@ -67,7 +67,7 @@ exporters:
     token: "${SPLUNK_HEC_TOKEN}"
     index: "${SPLUNK_HEC_INDEX}"
     sourcetype: "${SPLUNK_HEC_SOURCETYPE}"
-    source: "otel-collector-mesh"
+    source: "${SPLUNK_HEC_SOURCE}"
     tls:
       insecure_skip_verify: ${SPLUNK_HEC_TLS_SKIP_VERIFY}
     retry_on_failure:

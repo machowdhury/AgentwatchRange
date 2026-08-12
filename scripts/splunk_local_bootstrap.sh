@@ -61,8 +61,10 @@ for i in $(seq 1 60); do
 done
 
 echo "[bootstrap] Ensuring shared telemetry volume is writable..."
-docker exec -u root "$SPLUNK_CONTAINER" sh -c \
-  'mkdir -p /var/log/defenseclaw && chmod 1777 /var/log/defenseclaw' || true
+if ! docker exec -u root "$SPLUNK_CONTAINER" sh -c \
+  'mkdir -p /var/log/defenseclaw && chmod 1777 /var/log/defenseclaw'; then
+  echo "[bootstrap] WARNING: could not chmod shared telemetry volume — OTel file exporter may fail"
+fi
 
 echo "[bootstrap] Enabling HTTP Event Collector (global)..."
 hec_global_code="$(splunk_http_code POST "/services/data/inputs/http/http/enable" 2>/dev/null || echo "000")"
@@ -140,7 +142,9 @@ else
 fi
 
 echo "[bootstrap] Restarting OTel collector to flush HEC retry queue..."
-docker compose restart otel_collector >/dev/null 2>&1 || true
+if ! docker compose restart otel_collector >/dev/null 2>&1; then
+  echo "[bootstrap] WARNING: could not restart otel_collector — run: docker compose restart otel_collector"
+fi
 
 echo ""
 echo "[bootstrap] Testing HEC from host..."

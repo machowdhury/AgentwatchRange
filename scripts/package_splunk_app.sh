@@ -7,13 +7,13 @@
 #   ./scripts/package_splunk_app.sh
 #
 # Output:
-#   dist/acme_genai_compliance-2.0.0.tar.gz
+#   dist/acme_genai_compliance-<VERSION>.tar.gz  (VERSION set below)
 #
 # Install on Splunk Cloud:
-#   Apps → Browse more apps → Upload app → select the .tar.gz file
+#   Apps → Browse more apps → Upload app → select the printed .tar.gz filename
 #
 # Install on Splunk Enterprise:
-#   $SPLUNK_HOME/bin/splunk install app dist/acme_genai_compliance-2.0.0.tar.gz
+#   splunk install app dist/acme_genai_compliance-<VERSION>.tar.gz
 # =============================================================================
 set -euo pipefail
 
@@ -43,12 +43,16 @@ rsync -a \
   "${SRC_DIR}/" "${TARGET_DIR}/"
 
 mkdir -p "${DIST_DIR}"
+# Remove stale packages so install scripts never pick an old tarball.
+rm -f "${DIST_DIR}/${APP_ID}-"*.tar.gz
 OUTPUT="${DIST_DIR}/${PACKAGE_NAME}.tar.gz"
 
 echo "[package] Creating ${OUTPUT}..."
 tar -czf "${OUTPUT}" -C "${STAGING_DIR}" "${APP_ID}"
 
 rm -rf "${STAGING_DIR}"
+
+echo "${OUTPUT}" > "${DIST_DIR}/.last_package"
 
 echo "[package] Done."
 echo ""

@@ -77,6 +77,11 @@ def export_playbooks_lookup() -> Path:
 def enrich_framework_lookup() -> Path:
     """Add execution_mode column to framework lookup from playbooks."""
     src = LOOKUP_DIR / "acme_framework_lookup.csv"
+    if not src.is_file():
+        raise FileNotFoundError(
+            f"Expected lookup file at {src}. "
+            "Ensure splunk_app/splunk_compliance_app/lookups/ is present in the repo."
+        )
     playbooks = {p.technique_id: p for p in get_all_playbooks()}
 
     rows = []

@@ -6,9 +6,10 @@
 #   SPLUNK_MODE=local    → runs Splunk as a container (default)
 #   SPLUNK_MODE=external → skips Splunk container; OTel ships to your own instance
 #
-# Local mode:
-#   docker compose --profile local up --build -d
-#   (with .env from .env.example, COMPOSE_FILE includes docker-compose.local.yml)
+# Local mode (default with .env from .env.example):
+#   docker compose up --build -d
+#   Requires COMPOSE_PROFILES=local and COMPOSE_FILE including docker-compose.local.yml
+#   (both set in .env.example) so Splunk + HEC init start and otel waits correctly.
 #
 # External Splunk mode:
 #   docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -d
@@ -151,6 +152,7 @@ services:
       - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
       - SPLUNK_HEC_INDEX=${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}
       - SPLUNK_HEC_SOURCETYPE=${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}
+      - SPLUNK_HEC_SOURCE=${SPLUNK_HEC_SOURCE:-otel-collector-mesh}
       - SPLUNK_HEC_TLS_SKIP_VERIFY=${SPLUNK_HEC_TLS_SKIP_VERIFY:-true}
     ports:
       - "4317:4317"

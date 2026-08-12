@@ -46,12 +46,15 @@ if [[ "$ASSUME_YES" != true ]]; then
 fi
 
 echo "[fresh] Stopping and removing containers + volumes..."
-docker compose --profile local down -v --remove-orphans 2>/dev/null || \
-  docker compose down -v --remove-orphans 2>/dev/null || true
+if ! docker compose down -v --remove-orphans; then
+  echo "[fresh] WARNING: docker compose down failed — continuing with container cleanup"
+fi
 
 # Force-remove named containers if compose left them behind
-for c in acme_splunk acme_ollama acme_banking_app acme_attack_panel acme_otel_collector; do
-  docker rm -f "$c" 2>/dev/null || true
+for c in acme_splunk acme_splunk_hec_init acme_ollama acme_banking_app acme_attack_panel acme_otel_collector; do
+  if ! docker rm -f "$c" 2>/dev/null; then
+    : # container may already be gone
+  fi
 done
 
 echo "[fresh] Recreating .env..."
@@ -61,17 +64,33 @@ if [[ -f .env ]]; then
 fi
 cp .env.example .env
 
-echo "[fresh] Building and starting stack (5–15 min first boot)..."
-docker compose --profile local up --build -d
+# Load model name for readiness check (defaults match .env.example)
+set -a
+# shellcheck disable=SC1091
+source .env
+set +a
+OLLAMA_MODEL="${OLLAMA_MODEL:-llama3.2:1b}"
+OLLAMA_MODEL_BASE="${OLLAMA_MODEL%%:*}"
 
-echo "[fresh] Waiting for Ollama model pull (up to 10 min)..."
+echo "[fresh] Building and starting stack (5–15 min first boot)..."
+if ! docker compose up --build -d; then
+  echo "[fresh] ERROR: docker compose up failed — check docker compose logs" >&2
+  exit 1
+fi
+
+echo "[fresh] Waiting for Ollama model '${OLLAMA_MODEL}' (up to 10 min)..."
 for i in $(seq 1 60); do
-  if docker compose exec -T ollama ollama list 2>/dev/null | grep -q "llama"; then
+  model_list="$(docker compose exec -T ollama ollama list 2>&1)" || {
+    echo "[fresh] WARNING: ollama list failed (attempt ${i}/60) — container may still be starting"
+    sleep 10
+    continue
+  }
+  if echo "$model_list" | grep -Fq "${OLLAMA_MODEL}" || echo "$model_list" | grep -Fq "${OLLAMA_MODEL_BASE}"; then
     echo "[fresh] Ollama model ready."
     break
   fi
   if [[ "$i" -eq 60 ]]; then
-    echo "[fresh] WARN: Ollama still pulling — check: docker compose logs -f ollama"
+    echo "[fresh] WARN: Ollama still pulling '${OLLAMA_MODEL}' — check: docker compose logs -f ollama"
   fi
   sleep 10
 done
@@ -89,11 +108,11 @@ for i in $(seq 1 48); do
 done
 
 echo "[fresh] Bootstrapping Splunk HEC + index..."
-chmod +x scripts/splunk_local_bootstrap.sh scripts/splunk_install_app.sh
+chmod +x scripts/splunk_local_bootstrap.sh scripts/splunk_install_apps.sh
 ./scripts/splunk_local_bootstrap.sh
 
-echo "[fresh] Installing Splunk compliance app..."
-./scripts/splunk_install_app.sh
+echo "[fresh] Installing Splunk apps (compliance + MLTK)..."
+./scripts/splunk_install_apps.sh
 
 echo ""
 echo "=============================================="
