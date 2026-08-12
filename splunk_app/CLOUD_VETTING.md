@@ -34,7 +34,7 @@ chmod +x scripts/validate_splunk_app.sh scripts/package_splunk_app.sh
 ./scripts/package_splunk_app.sh
 ```
 
-Output: `dist/acme_genai_compliance-2.3.1.tar.gz`
+Output: `dist/acme_genai_compliance-*.tar.gz` — use the **exact filename printed** at the end of `./scripts/package_splunk_app.sh`.
 
 ---
 
@@ -55,7 +55,7 @@ Output: `dist/acme_genai_compliance-2.3.1.tar.gz`
 ## Splunk Enterprise install
 
 ```bash
-$SPLUNK_HOME/bin/splunk install app dist/acme_genai_compliance-2.3.1.tar.gz -update 1
+$SPLUNK_HOME/bin/splunk install app dist/acme_genai_compliance-*.tar.gz -update 1
 $SPLUNK_HOME/bin/splunk restart
 ```
 
@@ -69,7 +69,7 @@ Splunk Cloud private apps should pass **AppInspect** with the `cloud` tag:
 
 ```bash
 # Requires Splunk AppInspect CLI from Splunk Developer tools
-appinspect inspect dist/acme_genai_compliance-2.3.1.tar.gz --mode test --included-tags cloud
+appinspect inspect dist/acme_genai_compliance-*.tar.gz --mode test --included-tags cloud
 ```
 
 If you do not have AppInspect locally, upload to a Splunk Cloud **test stack** first and review **Manage Apps → App inspection**.

@@ -502,7 +502,7 @@ docker compose --profile local up --build -d
 ./scripts/package_splunk_app.sh && ./scripts/splunk_install_apps.sh && ./scripts/splunk_local_bootstrap.sh
 ```
 
-Then: http://localhost:5001 → **Workshop** → **RUN FIRST WIN PATH** → Splunk Search (Step 5 above).
+Then: http://localhost:5001 → **Workshop** → **RUN FIRST WIN PATH** → Splunk Search (Step 6 above).
 
 ---
 
@@ -1209,12 +1209,16 @@ This is a **deliberately vulnerable lab environment** designed for security rese
 # Start everything
 cp .env.example .env
 docker compose --profile local up --build -d
-./scripts/splunk_local_bootstrap.sh
+./scripts/splunk_install_apps.sh && ./scripts/splunk_local_bootstrap.sh
+
+# Verify baseline BEFORE attacking (wait ~2–3 min, then in Splunk Search):
+#   index=acme_agentic_telemetry earliest=-15m | stats count by testbed_mode
+#   Pass: count > 0
 
 # Open dashboards
 open http://localhost:5000    # Banking App
 open http://localhost:5001    # Attack Panel
-open http://localhost:8000    # Splunk (admin / ACMEPassword2026!)
+open http://localhost:8000    # Splunk (admin / password from .env)
 
 # Stop everything
 docker compose down

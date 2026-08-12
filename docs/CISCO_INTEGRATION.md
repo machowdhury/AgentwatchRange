@@ -19,7 +19,7 @@ On Splunk:
 
 1. Install **Machine Learning Toolkit** (Splunkbase)
 2. Install **cisco-time-series-model** from [github.com/splunk/cisco-time-series-model](https://github.com/splunk/cisco-time-series-model)
-3. Install app `acme_genai_compliance-2.4.0.tar.gz`
+3. Install the compliance app tarball printed by `./scripts/package_splunk_app.sh` (upload from `dist/`)
 4. Open **MLTK Anomaly Hunting** dashboard
 
 ---
