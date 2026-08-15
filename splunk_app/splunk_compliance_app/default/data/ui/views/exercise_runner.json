@@ -1,0 +1,268 @@
+{
+  "title": "Exercise Runner",
+  "description": "Guided single-technique practice — pick a technique, predict the outcome, run hunt SPL, apply the triage runbook, then reveal the explanation. Data-driven from exercise_content.csv lookup.",
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": {
+        "token": "global_time",
+        "defaultValue": "-30m,now"
+      }
+    },
+    "input_tier": {
+      "type": "input.dropdown",
+      "title": "Learning Tier Filter",
+      "options": {
+        "token": "tier_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All tiers", "value": "*" },
+          { "label": "Tier 1 — Beginner", "value": "1" },
+          { "label": "Tier 2 — Intermediate", "value": "2" },
+          { "label": "Tier 3 — Advanced", "value": "3" },
+          { "label": "Tier 4 — Coverage", "value": "4" }
+        ]
+      }
+    },
+    "input_technique": {
+      "type": "input.dropdown",
+      "title": "Technique",
+      "options": {
+        "token": "selected_technique",
+        "defaultValue": "AML.T0050",
+        "items": {
+          "type": "ds.search",
+          "dataSource": "ds_technique_list"
+        },
+        "fieldForLabel": "title",
+        "fieldForValue": "technique_id"
+      }
+    },
+    "input_prediction": {
+      "type": "input.dropdown",
+      "title": "Before you run — what do you expect?",
+      "options": {
+        "token": "learner_prediction",
+        "defaultValue": "NOT_SURE",
+        "items": [
+          { "label": "Not sure — run it", "value": "NOT_SURE" },
+          { "label": "BLOCKED", "value": "BLOCKED" },
+          { "label": "INJECTED", "value": "INJECTED" },
+          { "label": "SIMULATED (hunt-only)", "value": "SIMULATED" }
+        ]
+      }
+    },
+    "input_custom_spl": {
+      "type": "input.text",
+      "title": "SPL Query (editable — leave blank to use lookup default)",
+      "options": {
+        "token": "custom_spl",
+        "defaultValue": ""
+      }
+    },
+    "input_reveal": {
+      "type": "input.button",
+      "title": "Reveal deep explanation (after triage)",
+      "options": {
+        "token": "reveal_explanation",
+        "defaultValue": "0",
+        "items": [
+          { "label": "Reveal explanation", "value": "1" }
+        ]
+      }
+    },
+    "input_learner": {
+      "type": "input.text",
+      "title": "Learner ID (optional — for progress notes)",
+      "options": {
+        "token": "learner_id",
+        "defaultValue": "anonymous"
+      }
+    }
+  },
+  "defaults": {
+    "dataSources": {
+      "ds.search": {
+        "options": {
+          "queryParameters": {
+            "earliest": "$global_time.earliest$",
+            "latest": "$global_time.latest$"
+          }
+        }
+      }
+    }
+  },
+  "dataSources": {
+    "ds_tier_progress": {
+      "type": "ds.search",
+      "name": "Tier progress",
+      "options": {
+        "query": "| inputlookup exercise_content | search learning_tier=\"$tier_filter$\" OR \"$tier_filter$\"=\"*\" | stats count as tier_total | appendcols [ search index=acme_agentic_telemetry sourcetype=\"otel:agentic:json\" earliest=$global_time.earliest$ latest=$global_time.latest$ technique_id=AML.* | lookup exercise_content technique_id OUTPUT learning_tier | search learning_tier=\"$tier_filter$\" OR \"$tier_filter$\"=\"*\" | stats dc(technique_id) as tier_observed ] | eval tier_observed=coalesce(tier_observed,0) | eval progress=round(100*tier_observed/tier_total,1) | table tier_observed tier_total progress"
+      }
+    },
+    "ds_technique_list": {
+      "type": "ds.search",
+      "name": "Technique list",
+      "options": {
+        "query": "| inputlookup exercise_content | search learning_tier=\"$tier_filter$\" OR \"$tier_filter$\"=\"*\" | table technique_id, title | sort learning_tier, technique_id"
+      }
+    },
+    "ds_exercise_meta": {
+      "type": "ds.search",
+      "name": "Exercise meta",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1"
+      }
+    },
+    "ds_instructions": {
+      "type": "ds.search",
+      "name": "Instructions",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | table instructions_text, execution_mode, expected_outcome, chart_type, spl_query"
+      }
+    },
+    "ds_results": {
+      "type": "ds.search",
+      "name": "Exercise results",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | eval effective_spl=if(isnull(\"$custom_spl$\") OR len(\"$custom_spl$\")<8, spl_query, \"$custom_spl$\") | fields effective_spl | map maxsearches=1 search=\"$effective_spl$\""
+      }
+    },
+    "ds_prediction_check": {
+      "type": "ds.search",
+      "name": "Prediction check",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | eval feedback=case(expected_outcome=\"VARIES\", \"You predicted \" + \"$learner_prediction$\" + \". This technique is honestly VARIES in the lab (small-model non-determinism or config-dependent controls).\", \"$learner_prediction$\"=\"NOT_SURE\", \"No prediction committed — typical expected outcome: \" + expected_outcome + \".\", \"$learner_prediction$\"=expected_outcome, \"You predicted \" + \"$learner_prediction$\" + \" — aligns with typical expected outcome (\" + expected_outcome + \").\", true(), \"You predicted \" + \"$learner_prediction$\" + \"; this technique typically shows \" + expected_outcome + \". Compare against control fields in results, not model text alone.\") | table feedback"
+      }
+    },
+    "ds_triage": {
+      "type": "ds.search",
+      "name": "Triage runbook",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | table triage_runbook_text"
+      }
+    },
+    "ds_explanation": {
+      "type": "ds.search",
+      "name": "Explanation bundle",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | table explanation_text, framework_mapping, mitigation_text"
+      }
+    },
+    "ds_chart_bar": {
+      "type": "ds.search",
+      "name": "Chart bar",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | eval effective_spl=if(isnull(\"$custom_spl$\") OR len(\"$custom_spl$\")<8, spl_query, \"$custom_spl$\") | fields effective_spl | map maxsearches=1 search=\"$effective_spl$\" | stats count by agent.id | sort - count | head 10"
+      }
+    },
+    "ds_chart_line": {
+      "type": "ds.search",
+      "name": "Chart line",
+      "options": {
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | eval effective_spl=if(isnull(\"$custom_spl$\") OR len(\"$custom_spl$\")<8, spl_query, \"$custom_spl$\") | fields effective_spl | map maxsearches=1 search=\"$effective_spl$\" | timechart span=5m count"
+      }
+    }
+  },
+  "visualizations": {
+    "viz_progress": {
+      "type": "splunk.table",
+      "title": "Progress — techniques with telemetry in window (best-effort)",
+      "dataSources": { "primary": "ds_tier_progress" },
+      "options": { "count": 10 }
+    },
+    "viz_instructions": {
+      "type": "splunk.table",
+      "title": "Instructions",
+      "dataSources": { "primary": "ds_instructions" },
+      "options": { "count": 5, "wrap": true }
+    },
+    "viz_prediction": {
+      "type": "splunk.singlevalue",
+      "title": "Prediction vs expected outcome",
+      "dataSources": { "primary": "ds_prediction_check" },
+      "options": { "field": "feedback" }
+    },
+    "viz_results": {
+      "type": "splunk.table",
+      "title": "Results",
+      "dataSources": { "primary": "ds_results" },
+      "options": { "count": 20, "wrap": true }
+    },
+    "viz_triage": {
+      "type": "splunk.table",
+      "title": "Triage runbook — apply now",
+      "dataSources": { "primary": "ds_triage" },
+      "options": { "count": 5, "wrap": true }
+    },
+    "viz_bar": {
+      "type": "viz.column",
+      "title": "Visualization (bar)",
+      "dataSources": { "primary": "ds_chart_bar" },
+      "containerOptions": {
+        "visibility": { "conditions": ["cond_chart_bar"] }
+      }
+    },
+    "viz_line": {
+      "type": "viz.line",
+      "title": "Visualization (timechart)",
+      "dataSources": { "primary": "ds_chart_line" },
+      "containerOptions": {
+        "visibility": { "conditions": ["cond_chart_line"] }
+      }
+    },
+    "viz_explanation": {
+      "type": "splunk.table",
+      "title": "Explanation · Framework mapping · Mitigations",
+      "dataSources": { "primary": "ds_explanation" },
+      "options": { "count": 10, "wrap": true },
+      "containerOptions": {
+        "visibility": { "conditions": ["cond_show_explanation"] }
+      }
+    }
+  },
+  "expressions": {
+    "conditions": {
+      "cond_show_explanation": {
+        "name": "Explanation revealed",
+        "value": "$reveal_explanation$=1"
+      },
+      "cond_chart_bar": {
+        "name": "Bar chart",
+        "value": "$Instructions:result.chart_type$=bar"
+      },
+      "cond_chart_line": {
+        "name": "Line chart",
+        "value": "$Instructions:result.chart_type$=line"
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "globalInputs": [
+      "input_time",
+      "input_tier",
+      "input_technique",
+      "input_prediction",
+      "input_custom_spl",
+      "input_reveal",
+      "input_learner"
+    ],
+    "options": {
+      "display": "auto-scale",
+      "width": 1440,
+      "height": 2200
+    },
+    "structure": [
+      { "item": "viz_progress", "type": "block", "position": { "x": 0, "y": 0, "w": 1440, "h": 120 } },
+      { "item": "viz_instructions", "type": "block", "position": { "x": 0, "y": 130, "w": 700, "h": 220 } },
+      { "item": "viz_prediction", "type": "block", "position": { "x": 720, "y": 130, "w": 720, "h": 100 } },
+      { "item": "viz_triage", "type": "block", "position": { "x": 720, "y": 240, "w": 720, "h": 110 } },
+      { "item": "viz_results", "type": "block", "position": { "x": 0, "y": 360, "w": 1440, "h": 320 } },
+      { "item": "viz_bar", "type": "block", "position": { "x": 0, "y": 690, "w": 700, "h": 260 } },
+      { "item": "viz_line", "type": "block", "position": { "x": 720, "y": 690, "w": 720, "h": 260 } },
+      { "item": "viz_explanation", "type": "block", "position": { "x": 0, "y": 960, "w": 1440, "h": 280 } }
+    ]
+  }
+}
