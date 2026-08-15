@@ -216,7 +216,7 @@ All dashboards and saved searches inherit this macro automatically.
 
 ## 6. Optional: Legacy Cisco AI Defense App
 
-For `cisco:aidefense:json` sourcetype (legacy AgentWatch Range telemetry), install separately:
+For `acme:agentic:vendorsim:json` sourcetype (legacy vendor-sim telemetry), install separately:
 
 ```
 splunk_app/App-Agentic-Compliance/

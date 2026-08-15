@@ -234,7 +234,7 @@ python3 scripts/sync_splunk_lookups.py
 ./scripts/package_splunk_app.sh   # outputs dist/acme_genai_compliance-*.tar.gz
 ```
 
-**Legacy (optional):** `splunk_app/App-Agentic-Compliance/` — Cisco AI Defense crosswalk for `cisco:aidefense:json` events
+**Legacy (optional):** `splunk_app/App-Agentic-Compliance/` — vendor-sim crosswalk for `acme:agentic:vendorsim:json` events
 
 ---
 
@@ -388,7 +388,7 @@ If baseline or attack steps fail, see [HEC Token Alignment](#hec-token-alignment
 1. Open the banking dashboard: **http://localhost:5000**
 2. Enter a loan request in the pipeline textarea.
 3. Click **Run Through All Agents**.
-4. Review per-agent token usage, DefenseClaw/AcmeGate status, and final pipeline result.
+4. Review per-agent token usage, AcmeGate/AcmeSentinel status, and final pipeline result.
 
 **API alternative:**
 
@@ -539,14 +539,14 @@ docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -
 
 ### Lookup Enrichment
 
-The dashboard joins live events to `framework_compliance_crosswalk.csv` on:
+The **legacy** `App-Agentic-Compliance` app joins vendor-sim events to `framework_compliance_crosswalk.csv` on:
 
-- `cisco_aidefense_objective`
-- `cisco_aidefense_technique`
-- `cisco_aidefense_subtechnique`
-- `cisco_agent_name`
+- `vendorsim_objective`
+- `vendorsim_technique`
+- `vendorsim_subtechnique`
+- `agent_name`
 
-This adds `owasp_classification`, `mitre_atlas_id`, and `severity` to each event.
+This adds `owasp_classification`, `mitre_atlas_id`, and `severity` to each event. The primary `splunk_compliance_app` uses the `` `acme_vendorsim_crosswalk_enrich` `` macro for the same join at search time.
 
 ---
 

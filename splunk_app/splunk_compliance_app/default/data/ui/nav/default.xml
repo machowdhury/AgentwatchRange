@@ -1,11 +1,11 @@
 <nav search_view="search" color="#006d9c">
   <view name="executive_governance" default="true" label="Executive AI Governance"/>
+  <view name="exercise_runner" label="Exercise Runner"/>
   <view name="compliance_overview" label="Overview"/>
   <view name="cross_app_normalization" label="Cross-App Normalization"/>
   <view name="technique_coverage_matrix" label="Technique Coverage"/>
   <view name="threat_hunting" label="Threat Hunting"/>
   <view name="nist_rmf_compliance" label="NIST AI RMF Scoring"/>
-  <view name="exercise_runner" label="Exercise Runner"/>
   <view name="detection_efficacy" label="Detection Efficacy"/>
   <view name="control_attestation" label="Control Attestation"/>
   <view name="mltk_anomaly_hunting" label="MLTK Anomaly Hunting"/>

@@ -412,7 +412,7 @@ The Workshop is not a separate product — it orchestrates components already in
 ```text
 Workshop button (Attack Panel :5001)
     → REST API (/api/exploit, /api/chains, /api/techniques/execute-all)
-    → Banking app (:5000) — 4 agents, workflow guards, CodeGuard, DefenseClaw
+    → Banking app (:5000) — 4 agents, workflow guards, AcmeGate, AcmeSentinel
     → Ollama (:11434) — live LLM inference (llama3.2:1b by default)
     → OpenTelemetry spans + security attributes
     → OTel Collector (:4318) — batch, enrich
@@ -613,7 +613,7 @@ All dashboards read `` `acme_genai_index` `` (default: `index=acme_agentic_telem
 |---------------|---------|
 | **GAP** / grey | Technique in catalog but **no events** in time range — run lab attack to fill |
 | **OBSERVED** / blue | Technique fired; telemetry exists (may or may not be blocked) |
-| **DETECTED** / red | Technique observed **and** blocked (`workflow`, CodeGuard, or DefenseClaw) |
+| **DETECTED** / red | Technique observed **and** blocked (`workflow`, AcmeGate, or AcmeSentinel) |
 | **NOT_OBSERVED** / green (OWASP tables) | Risk category with **no** matching events (good for compliance score) |
 | **ACTIVE** / yellow–red (OWASP) | Risk category seen in telemetry |
 | **PASS / FAIL** (Control Attestation) | NIST control evidence from `control.status` |
@@ -667,7 +667,7 @@ Static HTML walkthrough (not data-driven).
 | Visualization | Type | What it tells you |
 |---------------|------|-------------------|
 | Technique Coverage % | Single % | Observed techniques ÷ 45 catalog entries |
-| MTTD (seconds, blocked events) | Single value | Avg time to block (workflow/CodeGuard/DefenseClaw) |
+| MTTD (seconds, blocked events) | Single value | Avg time to block (workflow/AcmeGate/AcmeSentinel) |
 | Chain Incidents | Single value | Count of `ACME-INC-*` correlated incidents |
 | Control Pass Rate % | Single % | Latest `control.pass_rate_pct` from attestation |
 | Kill-Chain Stage Completeness | Table | Per `incident_id`: how many kill-chain stages seen (HIGH/MEDIUM/LOW) |
@@ -785,7 +785,7 @@ Matrix status filter: All / Gaps only / Observed / Detected.
 | Kill-Chain Incidents Over Time | Column chart | When chains ran |
 | Chain Stages by Kill-Chain Stage Type | Bar chart | Recon / Execution / Exfil distribution |
 | Incident Summary | Table | Per `incident_id`: dwell time, technique chain, agents — **click to drill** |
-| Stage-by-Stage Forensics | Table | Appears after drill: every stage with CVSS, DefenseClaw, detection signal |
+| Stage-by-Stage Forensics | Table | Appears after drill: every stage with CVSS, AcmeSentinel, detection signal |
 | Correlation SPL box | HTML | Copy-paste hunt for selected incident |
 
 Filters: scenario family (A–E), incident ID.

@@ -25,7 +25,7 @@ All app searches use the `acme_genai_index` macro (no hardcoded HEC tokens or in
 | Issue | Severity | Resolution |
 |-------|----------|------------|
 | No saved searches for Phase 1 emerging LIVE/HYBRID scenarios (T0072–T0075, T0070–T0071) | High | Added Section 7 with six corroborated detections |
-| Block detection limited to DefenseClaw/CodeGuard/workflow only | Medium | New `acme_control_block` macro covers emerging fields |
+| Block detection limited to AcmeSentinel/AcmeGate/workflow only | Medium | New `acme_control_block` macro covers emerging fields |
 | Some hunts omitted `incident_id` / `kill_chain.stage` in `table` output | Low | Emerging searches include all three correlation fields |
 
 ### New saved searches

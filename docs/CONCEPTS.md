@@ -94,7 +94,7 @@ Nothing in step 4–7 happens inside Ollama. Nothing in step 6–7 requires the 
 | Container | What it does | What it does **not** do | Host port |
 |-----------|--------------|-------------------------|-----------|
 | **ollama** | Serves a local LLM; pulls one model from `OLLAMA_MODEL` | Pick models automatically; call Splunk; enforce security policy | 11434 |
-| **banking_app** | 4-agent loan pipeline, REST APIs, OTel export, CodeGuard/AcmeSentinel | Connect to OpenAI/Anthropic; embed a Splunk client | 5000 |
+| **banking_app** | 4-agent loan pipeline, REST APIs, OTel export, AcmeGate/AcmeSentinel | Connect to OpenAI/Anthropic; embed a Splunk client | 5000 |
 | **attack_panel** | UI + API that POSTs adversarial payloads to banking_app | Run its own LLM; bypass banking_app middleware | 5001 |
 | **otel_collector** | Receives OTLP; batches; exports to Splunk HEC + JSONL file | Store long-term data by itself; run detections | 4317, 4318 |
 | **splunk** (local mode) | Indexes HEC events; hosts Web UI | Start automatically with dashboards pre-installed | 8000, 8088 |
@@ -252,7 +252,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 | Capability | How AgentWatch Range Delivers It |
 |------------|-------------------------------|
 | **Red-team testing** | Ten-scenario adversarial lifecycle console fires real prompt injection, tool escape, identity spoofing, and autonomous agent attacks |
-| **Runtime defense** | Workflow guards (MCP, A2A, memory, orchestration) + DefenseClaw/AcmeGate on every LLM call |
+| **Runtime defense** | Workflow guards (MCP, A2A, memory, orchestration) + AcmeGate/AcmeSentinel on every LLM call |
 | **Multi-agent chain testing** | 4-agent loan pipeline (Intake → Extraction → Risk → Compliance) mirrors real enterprise agent orchestration |
 | **Non-deterministic reasoning** | Live Ollama `llama3.2:1b` calls — attacks test actual model behavior, not canned responses |
 
@@ -319,7 +319,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 ### Data Flow
 
 1. **Banking App** (`app_runtime.py`) runs a 4-agent transaction chain. Each agent calls Ollama for real LLM inference.
-2. **AcmeSentinel / CodeGuard** middleware scans every prompt and model response. On threat detection the pipeline is blocked and a security event is emitted.
+2. **AcmeGate / AcmeSentinel** middleware scans every prompt and model response. On threat detection the pipeline is blocked and a security event is emitted.
 3. **OpenTelemetry** exports GenAI metrics, traces, and security logs to the OTel Collector on port `4318`.
 4. **OTel Collector** forwards everything to Splunk HEC as `sourcetype=otel:agentic:json` in the `acme_agentic_telemetry` index.
 5. **Attack Panel** (`exploit_ui.py`) fires real adversarial payloads at targeted banking agents.

@@ -45,7 +45,7 @@ Use this guide after [install + baseline verification](../README.md#step-4--veri
 
 ### What this tab means
 
-Each card is **Scenario 1–10** (stored as `campaign_week` in Splunk). One button fires **one real adversarial payload** to **one target agent** via the live Ollama LLM. DefenseClaw, CodeGuard, and workflow guards run on the real code path.
+Each card is **Scenario 1–10** (stored as `campaign_week` in Splunk). One button fires **one real adversarial payload** to **one target agent** via the live Ollama LLM. AcmeSentinel, AcmeGate, and workflow guards run on the real code path.
 
 - **Preview payload** — read the string before firing (no LLM call).
 - **Run scenario N** — single-agent attack.

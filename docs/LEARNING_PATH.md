@@ -22,7 +22,7 @@ Structured curriculum for AgentWatch Range. This is a **navigation layer** on to
 
 ## Tier 1 — Beginner: single-surface, single-turn
 
-**Teaches:** Input vs. output inspection (AcmeGate vs. DefenseClaw); what regex guardrails catch and miss.
+**Teaches:** Input vs. output inspection (AcmeGate vs. AcmeSentinel); what regex guardrails catch and miss.
 
 | Scenario | Attack Panel | Tier badge |
 |----------|--------------|------------|
