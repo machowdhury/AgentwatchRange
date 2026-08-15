@@ -48,7 +48,7 @@ Then: http://localhost:5001 → **Workshop** → **RUN FIRST WIN PATH** → Splu
 | Docker Compose | v2.20+ (`docker compose`) | Stack orchestration |
 | Git | Any recent | Clone the repository |
 | Web browser | Modern | Access dashboards |
-| Splunk (optional) | 9.2+ with MLTK | External Splunk instead of container |
+| Splunk (optional) | 10.0+ with MLTK | External Splunk instead of container |
 
 **Linux / Ubuntu VM:** Your user must be in the `docker` group (`docker ps` without `sudo`). See [PREREQUISITES.md](PREREQUISITES.md#fix-permission-denied-on-dockersock).
 
@@ -67,7 +67,7 @@ Then: http://localhost:5001 → **Workshop** → **RUN FIRST WIN PATH** → Splu
 
 ### Splunk App Prerequisites (for full dashboard)
 
-- Splunk Enterprise 9.2+ (included in Docker stack, or external instance)
+- Splunk Enterprise 10.0+ (included in Docker stack as `splunk/splunk:10.2`, or external instance)
 - **Machine Learning Toolkit (MLTK)** — required for Panel 4 (CTSM token anomaly forecasting)
 - `security` index created (auto-created on first HEC ingest in most setups)
 
@@ -125,7 +125,7 @@ Five services on the shared `acme_mesh` bridge network:
 | `banking_app` | `Dockerfile.banking` | 4-agent banking fabric + framework APIs on port 5000 |
 | `attack_panel` | `Dockerfile.attack` | Adversarial attack console on port 5001 |
 | `otel_collector` | `otel/opentelemetry-collector-contrib` | Aggregates OTLP → Splunk HEC + JSONL archive |
-| `splunk` | `splunk/splunk:9.2.1` | Local telemetry sink (`--profile local`) |
+| `splunk` | `splunk/splunk:10.2` | Local telemetry sink (`--profile local`) |
 
 ### 2. Banking App (`apps/app_runtime.py`)
 

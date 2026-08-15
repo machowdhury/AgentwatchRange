@@ -95,6 +95,8 @@ docker compose --profile local up --build -d
 
 > **Tip:** `.env.example` sets `COMPOSE_PROFILES=local` so plain `docker compose up` works after `cp .env.example .env`. On older clones, always pass `--profile local`.
 
+> **Clean install (Splunk 10):** The stack now defaults to `splunk/splunk:10.2` (Dashboard Studio). To wipe a prior 9.x lab: `docker compose --profile local down -v`, remove old images (`docker rmi splunk/splunk:9.2.1 2>/dev/null || true`), then `git pull`, `cp .env.example .env`, and run Step 1 again. First Splunk 10 boot can take several minutes.
+
 > **Before you go further:** `.env.example` ships with a public, documented default password (`SPLUNK_PASSWORD`) and HEC token (`SPLUNK_HEC_TOKEN`) — that's intentional, they're meant to make `localhost` setup frictionless. They are **not** meant to be exposed. If you follow [docs/CLOUD_VM_DEPLOYMENT.md](docs/CLOUD_VM_DEPLOYMENT.md) to run this on a reachable server, change both values in `.env` *before* opening any port beyond your VPN.
 
 Wait for Ollama to pull the model (first boot only, ~1.3 GB):
@@ -285,7 +287,7 @@ What's actually running, and what's optional.
 | Ollama | Local LLM runtime | `ollama/ollama:latest`, model `llama3.2:1b` |
 | OpenTelemetry | GenAI semantic-convention instrumentation — traces, metrics, logs | SDK/API 1.24.0, semconv 0.45b0 |
 | OpenTelemetry Collector | Receives OTLP, batches, exports to Splunk HEC | `otel/opentelemetry-collector-contrib:0.96.0` |
-| Splunk | SIEM — compliance dashboards, HEC ingestion | `splunk/splunk:9.2.1` (local container), or your own Splunk Enterprise/Cloud — see [Deployment options](#deployment-options-local-self-hosted-or-splunk-cloud) |
+| Splunk | SIEM — compliance dashboards, HEC ingestion | `splunk/splunk:10.2` (local container), or your own Splunk Enterprise/Cloud — see [Deployment options](#deployment-options-local-self-hosted-or-splunk-cloud) |
 | requests, python-dotenv, PyYAML | HTTP client, config loading | pinned in [`apps/requirements.txt`](apps/requirements.txt) |
 
 ### Optional: Cisco AI Defense overlay (`docker-compose.cisco.yml`)

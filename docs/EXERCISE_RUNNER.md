@@ -61,7 +61,7 @@ Prediction comparison is **not graded** — it frames reasoning before seeing re
 
 ## Limitations
 
-- Requires **Dashboard Studio** (Splunk Enterprise 8.2+ / Splunk Cloud compatible builds).
+- Requires **Dashboard Studio** (Splunk Enterprise 10.0+ / Splunk Cloud compatible builds).
 - Each cell requires **Run** then dashboard **Submit** (Dashboard Studio batch refresh model).
 - Progress indicator uses **telemetry observed in the time window**, not a persisted KV store.
 - `map`-based SPL execution inherits lookup query limits; keep hunt SPL bounded.

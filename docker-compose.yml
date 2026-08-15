@@ -190,7 +190,7 @@ services:
     restart: on-failure:3
 
   splunk:
-    image: ${SPLUNK_IMAGE:-splunk/splunk:9.2.1}
+    image: ${SPLUNK_IMAGE:-splunk/splunk:10.2}
     container_name: acme_splunk
     profiles:
       - local
@@ -203,6 +203,7 @@ services:
       - shared_telemetry:/var/log/acme_sentinel
     environment:
       - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
       - SPLUNK_PASSWORD=${SPLUNK_PASSWORD:-ACMEPassword2026!}
       - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
       - SPLUNK_HEC_SSL=0
