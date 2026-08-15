@@ -203,7 +203,7 @@
         <search>
           <query>`acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$ | head 5000
 | eval has_tier1=if(isnotnull(gen_ai.usage.input_tokens) OR isnotnull(technique_id) OR isnotnull(incident_id),1,0)
-| eval has_tier2=if(isnotnull(gen_ai.input.preview) OR isnotnull(gen_ai.output.preview) OR isnotnull(defenseclaw.action),1,0)
+| eval has_tier2=if(isnotnull(gen_ai.input.preview) OR isnotnull(gen_ai.output.preview) OR isnotnull(acme_output_guard.action),1,0)
 | eval has_workflow=if(isnotnull(workflow.block_reason) OR isnotnull(tool.scope_violation) OR isnotnull(mcp.gateway.rule_id),1,0)
 | eval has_control=if(isnotnull(control.status) OR isnotnull(control.pass_rate_pct),1,0)
 | stats sum(has_tier1) as tier1_events sum(has_tier2) as tier2_events sum(has_workflow) as workflow_events sum(has_control) as control_events count as total

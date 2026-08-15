@@ -10,9 +10,9 @@ OrchestraACME exercises **nine threat surface categories** (eight Top 10 surface
 |---|----------------|----------------|--------------|----------------------------|
 | 1 | **AI supply chain & prompt drift** | Orchestration | Scenario 1 | `cisco_aibom_status`, `agent.aibom_validated` |
 | 2 | **Orchestration policy bypass** | Orchestration | Scenario 2 | `foundry.orchestrator_override`, workflow block |
-| 3 | **Unsafe generated / ingested content** | Input validation | Scenario 3 | `codeguard_blocked`, `CG-RULE-SBD-007` |
+| 3 | **Unsafe generated / ingested content** | Input validation | Scenario 3 | `acme_input_guard_blocked`, `CG-RULE-SBD-007` |
 | 4 | **Shadow / unapproved models** | Runtime | Scenario 4 | `slm.unapproved=true`, `deployment.tier=shadow` |
-| 5 | **Semantic jailbreak & output abuse** | Output gateway | Scenario 5 | `defenseclaw.action=HARD_DENY` |
+| 5 | **Semantic jailbreak & output abuse** | Output gateway | Scenario 5 | `acme_output_guard.action=HARD_DENY` |
 | 6 | **MCP tool abuse & host escape** | Tools | Scenario 6 | `tool.scope_violation=true`, MCP gateway block |
 | 7 | **Recursive token weaponization** | Cost / DoS | Scenario 7 | `call_depth_detected`, token usage spikes |
 | 8 | **A2A identity spoofing** | Agent identity | Scenario 8 | `cryptographic_passport_valid=false` |

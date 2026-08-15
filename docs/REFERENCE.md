@@ -143,7 +143,7 @@ Five services on the shared `acme_mesh` bridge network:
 - `gen_ai.prompt`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`
 - `gen_ai.operation.name="chat"`
 
-**DefenseClaw + CodeGuard middleware** (in `agents/llm_client.py`) detects:
+**AcmeSentinel + AcmeGate middleware** (in `agents/llm_client.py`) detects:
 
 - Prompt injection and jailbreak personas
 - Tool boundary escapes and shell invocation attempts
@@ -200,9 +200,9 @@ Ten **Top 10 scenarios** in the Attack Panel (Scenarios 1–10), each targeting 
 |----------|-------|---------|-------------|
 | 1 | Code Compliance Illusion | AI-BOM / prompt drift | AIBOM telemetry |
 | 2 | Agentic Evaluation Harness | Orchestration | `orchestration_guard` |
-| 3 | Secure-by-Default Vibe Coding | Prompt / markup | `codeguard` |
+| 3 | Secure-by-Default Vibe Coding | Prompt / markup | `acme_input_guard` |
 | 4 | Shadow AI at the Edge | Unapproved SLM | Asset discovery |
-| 5 | Guarding the Front Desk | Semantic jailbreak | `defenseclaw` |
+| 5 | Guarding the Front Desk | Semantic jailbreak | `acme_output_guard` |
 | 6 | Intern with the Master Key | MCP tools | `mcp_gateway` |
 | 7 | The Infinity Bill | Token recursion | `call_depth_detected` |
 | 8 | Identity Fracture | A2A DID | `a2a_verifier` |
@@ -388,7 +388,7 @@ If baseline or attack steps fail, see [HEC Token Alignment](#hec-token-alignment
 1. Open the banking dashboard: **http://localhost:5000**
 2. Enter a loan request in the pipeline textarea.
 3. Click **Run Through All Agents**.
-4. Review per-agent token usage, DefenseClaw/CodeGuard status, and final pipeline result.
+4. Review per-agent token usage, DefenseClaw/AcmeGate status, and final pipeline result.
 
 **API alternative:**
 
@@ -431,7 +431,7 @@ curl -s -X POST http://localhost:5001/api/custom \
 
 ```spl
 index=acme_agentic_telemetry sourcetype="otel:agentic:json"
-| table _time gen_ai.request.model defenseclaw_blocked codeguard_blocked technique_id incident_id
+| table _time gen_ai.request.model acme_output_guard_blocked acme_input_guard_blocked technique_id incident_id
 | sort - _time
 ```
 
@@ -465,7 +465,7 @@ Navigate in Splunk Web: **GenAI Compliance Monitor**
 3. Install apps via `./scripts/splunk_install_apps.sh` (compliance + MLTK) and create index `acme_agentic_telemetry` via `./scripts/splunk_local_bootstrap.sh`
 4. Open Attack Panel → fire Prompt Injection, Tool Escape, and Rogue Agent scenarios
 5. Open Splunk → confirm otel:agentic:json events ingested
-6. Open Compliance Overview → verify DefenseClaw denials increment
+6. Open Compliance Overview → verify AcmeSentinel denials increment
 7. Run kill-chain: POST /api/v1/chains/KC-A001/execute on banking app
 8. Review Kill-Chain Timeline dashboard for correlated incident_id events
 ```
@@ -582,8 +582,8 @@ docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -
 | `SPLUNK_HEC_INDEX` | `acme_agentic_telemetry` | Splunk destination index |
 | `SPLUNK_HEC_SOURCETYPE` | `otel:agentic:json` | Event sourcetype |
 | `SPLUNK_PASSWORD` | `ACMEPassword2026!` | Splunk admin password (local mode) |
-| `DEFENSECLAW_ENABLED` | `true` | Enable output-side threat scanning |
-| `CODEGUARD_ENABLED` | `true` | Enable input-side validation |
+| `ACME_OUTPUT_GUARD_ENABLED` | `true` | Enable output-side threat scanning |
+| `ACME_INPUT_GUARD_ENABLED` | `true` | Enable input-side validation |
 | `HITL_GATE_ENABLED` | `false` | Require human checkpoint for high-value compliance approvals (AML.T0074) |
 | `HITL_AMOUNT_THRESHOLD` | `250000` | Loan amount (USD) above which HITL applies when gate enabled |
 
@@ -612,7 +612,7 @@ docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -
 | `splunk_hec_init` exit 1 | HEC SSL on old volume, wrong password, or Splunk not ready | `docker logs acme_splunk_hec_init` then `./scripts/splunk_local_bootstrap.sh` and `docker compose restart otel_collector` |
 | OTel `connection reset by peer` on 8088 | HEC disabled or SSL-only | `./scripts/splunk_local_bootstrap.sh` |
 | OTel `permission denied` on jsonl file | Shared volume permissions | Bootstrap script; `docker compose restart otel_collector` |
-| DefenseClaw never fires | Attack too mild | Try Runtime Prompt Injection, MCP Tool Escape, or Rogue Agent scenarios |
+| AcmeSentinel never fires | Attack too mild | Try Runtime Prompt Injection, MCP Tool Escape, or Rogue Agent scenarios |
 | Compliance dashboard empty | App not installed | Install `splunk_compliance_app` (HEC/index via bootstrap first) |
 | CTSM panel shows error | MLTK not installed | Run `./scripts/splunk_install_apps.sh` (includes MLTK from `splunk_app/splunk-ai-toolkit_600.tgz`) |
 | Ollama GPU error | No NVIDIA driver | Remove `deploy` GPU block in compose |

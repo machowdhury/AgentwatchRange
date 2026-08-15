@@ -62,7 +62,7 @@ done
 
 echo "[bootstrap] Ensuring shared telemetry volume is writable..."
 if ! docker exec -u root "$SPLUNK_CONTAINER" sh -c \
-  'mkdir -p /var/log/defenseclaw && chmod 1777 /var/log/defenseclaw'; then
+  'mkdir -p /var/log/acme_sentinel && chmod 1777 /var/log/acme_sentinel'; then
   echo "[bootstrap] WARNING: could not chmod shared telemetry volume — OTel file exporter may fail"
 fi
 

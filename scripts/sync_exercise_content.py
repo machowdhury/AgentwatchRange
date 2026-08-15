@@ -61,7 +61,7 @@ def _infer_expected_outcome(technique, playbook) -> str:
         return "VARIES"
     if technique.technique_id == "AML.T0038" or (playbook.scenario_week == 9):
         return "INJECTED"
-    if technique.defenseclaw_action == "HARD_DENY":
+    if technique.acme_output_guard_action == "HARD_DENY":
         return "BLOCKED"
     if technique.technique_id in ("AML.T0050", "AML.T0015", "AML.T0054", "AML.T0051"):
         return "BLOCKED"
@@ -74,14 +74,14 @@ def _infer_expected_outcome(technique, playbook) -> str:
 
 def _triage_runbook(technique, playbook) -> str:
     steps = []
-    if technique.defenseclaw_action:
+    if technique.acme_output_guard_action:
         steps.append(
-            f"1. Check `defenseclaw_action` / `defenseclaw_blocked` — "
-            f"expect `{technique.defenseclaw_action}` when output-side control fires."
+            f"1. Check `acme_output_guard_action` / `acme_output_guard_blocked` — "
+            f"expect `{technique.acme_output_guard_action}` when output-side control fires."
         )
     else:
         steps.append(
-            "1. Check `codeguard_blocked` and `workflow.blocked` — confirm which control layer engaged."
+            "1. Check `acme_input_guard_blocked` and `workflow.blocked` — confirm which control layer engaged."
         )
     steps.append(
         "2. Pivot on `incident_id` and `agent.id` — look for multi-stage correlation in Kill-Chain Timeline."
@@ -149,7 +149,7 @@ def _explanation(technique, playbook) -> str:
         f"{'This is a SIMULATED/breadth technique — focus on hunt fields, not live model behavior.' if playbook.execution_mode == 'SIMULATED' else ''}"
         f"{' HYBRID emits both live and simulated telemetry legs.' if playbook.execution_mode == 'HYBRID' else ''}\n\n"
         f"**Honest limitation:** Small-model (llama3.2:1b) responses may vary run-to-run; "
-        f"use control telemetry (`defenseclaw_blocked`, `codeguard_blocked`, `workflow.blocked`) "
+        f"use control telemetry (`acme_output_guard_blocked`, `acme_input_guard_blocked`, `workflow.blocked`) "
         f"as ground truth, not model wording alone."
     )
 

@@ -8,11 +8,11 @@ Wraps every call to the local Ollama endpoint with:
      (gen_ai.system, gen_ai.request.model, gen_ai.usage.input_tokens,
       gen_ai.usage.output_tokens, gen_ai.operation.name, gen_ai.agent.*)
 
-  2. Cisco DefenseClaw Gateway middleware
+  2. AcmeSentinel output gateway middleware
      Scans the LLM's raw output for injection execution signatures.
      Fires HARD_DENY + OTel exception trace event if detected.
 
-  3. Project CodeGuard input validation
+  3. AcmeGate input validation
      Validates agent input against secure-by-default schema rules.
      Blocks and logs if raw unsanitised external content reaches model.
 
@@ -149,14 +149,14 @@ def _emit_log_record(body: dict, severity: str = "INFO", trace_id: Optional[str]
 
 
 # =============================================================================
-# DEFENSECLAW GATEWAY — Inline output inspection middleware
+# ACMESENTINEL GATEWAY — Inline output inspection middleware
 # =============================================================================
 
 # Patterns that constitute an injection execution signature in model output.
 # These are strings that, if present in model output, indicate the model
 # has been successfully hijacked and is attempting to execute an instruction
 # it should have refused.
-DEFENSECLAW_DENY_PATTERNS = [
+ACMESENTINEL_DENY_PATTERNS = [
     # Financial action execution attempts
     r"TRANSFER\s+\$[\d,]+",
     r"transfer\s+\$[\d,]+\s+to\s+account",
@@ -192,11 +192,11 @@ DEFENSECLAW_DENY_PATTERNS = [
     r"acme-agent-(?:creditrisk|compliance|orchestrator)-\d{3}",
 ]
 
-DEFENSECLAW_COMPILED = [re.compile(p, re.IGNORECASE | re.MULTILINE)
-                         for p in DEFENSECLAW_DENY_PATTERNS]
+ACMESENTINEL_COMPILED = [re.compile(p, re.IGNORECASE | re.MULTILINE)
+                         for p in ACMESENTINEL_DENY_PATTERNS]
 
-# CodeGuard: input fields that must NOT contain raw external markup
-CODEGUARD_FORBIDDEN_INPUT_PATTERNS = [
+# AcmeGate: input fields that must NOT contain raw external markup
+ACMEGATE_FORBIDDEN_INPUT_PATTERNS = [
     r"<script[^>]*>",
     r"javascript:",
     r"data:text/html",
@@ -205,27 +205,27 @@ CODEGUARD_FORBIDDEN_INPUT_PATTERNS = [
     r"\x00",               # null byte injection
     r"\\u[0-9a-fA-F]{4}", # unicode escape sequences in plain text
 ]
-CODEGUARD_COMPILED = [re.compile(p, re.IGNORECASE) for p in CODEGUARD_FORBIDDEN_INPUT_PATTERNS]
+ACMEGATE_COMPILED = [re.compile(p, re.IGNORECASE) for p in ACMEGATE_FORBIDDEN_INPUT_PATTERNS]
 
 
-class DefenseClawViolation(Exception):
-    """Raised when DefenseClaw detects an injection execution in model output."""
+class AcmeSentinelViolation(Exception):
+    """Raised when AcmeSentinel detects an injection execution in model output."""
     def __init__(self, pattern: str, matched_text: str, rule_id: str):
         self.pattern = pattern
         self.matched_text = matched_text
         self.rule_id = rule_id
-        super().__init__(f"DefenseClaw HARD_DENY: rule {rule_id} matched: {matched_text[:80]}")
+        super().__init__(f"AcmeSentinel HARD_DENY: rule {rule_id} matched: {matched_text[:80]}")
 
 
-class CodeGuardViolation(Exception):
-    """Raised when CodeGuard detects unsanitised external input."""
+class AcmeGateViolation(Exception):
+    """Raised when AcmeGate detects unsanitised external input."""
     def __init__(self, pattern: str, field: str):
         self.pattern = pattern
         self.field = field
-        super().__init__(f"CodeGuard CG-RULE-SBD-007: forbidden pattern in field '{field}'")
+        super().__init__(f"AcmeGate CG-RULE-SBD-007: forbidden pattern in field '{field}'")
 
 
-def defenseclaw_inspect_output(
+def acmesentinel_inspect_output(
     output_text: str,
     agent_id: str,
     span,
@@ -234,12 +234,12 @@ def defenseclaw_inspect_output(
     """
     Scan raw LLM output for injection execution signatures.
     If a match is found:
-      - Raises DefenseClawViolation
+      - Raises AcmeSentinelViolation
       - Records a Span exception event with full forensic context
       - Emits a HARD_DENY OTel log record
     Returns the output unchanged if clean.
     """
-    for i, pattern in enumerate(DEFENSECLAW_COMPILED):
+    for i, pattern in enumerate(ACMESENTINEL_COMPILED):
         match = pattern.search(output_text)
         if match:
             rule_id = f"DCL-RULE-{4400 + i:04d}"
@@ -247,27 +247,27 @@ def defenseclaw_inspect_output(
 
             # Record exception on the active span
             span.record_exception(
-                DefenseClawViolation(DEFENSECLAW_DENY_PATTERNS[i], matched, rule_id),
+                AcmeSentinelViolation(ACMESENTINEL_DENY_PATTERNS[i], matched, rule_id),
                 attributes={
-                    "defenseclaw.action":      "HARD_DENY",
-                    "defenseclaw.rule_id":     rule_id,
-                    "defenseclaw.pattern":     DEFENSECLAW_DENY_PATTERNS[i],
-                    "defenseclaw.matched_text": matched[:200],
-                    "defenseclaw.agent_id":    agent_id,
+                    "acme_output_guard.action":      "HARD_DENY",
+                    "acme_output_guard.rule_id":     rule_id,
+                    "acme_output_guard.pattern":     ACMESENTINEL_DENY_PATTERNS[i],
+                    "acme_output_guard.matched_text": matched[:200],
+                    "acme_output_guard.agent_id":    agent_id,
                     "gen_ai.security.event":   "injection_execution_detected",
                     "gen_ai.operation.name":   "security_inspection",
                     "session.id":              session_id,
                 }
             )
-            span.set_status(StatusCode.ERROR, f"DefenseClaw HARD_DENY: {rule_id}")
+            span.set_status(StatusCode.ERROR, f"AcmeSentinel HARD_DENY: {rule_id}")
 
             _emit_log_record({
-                "event_type":              "DEFENSECLAW_HARD_DENY",
+                "event_type":              "ACME_OUTPUT_GUARD_HARD_DENY",
                 "severity":                "CRITICAL",
-                "defenseclaw.action":      "HARD_DENY",
-                "defenseclaw.rule_id":     rule_id,
-                "defenseclaw.pattern":     DEFENSECLAW_DENY_PATTERNS[i],
-                "defenseclaw.matched_text": matched[:200],
+                "acme_output_guard.action":      "HARD_DENY",
+                "acme_output_guard.rule_id":     rule_id,
+                "acme_output_guard.pattern":     ACMESENTINEL_DENY_PATTERNS[i],
+                "acme_output_guard.matched_text": matched[:200],
                 "agent.id":                agent_id,
                 "session.id":              session_id,
                 "gen_ai.request.model":    _OLLAMA_MODEL,
@@ -279,20 +279,20 @@ def defenseclaw_inspect_output(
                 "timestamp_iso":           datetime.datetime.utcnow().isoformat() + "Z",
             }, severity="CRITICAL")
 
-            raise DefenseClawViolation(DEFENSECLAW_DENY_PATTERNS[i], matched, rule_id)
+            raise AcmeSentinelViolation(ACMESENTINEL_DENY_PATTERNS[i], matched, rule_id)
 
     return output_text
 
 
-def codeguard_validate_input(user_input: str, field_name: str = "user_input") -> str:
+def acmegate_validate_input(user_input: str, field_name: str = "user_input") -> str:
     """
-    CodeGuard secure-by-default input validation.
-    Raises CodeGuardViolation if forbidden markup patterns are detected.
+    AcmeGate secure-by-default input validation.
+    Raises AcmeGateViolation if forbidden markup patterns are detected.
     Returns input unchanged if clean.
     """
-    for pattern in CODEGUARD_COMPILED:
+    for pattern in ACMEGATE_COMPILED:
         if pattern.search(user_input):
-            raise CodeGuardViolation(pattern.pattern, field_name)
+            raise AcmeGateViolation(pattern.pattern, field_name)
     return user_input
 
 
@@ -309,7 +309,7 @@ def call_ollama(
     session_id: str,
     temperature: float = 0.7,
     max_tokens: int = 512,
-    skip_defenseclaw: bool = False,
+    skip_acmesentinel: bool = False,
     incident_id: Optional[str] = None,
     technique_id: str = "",
     testbed_mode: str = "BANKING_LIVE",
@@ -326,8 +326,8 @@ def call_ollama(
             "output_tokens": int,      # completion token count
             "latency_ms": float,       # end-to-end latency
             "model": str,              # model name from Ollama response
-            "defenseclaw_blocked": bool,
-            "codeguard_blocked": bool,
+            "acme_output_guard_blocked": bool,
+            "acme_input_guard_blocked": bool,
             "trace_id": str,           # hex trace ID for correlation
             "incident_id": str,
         }
@@ -373,8 +373,8 @@ def call_ollama(
             "output_tokens":      0,
             "latency_ms":         0,
             "model":              _OLLAMA_MODEL,
-            "defenseclaw_blocked": False,
-            "codeguard_blocked":  False,
+            "acme_output_guard_blocked": False,
+            "acme_input_guard_blocked":  False,
             "workflow_blocked":   True,
             "block_reason":       workflow.block_reason,
             "workflow_surface":   workflow.workflow_surface,
@@ -383,19 +383,19 @@ def call_ollama(
             "control_evidence":   control_summary(controls),
         }
 
-    # --- CodeGuard input validation ---
-    codeguard_blocked = False
+    # --- AcmeGate input validation ---
+    acme_input_guard_blocked = False
     try:
-        codeguard_validate_input(user_message, "user_message")
-    except CodeGuardViolation as cg:
-        codeguard_blocked = True
+        acmegate_validate_input(user_message, "user_message")
+    except AcmeGateViolation as cg:
+        acme_input_guard_blocked = True
         _emit_log_record({
-            "event_type":              "CODEGUARD_RULE_BREACH",
+            "event_type":              "ACME_INPUT_GUARD_RULE_BREACH",
             "severity":                "CRITICAL",
-            "codeguard.rule_id":       "CG-RULE-SBD-007",
-            "codeguard.rule_name":     "SECURE_BY_DEFAULT_INPUT_VALIDATION",
-            "codeguard.field":         cg.field,
-            "codeguard.pattern":       cg.pattern,
+            "acme_input_guard.rule_id":       "CG-RULE-SBD-007",
+            "acme_input_guard.rule_name":     "SECURE_BY_DEFAULT_INPUT_VALIDATION",
+            "acme_input_guard.field":         cg.field,
+            "acme_input_guard.pattern":       cg.pattern,
             "agent.id":                agent_id,
             "session.id":              session_id,
             "incident_id":             incident_id,
@@ -408,13 +408,13 @@ def call_ollama(
             "timestamp_iso":           datetime.datetime.utcnow().isoformat() + "Z",
         }, severity="CRITICAL")
         return {
-            "response":           f"[CODEGUARD BLOCKED] Input contains forbidden markup. CG-RULE-SBD-007.",
+            "response":           f"[ACMEGATE BLOCKED] Input contains forbidden markup. CG-RULE-SBD-007.",
             "input_tokens":       0,
             "output_tokens":      0,
             "latency_ms":         0,
             "model":              _OLLAMA_MODEL,
-            "defenseclaw_blocked": False,
-            "codeguard_blocked":  True,
+            "acme_output_guard_blocked": False,
+            "acme_input_guard_blocked":  True,
             "workflow_blocked":   False,
             "trace_id":           "",
             "incident_id":        incident_id,
@@ -479,7 +479,7 @@ def call_ollama(
                 "response":           "[TIMEOUT] Ollama did not respond within 120s",
                 "input_tokens":       0, "output_tokens": 0, "latency_ms": 120000,
                 "model":              _OLLAMA_MODEL,
-                "defenseclaw_blocked": False, "codeguard_blocked": False,
+                "acme_output_guard_blocked": False, "acme_input_guard_blocked": False,
                 "trace_id":           trace_id_hex, "incident_id": incident_id,
             }
         except requests.exceptions.ConnectionError as e:
@@ -489,7 +489,7 @@ def call_ollama(
                 "response":           "[CONNECTION ERROR] Cannot reach Ollama. Is it running?",
                 "input_tokens":       0, "output_tokens": 0, "latency_ms": 0,
                 "model":              _OLLAMA_MODEL,
-                "defenseclaw_blocked": False, "codeguard_blocked": False,
+                "acme_output_guard_blocked": False, "acme_input_guard_blocked": False,
                 "trace_id":           trace_id_hex, "incident_id": incident_id,
             }
 
@@ -519,17 +519,17 @@ def call_ollama(
         _token_counter_output.add(output_tokens, {**base_attrs, "gen_ai.token.type": "output"})
         _operation_duration.record(latency_s, base_attrs)
 
-        # --- DefenseClaw output inspection ---
-        defenseclaw_blocked = False
-        if not skip_defenseclaw:
+        # --- AcmeSentinel output inspection ---
+        acme_output_guard_blocked = False
+        if not skip_acmesentinel:
             try:
-                output_text = defenseclaw_inspect_output(
+                output_text = acmesentinel_inspect_output(
                     output_text, agent_id, span, session_id
                 )
-            except DefenseClawViolation as dcv:
-                defenseclaw_blocked = True
+            except AcmeSentinelViolation as dcv:
+                acme_output_guard_blocked = True
                 output_text = (
-                    f"[DEFENSECLAW HARD_DENY] {dcv.rule_id}: "
+                    f"[ACMESENTINEL HARD_DENY] {dcv.rule_id}: "
                     f"Model output contained injection execution signature. "
                     f"Response suppressed."
                 )
@@ -549,10 +549,10 @@ def call_ollama(
             "gen_ai.agent.id":          agent_id,
             "gen_ai.agent.name":        agent_name,
             # Security fields
-            "defenseclaw.action":       "HARD_DENY" if defenseclaw_blocked else "PASS",
-            "codeguard.status":         "BLOCKED" if codeguard_blocked else "PASS",
-            "codeguard_blocked":        str(codeguard_blocked).lower(),
-            "defenseclaw_blocked":      str(defenseclaw_blocked).lower(),
+            "acme_output_guard.action":       "HARD_DENY" if acme_output_guard_blocked else "PASS",
+            "acme_input_guard.status":         "BLOCKED" if acme_input_guard_blocked else "PASS",
+            "acme_input_guard_blocked":        str(acme_input_guard_blocked).lower(),
+            "acme_output_guard_blocked":      str(acme_output_guard_blocked).lower(),
             # Context
             "session.id":               session_id,
             "incident_id":              incident_id,
@@ -572,14 +572,14 @@ def call_ollama(
         log_body.update(control_otel_fields(controls))
 
         if campaign_week == 10 and (
-            defenseclaw_blocked or "AUTONOMOUS" in user_message.upper()
+            acme_output_guard_blocked or "AUTONOMOUS" in user_message.upper()
         ):
             soar = trigger_containment(agent_id, incident_id)
             log_body.update(soar_otel_fields(soar))
 
-        _emit_log_record(log_body, severity="ERROR" if defenseclaw_blocked else "INFO", trace_id=trace_id_hex)
+        _emit_log_record(log_body, severity="ERROR" if acme_output_guard_blocked else "INFO", trace_id=trace_id_hex)
 
-        span.set_status(StatusCode.OK if not defenseclaw_blocked else StatusCode.ERROR)
+        span.set_status(StatusCode.OK if not acme_output_guard_blocked else StatusCode.ERROR)
 
         return {
             "response":            output_text,
@@ -587,8 +587,8 @@ def call_ollama(
             "output_tokens":       output_tokens,
             "latency_ms":          latency_ms,
             "model":               response_model,
-            "defenseclaw_blocked": defenseclaw_blocked,
-            "codeguard_blocked":   codeguard_blocked,
+            "acme_output_guard_blocked": acme_output_guard_blocked,
+            "acme_input_guard_blocked":   acme_input_guard_blocked,
             "workflow_blocked":    False,
             "workflow_surface":    workflow.workflow_surface,
             "trace_id":            trace_id_hex,

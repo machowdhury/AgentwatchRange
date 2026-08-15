@@ -1,201 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dashboard version="1.1" theme="dark">
-  <label>Agentic Compliance Matrix</label>
-  <description>OrchestraACME Universal Compliance Dashboard — Cisco AI Defense telemetry joined against the Integrated AI Security and Safety Framework crosswalk. Monitors POLICY_HARD_DENY interventions, runtime threat boundaries, compliance ledger tracking, and GenAI token anomaly forecasting.</description>
+  <label>Vendor-Sim Compliance Matrix</label>
+  <description>Simulated vendor-grade AI security telemetry — illustrates the shape of a commercial AI security platform's output. Fully synthetic lab data, not real Cisco AI Defense. Uses sourcetype acme:agentic:vendorsim:json.</description>
+
+  <init>
+    <search>
+      <query>| rest splunk_server=local count=0 /services/apps/local MachineLearningToolkit | head 1 | eval has_mltk=1</query>
+      <done>
+        <condition match="'job.resultCount' == 1">
+          <set token="has_mltk">1</set>
+          <unset token="no_mltk"/>
+        </condition>
+        <condition>
+          <unset token="has_mltk"/>
+          <set token="no_mltk">1</set>
+        </condition>
+      </done>
+    </search>
+  </init>
+
+  <fieldset submitButton="false">
+    <input type="time" token="global_time">
+      <label>Dashboard time range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
 
   <row>
     <panel>
-      <title>POLICY_HARD_DENY Interventions (24h)</title>
+      <title>POLICY_HARD_DENY Interventions</title>
       <gauge>
         <search>
-          <query>
-            <![CDATA[
-index=security sourcetype=cisco:aidefense:json policy_action="POLICY_HARD_DENY" earliest=-24h@h latest=now
-| stats count AS deny_count
-            ]]>
-          </query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
+          <query>`acme_vendorsim_index` $global_time$ policy_action="POLICY_HARD_DENY"
+| stats count AS deny_count</query>
+          <earliest>$global_time.earliest$</earliest>
+          <latest>$global_time.latest$</latest>
         </search>
-        <option name="drilldown">all</option>
-        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="rangeValues">[0,5,15,30,50]</option>
-        <option name="showMarker">1</option>
-        <option name="showSparkline">1</option>
-        <option name="showTrendIndicator">1</option>
-        <option name="trendDisplayMode">absolute</option>
-        <option name="trendInterval">-24h</option>
         <option name="type">radialGauge</option>
         <option name="unit">denials</option>
         <option name="useColors">1</option>
-        <drilldown>
-          <link target="_blank">search?q=index%3Dsecurity%20sourcetype%3Dcisco%3Aaidefense%3Ajson%20policy_action%3D%22POLICY_HARD_DENY%22&amp;earliest=-24h@h&amp;latest=now</link>
-        </drilldown>
       </gauge>
     </panel>
     <panel>
-      <title>Configuration Variances (24h)</title>
+      <title>Normalization variances (unmapped framework rows)</title>
       <gauge>
         <search>
-          <query>
-            <![CDATA[
-index=security sourcetype=cisco:aidefense:json earliest=-24h@h latest=now
-| eval lookup_objective=coalesce(cisco_aidefense_objective, 'cisco_threat_taxonomy.objective')
-| lookup framework_compliance_crosswalk cisco_aidefense_objective AS lookup_objective OUTPUT severity AS expected_severity
-| eval is_variance=if(isnull(expected_severity) OR expected_severity="" OR (isnotnull(finding_type) AND finding_type="UNKNOWN"), 1, 0)
-| stats sum(is_variance) AS variance_count
-            ]]>
-          </query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
+          <query>`acme_vendorsim_index` $global_time$
+| `acme_vendorsim_crosswalk_enrich`
+| eval is_variance=if(isnull(framework_severity) OR framework_severity="" OR (isnotnull(finding_type) AND finding_type="UNKNOWN"), 1, 0)
+| stats sum(is_variance) AS variance_count</query>
+          <earliest>$global_time.earliest$</earliest>
+          <latest>$global_time.latest$</latest>
         </search>
-        <option name="drilldown">all</option>
-        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="rangeValues">[0,3,10,20,40]</option>
-        <option name="showMarker">1</option>
-        <option name="showSparkline">1</option>
-        <option name="showTrendIndicator">1</option>
-        <option name="trendDisplayMode">absolute</option>
-        <option name="trendInterval">-24h</option>
         <option name="type">radialGauge</option>
         <option name="unit">variances</option>
-        <option name="useColors">1</option>
-        <drilldown>
-          <link target="_blank">search?q=index%3Dsecurity%20sourcetype%3Dcisco%3Aaidefense%3Ajson&amp;earliest=-24h@h&amp;latest=now</link>
-        </drilldown>
       </gauge>
     </panel>
   </row>
 
   <row>
     <panel>
-      <title>Runtime Threats by Cisco AI Defense Objective Boundary</title>
+      <title>Runtime threats by vendor-sim objective boundary</title>
       <chart>
         <search>
-          <query>
-            <![CDATA[
-index=security sourcetype=cisco:aidefense:json earliest=-7d@d latest=now
-| eval objective_boundary=coalesce(cisco_aidefense_objective, 'cisco_threat_taxonomy.objective', "UNMAPPED")
+          <query>`acme_vendorsim_index` earliest=-7d@d latest=now
+| eval objective_boundary=coalesce(vendorsim_objective, 'cisco_threat_taxonomy.objective', "UNMAPPED")
 | stats count AS threat_count by objective_boundary
-| sort -threat_count
-            ]]>
-          </query>
+| sort -threat_count</query>
           <earliest>-7d@d</earliest>
           <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
         </search>
         <option name="charting.chart">pie</option>
-        <option name="charting.chart.showPercent">1</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.fieldColors">{"TA0001": "0xdc4e41", "TA0002": "0xf1813f", "TA0004": "0xf8be34", "TA0005": "0x0877a6", "TA0008": "0xdc4e41", "TA0009": "0xf1813f", "TA0040": "0x53a051", "UNMAPPED": "0x999999"}</option>
-        <option name="charting.legend.placement">right</option>
-        <option name="height">340</option>
-        <drilldown>
-          <set token="drill_objective">$click.value$</set>
-        </drilldown>
       </chart>
     </panel>
   </row>
 
   <row>
     <panel>
-      <title>Compliance Tracking Ledger — Live Telemetry x Framework Crosswalk</title>
+      <title>Compliance ledger — vendor-sim x framework crosswalk</title>
       <table>
         <search>
-          <query>
-            <![CDATA[
-index=security sourcetype=cisco:aidefense:json earliest=-24h@h latest=now
-| eval lookup_objective=coalesce(cisco_aidefense_objective, 'cisco_threat_taxonomy.objective')
-| eval lookup_technique=coalesce(cisco_aidefense_technique, 'cisco_threat_taxonomy.technique')
-| eval lookup_subtechnique=coalesce(cisco_aidefense_subtechnique, 'cisco_threat_taxonomy.subtechnique')
-| eval lookup_agent=coalesce(cisco_agent_name, agent_name)
-| lookup framework_compliance_crosswalk cisco_aidefense_objective AS lookup_objective cisco_aidefense_technique AS lookup_technique cisco_aidefense_subtechnique AS lookup_subtechnique cisco_agent_name AS lookup_agent OUTPUT owasp_classification mitre_atlas_id severity AS framework_severity
+          <query>`acme_vendorsim_index` $global_time$
+| `acme_vendorsim_crosswalk_enrich`
+| `acme_vendorsim_token_normalize`
 | eval event_time=coalesce(cisco_event_timestamp, otel_event_time, strftime(_time, "%Y-%m-%dT%H:%M:%S%z"))
-| eval total_tokens=if(isnotnull(gen_ai_input_tokens) AND isnotnull(gen_ai_output_tokens), gen_ai_input_tokens + gen_ai_output_tokens, null())
-| table event_time event_id transaction_id cisco_agent_name finding_type policy_action threat_category lookup_objective lookup_technique lookup_subtechnique owasp_classification mitre_atlas_id framework_severity gen_ai_input_tokens gen_ai_output_tokens total_tokens matched_indicator scan_target
-| rename event_time AS "Event Time" event_id AS "Event ID" transaction_id AS "Transaction ID" cisco_agent_name AS "Agent" finding_type AS "Finding Type" policy_action AS "Policy Action" threat_category AS "Threat Category" lookup_objective AS "AI Defense Objective" lookup_technique AS "AI Defense Technique" lookup_subtechnique AS "AI Defense Subtechnique" owasp_classification AS "OWASP LLM Class" mitre_atlas_id AS "MITRE ATLAS ID" framework_severity AS "Framework Severity" gen_ai_input_tokens AS "Input Tokens" gen_ai_output_tokens AS "Output Tokens" total_tokens AS "Total Tokens" matched_indicator AS "Matched Indicator" scan_target AS "Scan Target"
-| sort - "Event Time"
-            ]]>
-          </query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
+| table event_time event_id transaction_id agent_name finding_type policy_action threat_category lookup_objective lookup_technique lookup_subtechnique owasp_classification mitre_atlas_id framework_severity input_tokens output_tokens total_tokens matched_indicator scan_target
+| rename event_time AS "Event Time" event_id AS "Event ID" transaction_id AS "Transaction ID" agent_name AS "Agent" finding_type AS "Finding Type" policy_action AS "Policy Action" threat_category AS "Threat Category" lookup_objective AS "Vendor-Sim Objective" lookup_technique AS "Vendor-Sim Technique" lookup_subtechnique AS "Vendor-Sim Subtechnique" owasp_classification AS "OWASP LLM Class" mitre_atlas_id AS "MITRE ATLAS ID" framework_severity AS "Framework Severity" input_tokens AS "Input Tokens" output_tokens AS "Output Tokens" total_tokens AS "Total Tokens" matched_indicator AS "Matched Indicator" scan_target AS "Scan Target"
+| sort - "Event Time"</query>
+          <earliest>$global_time.earliest$</earliest>
+          <latest>$global_time.latest$</latest>
         </search>
         <option name="count">50</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">row</option>
-        <option name="percentagesRow">false</option>
         <option name="rowNumbers">true</option>
-        <option name="totalsRow">false</option>
-        <option name="wrap">true</option>
-        <format type="color" field="Policy Action">
-          <color field="POLICY_HARD_DENY">#dc4e41</color>
-        </format>
-        <format type="color" field="Framework Severity">
-          <color field="critical">#dc4e41</color>
-          <color field="high">#f1813f</color>
-          <color field="medium">#f8be34</color>
-          <color field="low">#53a051</color>
-        </format>
-        <format type="color" field="Finding Type">
-          <color field="MODEL_VULNERABILITY">#dc4e41</color>
-          <color field="VALIDATION_FINDING">#f8be34</color>
-          <color field="RUNTIME_ANOMALY">#f1813f</color>
-        </format>
-        <drilldown>
-          <link target="_blank">
-            <![CDATA[search?q=index%3Dsecurity%20sourcetype%3Dcisco%3Aaidefense%3Ajson%20transaction_id%3D%22$row.Transaction ID$%22&amp;earliest=-7d@d&amp;latest=now]]>
-          </link>
-        </drilldown>
       </table>
     </panel>
   </row>
 
   <row>
-    <panel>
-      <title>GenAI Token Usage Anomaly Forecast — Cisco Time Series Model (CTSM)</title>
+    <panel depends="$has_mltk$">
+      <title>GenAI token forecast (CTSM) — 14d window intentional override</title>
       <chart>
         <search>
-          <query>
-            <![CDATA[
-index=security sourcetype=cisco:aidefense:json earliest=-14d@d latest=now
-| eval input_tokens=if(isnotnull(gen_ai_input_tokens), gen_ai_input_tokens, 0)
-| eval output_tokens=if(isnotnull(gen_ai_output_tokens), gen_ai_output_tokens, 0)
-| eval total_tokens=input_tokens + output_tokens
+          <query>`acme_vendorsim_index` earliest=-14d@d latest=now
+| `acme_vendorsim_token_normalize`
 | timechart span=1h sum(total_tokens) AS total_tokens sum(input_tokens) AS input_tokens sum(output_tokens) AS output_tokens
-| fit MLTKContainer algo=ctsm_forecast total_tokens holdback=24 period=24 future_timespan=48 into forecast_total_tokens
-| fit MLTKContainer algo=ctsm_forecast input_tokens holdback=24 period=24 future_timespan=48 into forecast_input_tokens
-| fit MLTKContainer algo=ctsm_forecast output_tokens holdback=24 period=24 future_timespan=48 into forecast_output_tokens
-| eval anomaly_total=if(total_tokens > upper_total_tokens OR total_tokens < lower_total_tokens, total_tokens, null())
-| eval anomaly_input=if(input_tokens > upper_input_tokens OR input_tokens < lower_input_tokens, input_tokens, null())
-| eval anomaly_output=if(output_tokens > upper_output_tokens OR output_tokens < lower_output_tokens, output_tokens, null())
-            ]]>
-          </query>
+| fit MLTKContainer algo=ctsm_forecast total_tokens holdback=24 period=24 future_timespan=48 into forecast_total_tokens</query>
           <earliest>-14d@d</earliest>
           <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
         </search>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.text">Token Count</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
         <option name="charting.chart">line</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.showDataLabels">none</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.fieldColors">{"total_tokens": "0x00b4d8", "lower_total_tokens": "0x53a051", "upper_total_tokens": "0x53a051", "prediction_total_tokens": "0x0877a6", "anomaly_total": "0xdc4e41", "input_tokens": "0xf8be34", "output_tokens": "0xf1813f", "prediction_input_tokens": "0xf8be34", "prediction_output_tokens": "0xf1813f"}</option>
-        <option name="charting.legend.placement">bottom</option>
-        <option name="charting.lineWidth">2</option>
-        <option name="height">380</option>
-        <option name="refresh.display">progressbar</option>
-        <drilldown>
-          <set token="drill_forecast_time">$click.value$</set>
-        </drilldown>
       </chart>
+    </panel>
+    <panel depends="$no_mltk$">
+      <title>GenAI token forecast (CTSM)</title>
+      <html>
+        <h3>MLTK not installed</h3>
+        <p>Install Splunk Machine Learning Toolkit to enable the Cisco Time Series Model forecast panel. Token usage timechart still works without MLTK.</p>
+      </html>
     </panel>
   </row>
 

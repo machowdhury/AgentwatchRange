@@ -105,10 +105,10 @@ index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 20
       </single>
     </panel>
     <panel>
-      <title>DefenseClaw HARD_DENY Events (24h)</title>
+      <title>AcmeSentinel HARD_DENY Events (24h)</title>
       <single>
         <search>
-          <query>`acme_genai_index` defenseclaw.action=HARD_DENY OR defenseclaw_blocked=true | stats count</query>
+          <query>`acme_genai_index` acme_output_guard.action=HARD_DENY OR acme_output_guard_blocked=true | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>

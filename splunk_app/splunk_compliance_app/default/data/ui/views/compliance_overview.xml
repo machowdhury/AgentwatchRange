@@ -239,13 +239,13 @@
     </panel>
     <panel>
       <table>
-        <title>Recent DefenseClaw Actions</title>
+        <title>Recent AcmeSentinel Actions</title>
         <search>
-          <query>`acme_genai_index` `acme_last_24h` defenseclaw_action=*
-| table _time agent.id framework.technique_id framework.technique_name defenseclaw_action defenseclaw_rule_id framework.severity
+          <query>`acme_genai_index` `acme_last_24h` acme_output_guard_action=*
+| table _time agent.id framework.technique_id framework.technique_name acme_output_guard_action acme_output_guard_rule_id framework.severity
 | sort -_time
 | head 20
-| rename _time AS "Time", agent.id AS "Agent", framework.technique_id AS "Technique", framework.technique_name AS "Technique Name", defenseclaw_action AS "Action", defenseclaw_rule_id AS "Rule ID", framework.severity AS "Severity"</query>
+| rename _time AS "Time", agent.id AS "Agent", framework.technique_id AS "Technique", framework.technique_name AS "Technique Name", acme_output_guard_action AS "Action", acme_output_guard_rule_id AS "Rule ID", framework.severity AS "Severity"</query>
           <earliest>-24h</earliest>
           <latest>now</latest>
         </search>

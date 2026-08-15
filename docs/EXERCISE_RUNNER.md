@@ -32,7 +32,7 @@ python3 scripts/package_splunk_app.sh
 
 | Value | Meaning |
 |-------|---------|
-| `BLOCKED` | Runtime control telemetry expected (CodeGuard / DefenseClaw / workflow block) |
+| `BLOCKED` | Runtime control telemetry expected (AcmeGate / AcmeSentinel / workflow block) |
 | `INJECTED` | Detect-only or successful injection path (e.g. Scenario 9 RAG) |
 | `SIMULATED` | Hunt-only OTel — no live LLM block/inject semantics |
 | `VARIES` | Honest label for non-deterministic small-model or config-dependent behavior |

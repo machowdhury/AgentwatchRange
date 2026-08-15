@@ -75,7 +75,7 @@ services:
     networks:
       - acme_mesh
     volumes:
-      - shared_telemetry:/var/log/defenseclaw
+      - shared_telemetry:/var/log/acme_sentinel
     environment:
       - FLASK_ENV=development
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -87,8 +87,8 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,service.namespace=acme-banking-group
       - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
       - ACME_ENV=production
-      - DEFENSECLAW_ENABLED=true
-      - CODEGUARD_ENABLED=true
+      - ACME_OUTPUT_GUARD_ENABLED=true
+      - ACME_INPUT_GUARD_ENABLED=true
       - HITL_GATE_ENABLED=${HITL_GATE_ENABLED:-false}
       - HITL_AMOUNT_THRESHOLD=${HITL_AMOUNT_THRESHOLD:-250000}
       - TRAFFIC_SIM_ENABLED=${TRAFFIC_SIM_ENABLED:-true}
@@ -123,7 +123,7 @@ services:
     networks:
       - acme_mesh
     volumes:
-      - shared_telemetry:/var/log/defenseclaw
+      - shared_telemetry:/var/log/acme_sentinel
     environment:
       - FLASK_ENV=development
       - BANKING_APP_URL=http://banking_app:5000
@@ -147,7 +147,7 @@ services:
       - acme_mesh
     volumes:
       - ./config/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
-      - shared_telemetry:/var/log/defenseclaw
+      - shared_telemetry:/var/log/acme_sentinel
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
     environment:
       - SPLUNK_HEC_ENDPOINT=${SPLUNK_HEC_ENDPOINT:-http://splunk:8088/services/collector/event}
@@ -200,7 +200,7 @@ services:
     networks:
       - acme_mesh
     volumes:
-      - shared_telemetry:/var/log/defenseclaw
+      - shared_telemetry:/var/log/acme_sentinel
     environment:
       - SPLUNK_START_ARGS=--accept-license
       - SPLUNK_PASSWORD=${SPLUNK_PASSWORD:-ACMEPassword2026!}

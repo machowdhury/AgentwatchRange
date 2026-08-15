@@ -246,8 +246,8 @@ def run_tick(force_pipeline: Optional[bool] = None) -> Dict[str, Any]:
             result = _run_intake_only(user_input, session_id)
             blocked = (
                 result.get("workflow_blocked")
-                or result.get("defenseclaw_blocked")
-                or result.get("codeguard_blocked")
+                or result.get("acme_output_guard_blocked")
+                or result.get("acme_input_guard_blocked")
             )
             detail = {
                 "mode": mode,

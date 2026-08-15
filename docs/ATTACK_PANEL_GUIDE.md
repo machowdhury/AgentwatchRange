@@ -55,7 +55,7 @@ Each card is **Scenario 1–10** (stored as `campaign_week` in Splunk). One butt
 
 | Terminal status | Meaning |
 |-----------------|--------|
-| **BLOCKED** | A control stopped the attack (pre-LLM workflow, CodeGuard input, or DefenseClaw output) |
+| **BLOCKED** | A control stopped the attack (pre-LLM workflow, AcmeGate input, or AcmeSentinel output) |
 | **INJECTED** | Payload reached the model; response may partially comply — **still logged** (important for workshops) |
 | **ERROR** | Banking app / Ollama unreachable — fix stack, not Splunk |
 
@@ -67,9 +67,9 @@ Each card is **Scenario 1–10** (stored as `campaign_week` in Splunk). One butt
 |---|-------|---------|--------------|------------------|-------------------|------------------------------|
 | **1** | Code Compliance Illusion (AI BOM drift) | orchestration | creditrisk-003 | BLOCKED or INJECTED | Control Attestation · Detection Efficacy | `` `acme_campaign_w1` earliest=-30m \| table cisco_aibom_status agent.aibom_validated model_artifact_hash_expected model_artifact_hash_found control.status `` |
 | **2** | Agentic Evaluation Harness (Foundry bypass) | orchestration | intake-001 | Often **BLOCKED** (orchestration guard) | Detection Efficacy → Workflow Surface Blocks | `` `acme_campaign_w2` earliest=-30m \| table foundry.policy_status foundry.orchestrator_override workflow.blocked workflow.block_reason `` |
-| **3** | Secure-by-Default Vibe Coding | prompt | docingest-002 | Often **BLOCKED** (CodeGuard pre-LLM) | Control Attestation | `` `acme_campaign_w3` earliest=-30m \| table codeguard_blocked codeguard.rule_id codeguard.status workflow.blocked `` |
+| **3** | Secure-by-Default Vibe Coding | prompt | docingest-002 | Often **BLOCKED** (AcmeGate pre-LLM) | Control Attestation | `` `acme_campaign_w3` earliest=-30m \| table acme_input_guard_blocked acme_input_guard.rule_id acme_input_guard.status workflow.blocked `` |
 | **4** | Shadow AI at the Edge (rogue SLM) | runtime | intake-001 | INJECTED (detect/asset) | Overview · Detection Efficacy | `` `acme_campaign_w4` earliest=-30m \| table slm.unapproved gen_ai.request.model deployment.tier llm.runtime `` |
-| **5** | Guarding the Front Desk (jailbreak) | prompt | intake-001 | BLOCKED or INJECTED | Control Attestation · Detection Efficacy | `` `acme_campaign_w5` earliest=-30m \| table defenseclaw.action defenseclaw_blocked defenseclaw.rule_id workflow.blocked `` |
+| **5** | Guarding the Front Desk (jailbreak) | prompt | intake-001 | BLOCKED or INJECTED | Control Attestation · Detection Efficacy | `` `acme_campaign_w5` earliest=-30m \| table acme_output_guard.action acme_output_guard_blocked acme_output_guard.rule_id workflow.blocked `` |
 | **6** | Intern with the Master Key (MCP escape) | tools | docingest-002 | Often **BLOCKED** (pre-LLM tool scope) | Control Attestation · Detection Efficacy | `` `acme_campaign_w6` earliest=-30m \| stats count by workflow.blocked workflow.block_reason tool.scope_violation gen_ai.tool.name `` |
 | **7** | The Infinity Bill (token surge) | orchestration | creditrisk-003 | INJECTED (cost/DoS signal) | MLTK Anomaly Hunting · Detection Efficacy | `` `acme_campaign_w7` earliest=-30m \| table gen_ai.usage.input_tokens gen_ai.usage.output_tokens call_depth_detected cisco_tsm_anomaly_score `` |
 | **8** | Identity Fracture (A2A DID spoof) | a2a | compliance-004 | Often **BLOCKED** (trust chain) | Actor Chain Story · Control Attestation | `` `acme_campaign_w8` earliest=-30m \| table cryptographic_passport_valid delegation.chain did.document workflow.blocked `` |
@@ -101,7 +101,7 @@ Six **2026 emerging** scenarios were appended to the technique registry (Top 10 
 
 ```spl
 `acme_genai_index` earliest=-30m NOT testbed_mode=BASELINE_TRAFFIC campaign_week=6
-| table _time gen_ai.agent.name workflow.blocked defenseclaw.action
+| table _time gen_ai.agent.name workflow.blocked acme_output_guard.action
 ```
 
 ---
@@ -239,7 +239,7 @@ Free-form red-team input — **your** prompt injection, jailbreak, or tool-escap
 | search gen_ai.agent.name="acme-agent-intake-001"
 | sort - _time
 | head 5
-| table _time workflow.blocked defenseclaw_blocked codeguard_blocked workflow.block_reason
+| table _time workflow.blocked acme_output_guard_blocked acme_input_guard_blocked workflow.block_reason
 ```
 
 **Pass:** Your execute appears within 60s; you can explain which layer blocked or allowed.
@@ -277,9 +277,9 @@ Guided **multi-step paths**. Keep the Attack Panel tab open until the path compl
 
 ```spl
 `acme_campaign_w5` earliest=-30m
-| table defenseclaw.action defenseclaw_blocked workflow.blocked
+| table acme_output_guard.action acme_output_guard_blocked workflow.blocked
 ```
-**Pass:** DefenseClaw fields present — discuss output-side vs input-side.
+**Pass:** AcmeSentinel fields present — discuss output-side vs input-side.
 
 ```spl
 `acme_campaign_w9` earliest=-30m

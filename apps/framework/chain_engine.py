@@ -252,8 +252,8 @@ KILL_CHAINS: List[KillChain] = [
                 custom_fields={
                     "original_risk_score": "0.82",
                     "manipulated_recommendation": "APPROVE_MAXIMUM_CREDIT",
-                    "defenseclaw_action": "HARD_DENY",
-                    "defenseclaw_rule_id": "DCL-RULE-4417",
+                    "acme_output_guard_action": "HARD_DENY",
+                    "acme_output_guard_rule_id": "DCL-RULE-4417",
                 },
             ),
             ChainStage(
@@ -408,7 +408,7 @@ KILL_CHAINS: List[KillChain] = [
                     "signature_presented": "acme-sig-FORGED_SIGNATURE_HASH",
                     "signature_expected": "acme-sig-LEGITIMATE_SIGNATURE_HASH",
                     "cryptographic_passport_valid": "false",
-                    "defenseclaw_rule_id": "DCL-RULE-7744",
+                    "acme_output_guard_rule_id": "DCL-RULE-7744",
                 },
             ),
             ChainStage(
@@ -754,7 +754,7 @@ class ChainEngine:
 
             # Detection fields
             "detection_signal": technique.detection_signal,
-            "defenseclaw_action": technique.defenseclaw_action,
+            "acme_output_guard_action": technique.acme_output_guard_action,
             "galileo_check": technique.galileo_check,
             "splunk_spl_template": technique.splunk_spl_template,
 

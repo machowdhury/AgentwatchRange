@@ -141,9 +141,9 @@ Six techniques (**AML.T0070–T0075**) extend the registry without changing the 
 
 ```spl
 `acme_genai_index` earliest=-30m campaign_week=5
-| table defenseclaw.action defenseclaw_blocked workflow.blocked
+| table acme_output_guard.action acme_output_guard_blocked workflow.blocked
 ```
-**Pass:** You see `defenseclaw.action` (e.g. `HARD_DENY` or `ALLOW`) — output-side control fired or allowed.
+**Pass:** You see `acme_output_guard.action` (e.g. `HARD_DENY` or `ALLOW`) — output-side control fired or allowed.
 
 ```spl
 `acme_campaign_w9` earliest=-30m
@@ -184,7 +184,7 @@ Six techniques (**AML.T0070–T0075**) extend the registry without changing the 
 
 ```spl
 `acme_genai_index` earliest=-1h incident_id=*
-| stats count by incident_id workflow.blocked defenseclaw_blocked
+| stats count by incident_id workflow.blocked acme_output_guard_blocked
 ```
 **Pass:** You can narrate which stages blocked vs reached the model.
 
@@ -434,8 +434,8 @@ Workshop button (Attack Panel :5001)
 | **Memory policy** (`apps/framework/memory_policy.py`) | Persistent instruction abuse | Scenario 10 |
 | **RAG store / probe** (`apps/framework/rag_store.py`) | Retrieval anomaly telemetry | Scenario 9, KC-A001 |
 | **Orchestration guard** (`apps/framework/orchestration_guard.py`) | Supervisor bypass detection | Scenario 2 |
-| **CodeGuard** (in `llm_client.py`) | Input pattern block | Scenario 3 |
-| **DefenseClaw** (in `llm_client.py`) | Output HARD_DENY | Scenario 5 |
+| **AcmeGate** (in `llm_client.py`) | Input pattern block | Scenario 3 |
+| **AcmeSentinel** (in `llm_client.py`) | Output HARD_DENY | Scenario 5 |
 | **Control validator** (`control_validator.py` + `control_matrix.yaml`) | NIST pass/fail on emit | Control Attestation dashboard |
 | **Technique executor** (`apps/framework/technique_executor.py`) | 45 MITRE playbooks (LIVE/SIM/HYBRID) | Deep Workshop, All 45 tab |
 | **Kill chain engine** (`apps/framework/chain_engine.py`) | KC-A001…E001 staged execution + `incident_id` | Standard Workshop |
@@ -459,7 +459,7 @@ Workshop button (Attack Panel :5001)
 | Real | Simulated / enriched (still valid for hunts) |
 |------|---------------------------------------------|
 | HTTP attack traffic, Ollama inference | Some 45-technique **SIMULATED** events (supply chain, recon) |
-| CodeGuard / DefenseClaw / workflow guard decisions | SOAR containment fields (lab stub, not a live SOAR) |
+| AcmeGate / AcmeSentinel / workflow guard decisions | SOAR containment fields (lab stub, not a live SOAR) |
 | OTel → Splunk pipeline (when HEC configured) | “Cisco” product names on fields — lab middleware, not commercial products |
 | Kill chain **HYBRID** stages where live LLM applies | Accelerated chain timing (`accelerated: true`) |
 
@@ -553,7 +553,7 @@ After each action: wait **30–60 seconds**.
 | Your goal | What to click | Dashboard | Why it populates |
 |-----------|---------------|-----------|------------------|
 | Prove telemetry | **Workshop** tab → First Win, or **Top 10** → any scenario | **Overview** | `gen_ai.agent.*` on `otel:agentic:json` events |
-| Input/output blocking | **Scenario 3** or **5** | **Control Attestation** | `codeguard_blocked`, `defenseclaw.action`, `control.status` |
+| Input/output blocking | **Scenario 3** or **5** | **Control Attestation** | `acme_input_guard_blocked`, `acme_output_guard.action`, `control.status` |
 | Workflow-surface blocks | **Scenario 2**, **6**, or **8** | **Detection Efficacy** | `workflow.block_reason` (orchestration, MCP, A2A) |
 | All 10 surfaces | **FIRE ALL 10 SCENARIOS** (Workshop) | **Control Attestation** | Scenarios 1–10 + NIST fields |
 | Technique breadth | **RUN ALL 45** or Deep Workshop | **Technique Coverage Matrix** | `technique_id` → OBSERVED / NOT_OBSERVED |
@@ -646,14 +646,14 @@ Static HTML walkthrough (not data-driven).
 | Total Security Events (7d) | Single value | All agentic OTel events — **>0 means pipeline works** |
 | Critical Severity Events | Single value | Events tagged `framework.severity=Critical` |
 | Active Kill-Chain Incidents | Single value | Distinct `incident_id` with `testbed_mode=KILL_CHAIN_ACTIVE` |
-| DefenseClaw HARD_DENY Blocks | Single value | Output-side blocks in last 24h |
+| AcmeSentinel HARD_DENY Blocks | Single value | Output-side blocks in last 24h |
 | Unique Agents Monitored | Single value | How many `agent.id` values sent telemetry |
 | Security Events Over Time by Severity | Stacked area chart | Attack/benign traffic trend by severity |
 | Events by MITRE ATLAS Tactic | Bar chart | Which [ATLAS tactics](https://atlas.mitre.org/) appear most in your data |
 | OWASP LLM Top 10 — Active Risk Status | Table | LLM01–LLM10: NOT OBSERVED vs ACTIVE vs CRITICAL ACTIVE |
 | OWASP ASI Agentic Top 10 — Active Risk Status | Table | ASI01–ASI10 agentic risks |
 | Top 10 Agents by Risk Score | Table | Agents ranked by max CVSS and technique diversity |
-| Recent DefenseClaw Actions | Table | Last 20 output-gateway decisions (HARD_DENY, ALERT, etc.) |
+| Recent AcmeSentinel Actions | Table | Last 20 output-gateway decisions (HARD_DENY, ALERT, etc.) |
 
 **Light up:** Banking app benign loan **or** Workshop **First Win**.  
 **Best for:** First live demo — “we have telemetry.”
@@ -737,7 +737,7 @@ Filter: execution mode (LIVE / SIMULATED / HYBRID).
 | Visualization | Type | What it tells you |
 |---------------|------|-------------------|
 | Active Threat Actor Incidents | Table | Per incident: threat actor profile, technique chain, stages seen, max CVSS — **click row to drill** |
-| Stage Timeline | Table | Chronological stages: technique, agents, risk statement, DefenseClaw action |
+| Stage Timeline | Table | Chronological stages: technique, agents, risk statement, AcmeSentinel action |
 
 Filter: chain ID (KC-A001 … KC-E001).
 
@@ -878,9 +878,9 @@ For each: **Top 10 Scenarios** tab → **▶ FIRE SCENARIO n** → wait 60s → 
 |----------|---------|-------|----------------|------------|-------------------|-----------|
 | 1 | Supply chain / drift | **▶ FIRE SCENARIO 1** | Drift telemetry | `cisco_aibom_status`, `cisco.aibom.*`, `agent.aibom_validated` | *How would you detect prompt drift without blocking every request?* | Control Attestation, **MLTK Anomaly Hunting** |
 | 2 | Orchestration | **▶ FIRE SCENARIO 2** | BLOCKED | `foundry.orchestrator_override`, `workflow.block_reason` | *Why enforce policy at the orchestrator, not only in prompts?* | Detection Efficacy |
-| 3 | Input validation | **▶ FIRE SCENARIO 3** | BLOCKED | `codeguard.rule_id`, `codeguard_blocked` | *What attacks does input validation miss if you skip output inspection?* | Control Attestation |
+| 3 | Input validation | **▶ FIRE SCENARIO 3** | BLOCKED | `acme_input_guard.rule_id`, `acme_input_guard_blocked` | *What attacks does input validation miss if you skip output inspection?* | Control Attestation |
 | 4 | Shadow runtime | **▶ FIRE SCENARIO 4** | INJECTED + discovery | `slm.unapproved`, `deployment.tier` | *How do you govern models IT never approved?* | Overview |
-| 5 | Output gateway | **▶ FIRE SCENARIO 5** | BLOCKED or INJECTED | `defenseclaw.action`, `defenseclaw_blocked` | *When is post-LLM output inspection the right layer?* | Control Attestation |
+| 5 | Output gateway | **▶ FIRE SCENARIO 5** | BLOCKED or INJECTED | `acme_output_guard.action`, `acme_output_guard_blocked` | *When is post-LLM output inspection the right layer?* | Control Attestation |
 | 6 | Tools (MCP) | **▶ FIRE SCENARIO 6** | BLOCKED | `tool.scope_violation`, `mcp.gateway.rule_id` | *Why block tool abuse before the LLM runs?* | Detection Efficacy |
 | 7 | Cost / DoS | **▶ FIRE SCENARIO 7** | Often INJECTED + **CTSM anomaly** | `gen_ai.usage.*_tokens`, `cisco_tsm_anomaly_score`, `mltk.ctsm_signal` | *What is your token budget alert threshold per agent?* | **MLTK Anomaly Hunting** |
 | 8 | Agent identity (A2A) | **▶ FIRE SCENARIO 8** | BLOCKED | `cryptographic_passport_valid=false` | *Who is allowed to delegate authority between agents?* | Control Attestation |
@@ -900,7 +900,7 @@ Workshop → **▶ FIRE ALL 10 SCENARIOS**, then:
 
 ```spl
 `acme_genai_index` earliest=-1h campaign_week=*
-| stats count by campaign_week workflow.block_reason defenseclaw.action
+| stats count by campaign_week workflow.block_reason acme_output_guard.action
 | sort campaign_week
 ```
 
@@ -953,8 +953,8 @@ Aim for **coverage % > 50%** on **Technique Coverage Matrix** after a full run.
 | Layer | When | Terminal signal |
 |-------|------|-------------------|
 | Workflow guard | Before LLM | `workflow.block_reason` |
-| CodeGuard | Before LLM | `codeguard_blocked=true` |
-| DefenseClaw | After LLM | `defenseclaw.action=HARD_DENY` |
+| AcmeGate | Before LLM | `acme_input_guard_blocked=true` |
+| AcmeSentinel | After LLM | `acme_output_guard.action=HARD_DENY` |
 
 | Status | Meaning |
 |--------|---------|

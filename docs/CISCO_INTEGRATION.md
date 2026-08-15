@@ -39,8 +39,8 @@ LAB_MODE=enforce        # stricter demos
 Existing escape hatches still work:
 
 ```bash
-DEFENSECLAW_ENABLED=false
-CODEGUARD_ENABLED=false
+ACME_OUTPUT_GUARD_ENABLED=false
+ACME_INPUT_GUARD_ENABLED=false
 ```
 
 ---
@@ -51,9 +51,20 @@ CODEGUARD_ENABLED=false
 |------|------|-------------------|
 | **AI BOM** | [cisco-ai-defense/aibom](https://github.com/cisco-ai-defense/aibom) | Scenario 1 telemetry + preflight scan |
 | **MCP Scanner** | [cisco-ai-defense/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) | Scenario 6 preflight + `data/mcp/acme_banking_mcp.json` |
-| **DefenseClaw** | [cisco-ai-defense/defenseclaw](https://github.com/cisco-ai-defense/defenseclaw) | *Not embedded* — lab uses compatible `defenseclaw.*` OTel fields; optional enterprise deployment alongside |
+| **AcmeSentinel** (lab middleware) | N/A — lab-original | Python regex output gateway in `llm_client.py`; telemetry fields `acme_output_guard.*` |
+| **DefenseClaw** (real OSS, optional Phase 7) | [cisco-ai-defense/defenseclaw](https://github.com/cisco-ai-defense/defenseclaw) | *Not embedded* — distinct from lab AcmeSentinel; optional future integration |
 | **Foundation-Sec-8B** | [fdtn-ai/Foundation-Sec-8B](https://huggingface.co/fdtn-ai/Foundation-Sec-8B) | `POST /api/v1/hunt/foundation-sec` hunt enrichment via Ollama |
 | **Cisco TSM** | [splunk/cisco-time-series-model](https://github.com/splunk/cisco-time-series-model) | Splunk `\| fit MLTKContainer algo=ctsm_forecast` on token time series |
+
+---
+
+## Three Cisco-adjacent things (do not confuse)
+
+1. **Real commercial overlay** — `docker-compose.cisco.yml` (Cisco AI Defense platform, Foundation-Sec-8B, CTSM).
+2. **Real open-source tools (optional Phase 7)** — DefenseClaw, MCP Scanner, Skill Scanner from [github.com/cisco-ai-defense](https://github.com/cisco-ai-defense).
+3. **Lab vendor-simulation dashboard** — `acme:agentic:vendorsim:json` in `App-Agentic-Compliance` — fully synthetic, not real Cisco data.
+
+**AcmeGate** and **AcmeSentinel** (this lab's regex middleware) are unrelated to all three. See [NOTICE.md](../NOTICE.md).
 
 ---
 

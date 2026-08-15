@@ -1,10 +1,10 @@
 campaign_week,slug,theme,attack_class,workflow_surface,core_technology,target_agent,splunk_macro,expected_block_layer
 1,code-compliance-illusion,The Code Compliance Illusion,supply_chain_drift,orchestration,cisco-aibom Build Manifest,acme-agent-creditrisk-003,acme_campaign_w1,aibom_drift_detection
 2,agentic-evaluation-harness,The Agentic Evaluation Harness,orchestration_bypass,orchestration,Foundry Security Spec Matrix,acme-agent-intake-001,acme_campaign_w2,orchestration_guard
-3,secure-by-default-vibe-coding,Secure-by-Default Vibe Coding,insecure_codegen,prompt,Project CodeGuard Rulesets,acme-agent-docingest-002,acme_campaign_w3,codeguard
+3,secure-by-default-vibe-coding,Secure-by-Default Vibe Coding,insecure_codegen,prompt,Project AcmeGate Rulesets,acme-agent-docingest-002,acme_campaign_w3,acme_input_guard
 4,shadow-ai-at-the-edge,Shadow AI at the Edge,shadow_edge_slm,runtime,Cisco AI Defense Explorer,acme-agent-intake-001,acme_campaign_w4,asset_discovery
-5,guarding-the-front-desk,Guarding the Front Desk,semantic_jailbreak,prompt,defenseclaw-gateway Go Proxy,acme-agent-intake-001,acme_campaign_w5,defenseclaw
-6,intern-with-the-master-key,The Intern with the Master Key,mcp_tool_abuse,tools,DefenseClaw OpenShell,acme-agent-docingest-002,acme_campaign_w6,mcp_gateway
+5,guarding-the-front-desk,Guarding the Front Desk,semantic_jailbreak,prompt,acmesentinel-gateway Go Proxy,acme-agent-intake-001,acme_campaign_w5,acme_output_guard
+6,intern-with-the-master-key,The Intern with the Master Key,mcp_tool_abuse,tools,AcmeSentinel OpenShell,acme-agent-docingest-002,acme_campaign_w6,mcp_gateway
 7,the-infinity-bill,The Infinity Bill,recursive_token_weaponization,orchestration,Cisco Time Series Model,acme-agent-creditrisk-003,acme_campaign_w7,token_anomaly
 8,the-identity-fracture,The Identity Fracture,a2a_identity_spoof,a2a,W3C DIDs & Cryptographic Passports,acme-agent-compliance-004,acme_campaign_w8,a2a_verifier
 9,the-invisible-leak,The Invisible Leak,rag_knowledge_exfil,rag,Galileo Observe Engine,acme-agent-docingest-002,acme_campaign_w9,galileo_observe

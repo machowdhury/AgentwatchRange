@@ -163,7 +163,7 @@ Open these dashboards:
 |----------|-------|----------------|
 | 1 | AI BOM / supply chain | L1, L7 |
 | 2 | Foundry evaluation bypass | L7 |
-| 3 | CodeGuard rule breach | L2 |
+| 3 | AcmeGate rule breach | L2 |
 | 4 | Shadow SLM at edge | L7 |
 | 5 | Output gateway jailbreak | L3 |
 | 6 | MCP tool escape | L4, L5 |

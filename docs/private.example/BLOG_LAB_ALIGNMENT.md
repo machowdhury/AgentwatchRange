@@ -8,9 +8,9 @@ Maps OrchestraACME Workshop scenarios to blog narrative tracks in `apps/framewor
 |------|----------|----------------------|----------------------------|---------------------|
 | W1 | 1 — Code Compliance Illusion | Prompt drift vs code audits | AIBOM → Splunk lookup / drift hunt | [cisco-ai-defense/aibom](https://github.com/cisco-ai-defense/aibom) |
 | W2 | 2 — Evaluation Harness | Structured eval roles | Foundry trace SPL | OTel `foundry.*` fields |
-| W3 | 3 — Vibe Coding | IDE guardrails | CodeGuard input validation SPL | Lab CodeGuard + Cisco field names |
+| W3 | 3 — Vibe Coding | IDE guardrails | AcmeGate input validation SPL | Lab AcmeGate + Cisco field names |
 | W4 | 4 — Shadow SLM | Rogue edge models | SLM asset discovery dashboard | `slm.unapproved` telemetry |
-| W5 | 5 — Front Desk | Semantic jailbreak | DefenseClaw HARD_DENY correlation | Compatible with [DefenseClaw](https://github.com/cisco-ai-defense/defenseclaw) telemetry |
+| W5 | 5 — Front Desk | Semantic jailbreak | AcmeSentinel HARD_DENY correlation | Compatible with [DefenseClaw](https://github.com/cisco-ai-defense/defenseclaw) telemetry |
 | W6 | 6 — MCP Tools | Tool privilege escape | MCP session / scope tracking | [mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) |
 | W7 | 7 — Infinity Bill | Recursive agent cost | **CTSM** `\| fit ctsm_forecast` token alert | [cisco-time-series-model](https://github.com/splunk/cisco-time-series-model) |
 | W8 | 8 — Identity Fracture | A2A zero trust | DID verification ledger | [a2a-scanner](https://github.com/cisco-ai-defense/a2a-scanner) (optional) |
@@ -32,7 +32,7 @@ Maps OrchestraACME Workshop scenarios to blog narrative tracks in `apps/framewor
 | Blog demo theme | Dashboard |
 |-----------------|-----------|
 | AIBOM / drift | Control Attestation, MLTK Anomaly Hunting |
-| DefenseClaw / output gateway | Control Attestation, Overview |
+| AcmeSentinel / output gateway | Control Attestation, Overview |
 | MCP abuse | Detection Efficacy, MLTK Anomaly Hunting |
 | CTSM token surge | **MLTK Anomaly Hunting** |
 | RAG behavioral | Threat Hunting, MLTK Anomaly Hunting |

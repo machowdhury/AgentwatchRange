@@ -50,7 +50,7 @@
 | sort stage_num_n, _time
 | lookup acme_kill_chain_stages_lookup chain_id, stage_num OUTPUT stage_name as expected_stage
 | convert ctime(_time)
-| table _time, stage_num, stage_name, expected_stage, technique_id, framework.technique_name, kill_chain.stage, campaign_week, requesting_agent_id, target_agent_id, agent.id, rogue_actor_story, risk_statement, defenseclaw_action, execution_mode</query>
+| table _time, stage_num, stage_name, expected_stage, technique_id, framework.technique_name, kill_chain.stage, campaign_week, requesting_agent_id, target_agent_id, agent.id, rogue_actor_story, risk_statement, acme_output_guard_action, execution_mode</query>
         </search>
       </table>
     </panel>

@@ -22,14 +22,14 @@ Structured curriculum for OrchestraACME / AgentWatch Range. This is a **navigati
 
 ## Tier 1 — Beginner: single-surface, single-turn
 
-**Teaches:** Input vs. output inspection (CodeGuard vs. DefenseClaw); what regex guardrails catch and miss.
+**Teaches:** Input vs. output inspection (AcmeGate vs. DefenseClaw); what regex guardrails catch and miss.
 
 | Scenario | Attack Panel | Tier badge |
 |----------|--------------|------------|
 | **3** — Secure-by-Default Vibe Coding | Top 10 → Scenario 3 | Tier 1 — Beginner |
 | **5** — Guarding the Front Desk | Top 10 → Scenario 5 | Tier 1 — Beginner |
 
-**Splunk proof:** `` `acme_campaign_w3` `` and `` `acme_campaign_w5` `` — compare `codeguard_blocked` vs `defenseclaw_action=HARD_DENY`.
+**Splunk proof:** `` `acme_campaign_w3` `` and `` `acme_campaign_w5` `` — compare `acme_input_guard_blocked` vs `acme_output_guard_action=HARD_DENY`.
 
 **Recommended UI:** **GenAI Compliance Monitor → Exercise Runner** — select Tier 1 techniques after firing scenarios in the Attack Panel.
 
@@ -80,6 +80,8 @@ Structured curriculum for OrchestraACME / AgentWatch Range. This is a **navigati
 
 **Why this exists:** Compliance and purple-team backlog prioritization require breadth. Tier 4 techniques marked `redundant_with` in the registry teach the same concept as an earlier LIVE technique — run them for coverage, not for a second lesson.
 
+**Cross-app normalization (Phase 6):** After the bulk campaign, open **Cross-App Normalization** dashboard and run `python3 scripts/emit_thirdparty_telemetry.py 10` to ingest third-party-shaped events. Compare `norm_*` fields across three sourcetypes — this is the meta-lesson for Splunk-literate SOC/compliance teams.
+
 ---
 
 ## Tier 5 — Vendor-realistic tooling (Cisco overlay)
@@ -117,7 +119,7 @@ docker compose -f docker-compose.yml -f docker-compose.cisco.yml --profile local
 
 | Scenario week | Tier | Primary teaching focus |
 |---------------|------|------------------------|
-| 3, 5 | 1 | CodeGuard / DefenseClaw |
+| 3, 5 | 1 | AcmeGate / AcmeSentinel |
 | 2, 6, 7 | 2 | Orchestration, MCP tools, DoS |
 | 8, 9, 10 | 3 | A2A, RAG, rogue agent |
 | 1, 4 | 4 (also Tier 5 Cisco) | Supply chain / shadow AI breadth |

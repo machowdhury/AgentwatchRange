@@ -163,7 +163,7 @@ def technique_to_hf_record(
         "acme_tactic_name": technique.tactic_name,
         "acme_kill_chain_stage": technique.kill_chain_stage,
         "acme_kill_chain_order": technique.kill_chain_order,
-        "acme_defenseclaw_action": technique.defenseclaw_action,
+        "acme_acme_output_guard_action": technique.acme_output_guard_action,
         "acme_galileo_check": technique.galileo_check,
         "acme_detection_signal": technique.detection_signal,
         "acme_splunk_spl_template": technique.splunk_spl_template,
@@ -205,7 +205,7 @@ def chain_to_hf_records(kill_chain) -> List[dict]:
 # EXPORT FUNCTIONS
 # =============================================================================
 
-def export_synthetic_dataset(output_path: str = "/var/log/defenseclaw/acme_synthetic_dataset.jsonl") -> dict:
+def export_synthetic_dataset(output_path: str = "/var/log/acme_sentinel/acme_synthetic_dataset.jsonl") -> dict:
     """
     Generate a complete synthetic dataset from the taxonomy without requiring
     Splunk connectivity. Useful for seeding, testing, and sharing.
@@ -246,7 +246,7 @@ def export_synthetic_dataset(output_path: str = "/var/log/defenseclaw/acme_synth
     return stats
 
 
-def export_splunk_lookup_csv(output_path: str = "/var/log/defenseclaw/acme_framework_lookup.csv") -> dict:
+def export_splunk_lookup_csv(output_path: str = "/var/log/acme_sentinel/acme_framework_lookup.csv") -> dict:
     """
     Export the framework taxonomy as a Splunk-ready CSV lookup table.
     This file should be placed in the Splunk compliance app's lookups/ directory.
@@ -266,7 +266,7 @@ def export_splunk_events_to_jsonl(
     splunk_port: int,
     splunk_username: str,
     splunk_password: str,
-    output_path: str = "/var/log/defenseclaw/acme_splunk_export.jsonl",
+    output_path: str = "/var/log/acme_sentinel/acme_splunk_export.jsonl",
     earliest: str = "-7d",
     latest: str = "now",
     max_results: int = 10000,
@@ -289,7 +289,7 @@ def export_splunk_events_to_jsonl(
         f'framework.tactic_id framework.severity framework.cvss_score '
         f'framework.kill_chain_stage framework.owasp_llm framework.owasp_asi '
         f'framework.maestro_layers framework.nist_ai_rmf '
-        f'defenseclaw_action detection_signal agent.id event_type '
+        f'acme_output_guard_action detection_signal agent.id event_type '
         f'| head {max_results}'
     )
 
@@ -346,7 +346,7 @@ def export_splunk_events_to_jsonl(
                         "splunk_time": row.get("_time", ""),
                         "splunk_agent_id": row.get("agent.id", ""),
                         "splunk_event_type": row.get("event_type", ""),
-                        "splunk_defenseclaw_action": row.get("defenseclaw_action", ""),
+                        "splunk_acme_output_guard_action": row.get("acme_output_guard_action", ""),
                     }
                 )
                 records.append(record)
@@ -367,7 +367,7 @@ def export_splunk_events_to_jsonl(
         return {"error": str(e)}
 
 
-def export_dataset_card(output_path: str = "/var/log/defenseclaw/DATASET_CARD.md") -> str:
+def export_dataset_card(output_path: str = "/var/log/acme_sentinel/DATASET_CARD.md") -> str:
     """
     Generate a HuggingFace-style dataset card for the exported dataset.
     """
@@ -468,7 +468,7 @@ CC-BY-4.0
 # FLASK ROUTES (mounted by app_runtime.py)
 # =============================================================================
 
-def register_export_routes(app, base_output_dir: str = "/var/log/defenseclaw"):
+def register_export_routes(app, base_output_dir: str = "/var/log/acme_sentinel"):
     """Register dataset export API routes on an existing Flask app."""
     from flask import jsonify, request
 
@@ -532,7 +532,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="ACME Dataset Exporter")
     parser.add_argument("--mode", choices=["synthetic", "lookup", "card", "all"], default="all")
-    parser.add_argument("--output-dir", default="/var/log/defenseclaw")
+    parser.add_argument("--output-dir", default="/var/log/acme_sentinel")
     args = parser.parse_args()
 
     output_dir = args.output_dir
