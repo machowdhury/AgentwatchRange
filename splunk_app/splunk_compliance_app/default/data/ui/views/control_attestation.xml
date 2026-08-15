@@ -26,6 +26,17 @@
 
   <row>
     <panel>
+      <html>
+        <h3>How to read this dashboard</h3>
+        <p>Pass/fail evidence for NIST AI RMF controls, computed per scenario and workflow surface from real telemetry — not a self-attestation checklist.</p>
+        <p>"Controls Passed" / "Controls Failed" count distinct scenario-surface pairs where <code>pass_rate_pct</code> crossed the pass threshold for that control in the current window. A control shows as failed if the surface was exercised (an attack fired) but the expected control action never fired.</p>
+        <p>To generate or refresh evidence for a control, re-run its scenario from the Attack Panel — this dashboard reflects the latest telemetry window, it doesn't require a manual re-attestation step.</p>
+      </html>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
       <single>
         <title>Controls Passed</title>
         <search>

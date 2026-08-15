@@ -11,6 +11,17 @@
 
   <row>
     <panel>
+      <html>
+        <h3>How to read this dashboard</h3>
+        <p><strong>Technique Coverage %</strong> = techniques observed ÷ techniques in the full catalog — how much of the lab you've actually exercised, not how well-defended you are.</p>
+        <p><strong>MTTD (Mean Time to Detect)</strong> is measured in seconds from attack event to control block — lower is better; this is the strongest evidence of real detection value, since it can't be gamed by just running more attacks.</p>
+        <p><strong>Control Pass Rate %</strong> is the share of high-severity events that were actually blocked or flagged — this is defense efficacy, distinct from coverage (how much you tested) and distinct from MTTD (how fast controls reacted).</p>
+      </html>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
       <single>
         <title>Technique Coverage %</title>
         <search>

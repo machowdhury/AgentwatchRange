@@ -4,6 +4,17 @@
 
   <row>
     <panel>
+      <html>
+        <h3>How to read this dashboard</h3>
+        <p>Universal posture view — works with any <code>otel:agentic:json</code> source, not just AgentWatch Range's own telemetry.</p>
+        <p><strong>Risk status badges</strong> (OWASP/MAESTRO panels) follow max observed CVSS in the window: <strong>🟢 NOT OBSERVED</strong> (no events) · <strong>🟡 ACTIVE</strong> (events present, CVSS &lt; 7) · <strong>🟠 HIGH ACTIVE</strong> (max CVSS ≥ 7) · <strong>🔴 CRITICAL ACTIVE</strong> (max CVSS ≥ 9).</p>
+        <p><strong>Start here:</strong> "Detection Gaps" — techniques that were attempted but not blocked or detected — is the panel to act on first; everything else is context.</p>
+      </html>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
       <single>
         <title>Critical Severity Events (7d)</title>
         <search>

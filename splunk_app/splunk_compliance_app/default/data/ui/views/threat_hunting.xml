@@ -23,6 +23,16 @@
 
   <row>
     <panel>
+      <html>
+        <h3>How to read this dashboard</h3>
+        <p>Practitioner workflow, left to right: pick a technique from the <strong>Hunt Playbook Library</strong> (per-technique SPL template + hunt steps), run it — results land in <strong>Scoped Hunt Results</strong> — then check <strong>Defense Control Efficacy</strong> to see whether an existing control already catches it or whether this is a genuine hunt-only gap that needs a new detection.</p>
+        <p>Use this after seeing an <code>ATTEMPTED_NOT_DETECTED</code> row on the Technique Coverage Matrix — that's the shortlist of techniques worth hunting here.</p>
+      </html>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
       <title>Hunt Playbook Library</title>
       <table>
         <search>

@@ -19,6 +19,16 @@
 
   <row>
     <panel>
+      <html>
+        <h3>How to read this dashboard</h3>
+        <p>Three-state matrix across all 51 registry entries: <strong>NOT_ATTEMPTED</strong> (no telemetry yet — you haven't run this technique) · <strong>ATTEMPTED_NOT_DETECTED</strong> (the attack fired but no control block or detection fired — a real gap worth hunting) · <strong>DETECTED</strong> (control blocked it or a hunt flagged it).</p>
+        <p>To fill this matrix in one pass, use Attack Panel → <strong>All 51 Techniques → RUN ALL 51</strong> (see <a href="/app/acme_genai_compliance/threat_hunting">Threat Hunting</a> for per-technique follow-up on any <code>ATTEMPTED_NOT_DETECTED</code> row).</p>
+      </html>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
       <single>
         <title>Techniques Observed</title>
         <search>

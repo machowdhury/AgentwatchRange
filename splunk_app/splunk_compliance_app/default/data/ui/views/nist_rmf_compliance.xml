@@ -14,6 +14,18 @@
 
   <row>
     <panel>
+      <html>
+        <h3>How to read this dashboard</h3>
+        <p>Daily compliance posture across OWASP LLM Top 10, OWASP ASI Agentic Top 10, and NIST AI RMF functions — universal, works with any <code>otel:agentic:json</code> source.</p>
+        <p><strong>Risk status</strong> follows max CVSS in-window: <strong>🟢 LOW</strong> (&lt; 4) · <strong>🟡 MEDIUM</strong> (4–6.9) · <strong>🟠 HIGH</strong> (7–8.9) · <strong>🔴 CRITICAL</strong> (≥ 9).</p>
+        <p><strong>Control attestation</strong> states: <strong>VALIDATED</strong> (control has a recorded validation event and ≥ 80% pass rate) · <strong>OBSERVED</strong> (telemetry exists but hasn't cleared the validation bar yet) · <strong>NOT_RUN</strong> (no telemetry for this control yet).</p>
+        <p><strong>Behavioral drift</strong> compares 7-day vs 30-day baseline CVSS: <strong>🔴 SIGNIFICANT DRIFT</strong> (+2.0 or more) · <strong>🟠 MILD DRIFT</strong> (+0.5 to +2.0) · <strong>🟢 IMPROVING</strong> (−0.5 or better) · <strong>🟡 STABLE</strong> (everything else).</p>
+      </html>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
       <single>
         <title>OWASP LLM Compliance Score</title>
         <search>
