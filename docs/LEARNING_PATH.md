@@ -82,6 +82,8 @@ Structured curriculum for OrchestraACME / AgentWatch Range. This is a **navigati
 
 **Cross-app normalization (Phase 6):** After the bulk campaign, open **Cross-App Normalization** dashboard and run `python3 scripts/emit_thirdparty_telemetry.py 10` to ingest third-party-shaped events. Compare `norm_*` fields across three sourcetypes — this is the meta-lesson for Splunk-literate SOC/compliance teams.
 
+**Executive summary (Phase 11):** Open **Executive AI Governance** (default app landing) for CISO/audit posture — framework readiness %, regulatory control gap on Critical/High events, portfolio risk matrix (registry × attacks), and guardrail/HITL panels. See [EXECUTIVE_GOVERNANCE.md](EXECUTIVE_GOVERNANCE.md).
+
 ---
 
 ## Tier 5 — Vendor-realistic tooling (Cisco overlay)
@@ -135,4 +137,5 @@ docker compose -f docker-compose.yml -f docker-compose.cisco.yml --profile local
 - [ATTACK_PANEL_GUIDE.md](ATTACK_PANEL_GUIDE.md) — per-scenario SPL and outcomes
 - [TECHNIQUE_AUDIT.md](TECHNIQUE_AUDIT.md) — tier assignment audit and redundancy recommendations
 - [EXERCISE_RUNNER.md](EXERCISE_RUNNER.md) — Splunk guided exercise dashboard
+- [EXECUTIVE_GOVERNANCE.md](EXECUTIVE_GOVERNANCE.md) — CISO / audit executive dashboard (Phase 11)
 - [WORKSHOP.md](WORKSHOP.md) — ordered workshop paths
