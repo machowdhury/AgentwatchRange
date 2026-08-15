@@ -2,7 +2,7 @@
   <label>Executive AI Governance</label>
   <description>CISO and auditor front door — framework readiness, regulatory control gap, portfolio risk, agent inventory (running vs shadow), and guardrail efficacy. Real sourcetypes only; excludes baseline traffic via NOT testbed_mode=BASELINE_TRAFFIC.</description>
 
-  <fieldset submitButton="false" autoRun="true">
+  <fieldset submitButton="true" autoRun="true">
     <input type="time" token="time_range">
       <label>Time Range</label>
       <default><earliest>-24h</earliest><latest>now</latest></default>
@@ -34,7 +34,7 @@
           <query>| inputlookup acme_framework_lookup
 | stats count as total_techniques
 | appendcols [
-    search `acme_genai_index` $time_range$ technique_id=AML.* NOT testbed_mode=BASELINE_TRAFFIC
+    search `acme_genai_index` technique_id=AML.* NOT testbed_mode=BASELINE_TRAFFIC
     | stats dc(technique_id) as techniques_observed
   ]
 | eval readiness_score=round(100*techniques_observed/total_techniques,1)
@@ -55,7 +55,7 @@
           <query>| inputlookup acme_framework_lookup
 | stats count as total_techniques
 | appendcols [
-    search `acme_genai_index` $time_range$ technique_id=AML.* NOT testbed_mode=BASELINE_TRAFFIC
+    search `acme_genai_index` technique_id=AML.* NOT testbed_mode=BASELINE_TRAFFIC
     | stats dc(technique_id) as techniques_observed
   ]
 | eval readiness_score=round(100*techniques_observed/total_techniques,1)
@@ -70,7 +70,7 @@
       <title>Regulatory Gap Metric (% high-severity events without control block)</title>
       <single>
         <search>
-          <query>search `acme_genai_index` $time_range$ NOT testbed_mode=BASELINE_TRAFFIC severity IN ("Critical","High","critical","high")
+          <query>search `acme_genai_index` NOT testbed_mode=BASELINE_TRAFFIC severity IN ("Critical","High","critical","high")
 | stats count as high_severity_events sum(eval(if(acme_output_guard_blocked=true OR acme_input_guard_blocked=true OR workflow.blocked=true OR mcp.gateway.action="BLOCK" OR acme_output_guard_action IN ("HARD_DENY","QUARANTINE") OR (hitl_required=true AND hitl_bypassed=false),1,0))) as blocked_events
 | eval control_efficacy=if(high_severity_events&gt;0, round(100*blocked_events/high_severity_events,1), 100)
 | eval regulatory_gap=round(100-control_efficacy,1)
@@ -88,7 +88,7 @@
       <title>Control efficacy on Critical/High severity</title>
       <table>
         <search>
-          <query>search `acme_genai_index` $time_range$ NOT testbed_mode=BASELINE_TRAFFIC severity IN ("Critical","High","critical","high")
+          <query>search `acme_genai_index` NOT testbed_mode=BASELINE_TRAFFIC severity IN ("Critical","High","critical","high")
 | stats count as high_severity_events sum(eval(if(acme_output_guard_blocked=true OR acme_input_guard_blocked=true OR workflow.blocked=true OR mcp.gateway.action="BLOCK" OR acme_output_guard_action IN ("HARD_DENY","QUARANTINE") OR (hitl_required=true AND hitl_bypassed=false),1,0))) as blocked_events
 | eval control_efficacy=if(high_severity_events&gt;0, round(100*blocked_events/high_severity_events,1), 100)
 | eval regulatory_gap=round(100-control_efficacy,1)
@@ -106,12 +106,12 @@
       <title>AI Portfolio Risk Matrix (registry × attack volume)</title>
       <table>
         <search>
-          <query>search `acme_registry_index` $time_range$
+          <query>search `acme_registry_index`
 | sort - _time
 | dedup agent_id
 | eval registry_key=agent_id
 | join type=left registry_key [
-    search `acme_genai_index` $time_range$ NOT testbed_mode=BASELINE_TRAFFIC
+    search `acme_genai_index` NOT testbed_mode=BASELINE_TRAFFIC
     | stats count as attack_events dc(technique_id) as distinct_techniques values(severity) as severities by gen_ai_agent_id
     | rename gen_ai_agent_id as registry_key
   ]
@@ -134,7 +134,7 @@
       <title>Agent inventory — running vs shadow (latest snapshot in window)</title>
       <table>
         <search>
-          <query>search `acme_registry_index` $time_range$
+          <query>search `acme_registry_index`
 | sort - _time
 | dedup agent_id
 | stats count(eval(agent_status="running")) as running_agents count(eval(agent_status="shadow")) as shadow_agents count as agents_in_latest_snapshot</query>
@@ -147,7 +147,7 @@
       <title>Registered agents (deduped latest per agent_id)</title>
       <table>
         <search>
-          <query>search `acme_registry_index` $time_range$
+          <query>search `acme_registry_index`
 | sort - _time
 | dedup agent_id
 | table _time agent_id agent_name agent_status model_origin owning_department mcp_scope trust_score trust_boundary agent_role
@@ -166,7 +166,7 @@
       <title>Guardrail blocks over time (by technique)</title>
       <chart>
         <search>
-          <query>search `acme_genai_index` $time_range$ NOT testbed_mode=BASELINE_TRAFFIC (acme_output_guard_blocked=true OR acme_input_guard_blocked=true OR workflow.blocked=true OR mcp.gateway.action=BLOCK OR acme_output_guard_action IN ("HARD_DENY","QUARANTINE"))
+          <query>search `acme_genai_index` NOT testbed_mode=BASELINE_TRAFFIC (acme_output_guard_blocked=true OR acme_input_guard_blocked=true OR workflow.blocked=true OR mcp.gateway.action=BLOCK OR acme_output_guard_action IN ("HARD_DENY","QUARANTINE"))
 | timechart span=1h count by technique_id limit=8 useother=f</query>
           <earliest>$time_range.earliest$</earliest>
           <latest>$time_range.latest$</latest>
@@ -192,7 +192,7 @@
       <title>Human-in-the-loop governance events</title>
       <table>
         <search>
-          <query>search `acme_genai_index` $time_range$ NOT testbed_mode=BASELINE_TRAFFIC (hitl_required=true OR hitl_bypassed=true)
+          <query>search `acme_genai_index` NOT testbed_mode=BASELINE_TRAFFIC (hitl_required=true OR hitl_bypassed=true)
 | sort - _time
 | table _time gen_ai_agent_id technique_id hitl_required hitl_bypassed hitl.gate_enabled loan_amount_usd incident_id
 | head 25</query>
