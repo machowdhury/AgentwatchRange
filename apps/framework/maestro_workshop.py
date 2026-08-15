@@ -86,7 +86,7 @@ L4 — Agent Capabilities
 - Tools: MCP credit API simulation, document parsers, workflow action emitters.
 - Agents can recommend APPROVE/DENY/ESCALATE with structured JSON outputs.
 - Excessive agency risk: tool escape attempts bypass pre-LLM workflow guards (Scenario 6).
-- CodeGuard rules inspect generated code-like snippets in agent outputs (Scenario 3).
+- AcmeGate rules inspect generated code-like snippets in agent outputs (Scenario 3).
 
 L5 — Multi-Agent Systems
 - Four-agent pipeline with delegation: Intake → Document Extraction → Credit Risk → Compliance.
@@ -96,8 +96,8 @@ L5 — Multi-Agent Systems
 - Token surge / resource exhaustion across chained agent calls (Scenario 7).
 
 L6 — Security & Compliance
-- DefenseClaw input/output inspection on every LLM call (HARD_DENY, SOFT_DENY, ALLOW).
-- CodeGuard static rules for insecure patterns in model output.
+- AcmeSentinel input/output inspection on every LLM call (HARD_DENY, SOFT_DENY, ALLOW).
+- AcmeGate static rules for insecure patterns in model output.
 - Workflow guards: MCP tool allowlists, A2A identity checks, memory write policies, orchestration gates.
 - Human-in-the-loop fatigue and guardrail bypass patterns (Scenario 10 memory/SOC bypass).
 - Full OTel GenAI semantic conventions exported to Splunk for audit and attestation.

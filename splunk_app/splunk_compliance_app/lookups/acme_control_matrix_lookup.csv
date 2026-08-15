@@ -1,9 +1,9 @@
 control_id,nist_function,nist_subcategory,campaign_week,attack_class,workflow_surface,description,pass_signal,fail_signal,splunk_macro
 CTRL-W1-AIBOM,GOVERN,GOVERN-6.1,1,supply_chain_drift,orchestration,AI-BOM manifest hash matches approved agent artifact,agent.aibom_validated=true,cisco_aibom_status=PROMPT_DRIFT_DETECTED,acme_campaign_w1
 CTRL-W2-FOUNDRY,MEASURE,MEASURE-2.6,2,orchestration_bypass,orchestration,Foundry eval harness rejects unauthorized orchestrator override,foundry.policy_status=ENFORCED,foundry.orchestrator_override=true,acme_campaign_w2
-CTRL-W3-CODEGUARD,MANAGE,MANAGE-2.4,3,insecure_codegen,prompt,CodeGuard blocks unsanitized markup in agent input,codeguard.status=PASS,codeguard_blocked=true,acme_campaign_w3
+CTRL-W3-ACMEGATE,MANAGE,MANAGE-2.4,3,insecure_codegen,prompt,AcmeGate blocks unsanitized markup in agent input,acme_input_guard.status=PASS,acme_input_guard_blocked=true,acme_campaign_w3
 CTRL-W4-SLM,MAP,MAP-1.1,4,shadow_edge_slm,runtime,Only approved models in gen_ai.request.model telemetry,slm.unapproved=false,slm.unapproved=true,acme_campaign_w4
-CTRL-W5-DEFENSECLAW,MANAGE,MANAGE-2.4,5,semantic_jailbreak,prompt,Runtime gateway HARD_DENY on jailbreak execution signatures,defenseclaw.action=PASS,defenseclaw.action=HARD_DENY,acme_campaign_w5
+CTRL-W5-ACMESENTINEL,MANAGE,MANAGE-2.4,5,semantic_jailbreak,prompt,Runtime gateway HARD_DENY on jailbreak execution signatures,acme_output_guard.action=PASS,acme_output_guard.action=HARD_DENY,acme_campaign_w5
 CTRL-W6-MCP,GOVERN,GOVERN-1.1,6,mcp_tool_abuse,tools,MCP gateway blocks out-of-scope tool invocations,tool.scope_violation=false,tool.scope_violation=true,acme_campaign_w6
 CTRL-W7-TOKEN,MEASURE,MEASURE-2.5,7,recursive_token_weaponization,orchestration,Token surge / recursive depth within budget,call_depth_detected<5,call_depth_detected>=5,acme_campaign_w7
 CTRL-W8-A2A,GOVERN,GOVERN-1.1,8,a2a_identity_spoof,a2a,Cross-enclave delegation requires valid cryptographic passport,cryptographic_passport_valid=true,cryptographic_passport_valid=false,acme_campaign_w8

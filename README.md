@@ -193,7 +193,7 @@ Cloud VM: replace `localhost` with your server IP — [docs/CLOUD_VM_DEPLOYMENT.
 
 | Read this | When |
 |-----------|------|
-| **[docs/CONCEPTS.md](docs/CONCEPTS.md)** | Architecture, containers, DefenseClaw/CodeGuard transparency, limitations |
+| **[docs/CONCEPTS.md](docs/CONCEPTS.md)** | Architecture, containers, DefenseClaw/AcmeGate transparency, limitations |
 | **[docs/REFERENCE.md](docs/REFERENCE.md)** | Env vars, credentials, API curl examples, install detail, troubleshooting |
 | **[docs/USER_GUIDE.md](docs/USER_GUIDE.md)** | Workshop buttons, SPL queries, dashboards, maturity lifecycle |
 | **[docs/ATTACK_PANEL_GUIDE.md](docs/ATTACK_PANEL_GUIDE.md)** | Every Attack Panel tab — outcomes, per-scenario SPL |
@@ -210,6 +210,6 @@ Cloud VM: replace `localhost` with your server IP — [docs/CLOUD_VM_DEPLOYMENT.
 
 OrchestraACME Lab — Principal DevSecOps Systems Engineering range for agentic AI security validation.
 
-**Third-party / reference names:** “DefenseClaw”, “CodeGuard”, and Cisco AI Defense telemetry field names demonstrate compatible observability patterns. Runtime controls in this repo are **open-source lab middleware** unless you enable the optional [Cisco AI Defense overlay](docs/CISCO_INTEGRATION.md) (`docker-compose.cisco.yml`). Splunk and Ollama are used as described in their respective containers/images.
+**Third-party / reference names:** AcmeGate and AcmeSentinel are **lab-original** Python middleware. Optional [Cisco AI Defense overlay](docs/CISCO_INTEGRATION.md) uses real third-party tools when enabled. Splunk and Ollama run as described in their respective containers/images. See [NOTICE.md](NOTICE.md).
 
 MIT License — see [LICENSE](LICENSE).

@@ -121,8 +121,8 @@ def enrich_campaign_context(
     session_id: str,
     model_name: str,
     incident_id: str,
-    defenseclaw_blocked: bool = False,
-    codeguard_blocked: bool = False,
+    acme_output_guard_blocked: bool = False,
+    acme_input_guard_blocked: bool = False,
 ) -> Dict[str, str]:
     """Return extra OTel log fields for a campaign-week exploit or technique run."""
     fields: Dict[str, str] = dict(campaign_framework_tags(campaign_week))
@@ -158,7 +158,7 @@ def enrich_campaign_context(
         fields.update(rag_otel_fields(rag))
     elif campaign_week == 10:
         rogue = "AUTONOMOUS MODE" in user_message.upper() or "AUTONOMOUS DIRECTIVES" in user_message.upper()
-        if rogue or defenseclaw_blocked or codeguard_blocked:
+        if rogue or acme_output_guard_blocked or acme_input_guard_blocked:
             soar = trigger_containment(agent_id, incident_id)
             fields.update(soar_otel_fields(soar))
 

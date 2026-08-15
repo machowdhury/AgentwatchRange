@@ -109,7 +109,7 @@ Skills are mapped by role. You do not need every level; follow the [role quick-s
 | Confirm GenAI telemetry ingest | Level 0–1 | “Are we actually logging agent calls?” — first question on any AI incident |
 | Hunt by scenario number | Level 1–2 | Map alerts to **which agent surface** failed (tools vs output vs retrieval) |
 | Read `workflow.blocked` and `workflow.block_reason` | Level 1, Q204 | Triage pre-LLM blocks vs model-reached events |
-| Read `defenseclaw.action` / `codeguard_blocked` | Level 1, Q102 | Distinguish output-side denials from input validation |
+| Read `acme_output_guard.action` / `acme_input_guard_blocked` | Level 1, Q102 | Distinguish output-side denials from input validation |
 | Field discovery on unfamiliar sourcetypes | Level 2, Q201–Q203 | Same muscle memory as BOTS — explore before you filter |
 | Use macros and time bounds | All levels | Production hunts: `` `acme_genai_index` `` pattern translates to your org’s index macro |
 
@@ -575,7 +575,7 @@ Next: [Level 1 — Pipeline proof](#level-1--pipeline-proof-everyone) (**▶ RUN
 | Scenario | Surface | What you teach |
 |----------|---------|----------------|
 | 6 | MCP tools | Block **before** LLM (`workflow.block_reason`) |
-| 5 | Output gateway | Block or flag **after** LLM (`defenseclaw.action`) |
+| 5 | Output gateway | Block or flag **after** LLM (`acme_output_guard.action`) |
 | 9 | RAG | **Detect-only** — alert without always blocking |
 
 **Splunk dashboards:** Overview · Detection Efficacy · Control Attestation
@@ -595,14 +595,14 @@ Look for `workflow.blocked=true` and a tool-scope `workflow.block_reason` on Sce
 </details>
 
 <details>
-<summary><strong>Q102</strong> — Which field tells you DefenseClaw acted on output?</summary>
+<summary><strong>Q102</strong> — Which field tells you AcmeSentinel acted on output?</summary>
 
 ```spl
 `acme_genai_index` earliest=-30m campaign_week=5
-| table defenseclaw.action defenseclaw_blocked codeguard_blocked workflow.blocked
+| table acme_output_guard.action acme_output_guard_blocked acme_input_guard_blocked workflow.blocked
 ```
 
-**Answer field:** `defenseclaw.action` (e.g. `HARD_DENY`, `ALLOW`).
+**Answer field:** `acme_output_guard.action` (e.g. `HARD_DENY`, `ALLOW`).
 
 </details>
 
@@ -798,7 +798,7 @@ If empty, complete Level 3 first.
 
 ```spl
 `acme_genai_index` earliest=-1h incident_id=*
-| stats count by incident_id workflow.blocked defenseclaw_blocked codeguard_blocked
+| stats count by incident_id workflow.blocked acme_output_guard_blocked acme_input_guard_blocked
 ```
 
 </details>
@@ -841,10 +841,10 @@ Use **Technique Coverage Matrix** → filter NOT_OBSERVED, or Threat Hunting pla
 </details>
 
 <details>
-<summary><strong>Q403</strong> — Mean time to detect proxy: events with `defenseclaw_blocked` or `workflow.blocked`.</summary>
+<summary><strong>Q403</strong> — Mean time to detect proxy: events with `acme_output_guard_blocked` or `workflow.blocked`.</summary>
 
 ```spl
-`acme_genai_index` earliest=-24h (workflow.blocked=true OR defenseclaw_blocked=true OR codeguard_blocked=true)
+`acme_genai_index` earliest=-24h (workflow.blocked=true OR acme_output_guard_blocked=true OR acme_input_guard_blocked=true)
 | timechart span=1h count
 ```
 

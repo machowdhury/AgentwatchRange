@@ -69,7 +69,7 @@ class TechniqueEntry:
     # --- Detection ---
     detection_signal: str = ""       # What OTel field/value indicates this
     splunk_spl_template: str = ""    # Starter SPL for detection
-    defenseclaw_action: str = ""     # HARD_DENY | ALERT | RATE_LIMIT | QUARANTINE
+    acme_output_guard_action: str = ""     # HARD_DENY | ALERT | RATE_LIMIT | QUARANTINE
     galileo_check: str = ""          # Galileo platform validation type
 
     # --- Dataset compatibility (HuggingFace schema) ---
@@ -99,7 +99,7 @@ class TechniqueEntry:
             "framework.kill_chain_stage": self.kill_chain_stage,
             "kill_chain.stage": self.kill_chain_stage,
             "framework.kill_chain_order": str(self.kill_chain_order),
-            "framework.defenseclaw_action": self.defenseclaw_action,
+            "framework.acme_output_guard_action": self.acme_output_guard_action,
             "framework.attack_vector": self.attack_vector,
             "framework.detection_signal": self.detection_signal,
         }
@@ -217,7 +217,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["recon", "model-probing", "api-abuse"],
         detection_signal="inference_api_query_rate > baseline_sigma_3",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0000" | stats count by agent.id span=1m | where count > 50',
-        defenseclaw_action="RATE_LIMIT",
+        acme_output_guard_action="RATE_LIMIT",
         quality_tier="reviewed",
         references=["https://atlas.mitre.org/techniques/AML.T0000"],
     ),
@@ -242,7 +242,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["recon", "direct-access", "model-file"],
         detection_signal="model_file_read_by_unauthorized_principal",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0001" | table _time agent.id event_type',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -266,7 +266,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["recon", "passive", "traffic-analysis"],
         detection_signal="unusual_log_export_volume",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0002"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -291,7 +291,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["recon", "system-prompt", "prompt-extraction"],
         detection_signal="output_contains_system_prompt_fragment",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0003" galileo_check="PROMPT_LEAK_DETECTED"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         galileo_check="PROMPT_EXTRACTION_ATTEMPT",
         quality_tier="reviewed",
         real_world_incident="Bing Chat (Sydney) system prompt extraction, Feb 2023",
@@ -317,7 +317,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["recon", "scanning", "infrastructure-discovery"],
         detection_signal="port_scan_targeting_ai_ports",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0004"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -341,7 +341,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["recon", "osint", "open-source"],
         detection_signal="model_identifier_in_public_leak",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0005"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -370,7 +370,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["initial-access", "supply-chain", "tooling"],
         detection_signal="unsigned_model_artifact_loaded",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0010" agent.aibom_validated="false"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -395,7 +395,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["initial-access", "credential-abuse", "api-key"],
         detection_signal="api_key_used_from_anomalous_ip",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0012" | stats dc(source_ip) as unique_ips by api_key | where unique_ips > 3',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -420,7 +420,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["initial-access", "supply-chain", "backdoor"],
         detection_signal="model_hash_mismatch_vs_aibom_baseline",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0048" cisco_aibom_status="HASH_MISMATCH"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         galileo_check="SUPPLY_CHAIN_INTEGRITY_FAIL",
         quality_tier="reviewed",
         real_world_incident="Hugging Face malicious model upload campaigns, 2024",
@@ -446,8 +446,8 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         mitigations=["Verify tool provenance before installation", "Sandbox tool execution", "Monitor tool invocation patterns", "Maintain approved tool allowlist"],
         tags=["initial-access", "supply-chain", "mcp", "plugin-poison"],
         detection_signal="mcp_tool_invoked_not_in_approved_allowlist",
-        splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0049" defenseclaw_action="HARD_DENY"',
-        defenseclaw_action="HARD_DENY",
+        splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0049" acme_output_guard_action="HARD_DENY"',
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
         real_world_incident="BlueRock Security MCP server analysis: 36.7% SSRF-vulnerable, 2026",
     ),
@@ -477,7 +477,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["resource-dev", "adversarial-examples", "evasion"],
         detection_signal="galileo_adversarial_input_flagged",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0017" galileo_validation="ADVERSARIAL_INPUT_DETECTED"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         galileo_check="ADVERSARIAL_EXAMPLE_DETECTED",
         quality_tier="reviewed",
     ),
@@ -503,7 +503,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["resource-dev", "training-poison", "backdoor"],
         detection_signal="training_data_anomaly_score_elevated",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0018"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -532,7 +532,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["staging", "shadow-model", "surrogate"],
         detection_signal="watermark_absent_from_model_output",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0019"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -556,7 +556,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["staging", "model-stealing", "surrogate", "extraction"],
         detection_signal="systematic_api_query_pattern_detected",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0020" | bucket _time span=1h | stats count by agent.id | where count > 5000',
-        defenseclaw_action="RATE_LIMIT",
+        acme_output_guard_action="RATE_LIMIT",
         quality_tier="reviewed",
         real_world_incident="Cloudflare workers AI model extraction, 2024",
     ),
@@ -585,11 +585,11 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         description="Adversary injects malicious instructions directly into the user-facing prompt, overriding system instructions or persona, causing the model to take unauthorised actions.",
         impact="Complete agent goal hijack; potential for unauthorised data access, financial transactions, or lateral movement",
         affected_components=["user_input", "agent_context", "tool_executor"],
-        mitigations=["Inline prompt injection detection via defenseclaw-gateway", "Input sanitisation", "Least-privilege tool scopes", "Output validation"],
+        mitigations=["Inline prompt injection detection via acmesentinel-gateway", "Input sanitisation", "Least-privilege tool scopes", "Output validation"],
         tags=["execution", "prompt-injection", "direct", "goal-hijack"],
         detection_signal="prompt_injection_pattern_in_user_input",
-        splunk_spl_template='sourcetype="otel:agentic:json" (technique_id="AML.T0051" OR subtechnique_id="AML.T0051.000") defenseclaw_action="HARD_DENY"',
-        defenseclaw_action="HARD_DENY",
+        splunk_spl_template='sourcetype="otel:agentic:json" (technique_id="AML.T0051" OR subtechnique_id="AML.T0051.000") acme_output_guard_action="HARD_DENY"',
+        acme_output_guard_action="HARD_DENY",
         galileo_check="PROMPT_INJECTION_RUNTIME",
         quality_tier="reviewed",
         real_world_incident="Bing Chat prompt injection via webpage content, 2023; Air Canada chatbot manipulation, 2024",
@@ -619,7 +619,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["execution", "prompt-injection", "indirect", "rag-poisoning"],
         detection_signal="agent_action_triggered_by_retrieved_content",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0054" injection_vector="retrieved_content"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         galileo_check="INDIRECT_INJECTION_DETECTED",
         quality_tier="reviewed",
         real_world_incident="ChatGPT plugin indirect injection via web content, 2023",
@@ -646,7 +646,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["execution", "context-poisoning", "memory-attack"],
         detection_signal="context_hash_drift_from_approved_baseline",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0055" event_type="CONTEXT_WINDOW_POISONING_DETECTED"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -670,7 +670,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["execution", "memory-manipulation", "persistence", "cross-session"],
         detection_signal="memory_write_from_untrusted_source",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0056"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -694,7 +694,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["execution", "thread-hijack", "multi-turn", "session"],
         detection_signal="conversation_intent_drift_detected",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0057"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -719,7 +719,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["execution", "dos", "resource-exhaustion", "loop-attack", "infinity-bill"],
         detection_signal="recursive_call_depth_exceeds_threshold",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0040" call_depth_detected > 10',
-        defenseclaw_action="RATE_LIMIT",
+        acme_output_guard_action="RATE_LIMIT",
         quality_tier="reviewed",
     ),
 
@@ -748,7 +748,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["persistence", "data-exfil", "membership-inference", "pii"],
         detection_signal="model_output_matches_training_data_pattern",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0024" pii_detected="true"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
         real_world_incident="Samsung ChatGPT training data concerns, 2023",
     ),
@@ -773,7 +773,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["persistence", "backdoor", "trojan", "trigger"],
         detection_signal="model_behavior_anomaly_on_specific_input_pattern",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0025"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -797,7 +797,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["persistence", "rogue-agent", "misalignment", "self-directed"],
         detection_signal="agent_behavior_diverges_from_approved_policy",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0026" event_type="ROGUE_AGENT_DETECTED"',
-        defenseclaw_action="QUARANTINE",
+        acme_output_guard_action="QUARANTINE",
         quality_tier="reviewed",
         real_world_incident="Replit agent meltdown incident, 2025",
     ),
@@ -827,7 +827,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["defence-evasion", "adversarial-perturbation", "classifier-bypass"],
         detection_signal="homoglyph_or_encoding_anomaly_in_input",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0015"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -851,7 +851,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["defence-evasion", "oracle-probing", "classifier-boundary"],
         detection_signal="systematic_edge_case_probing_pattern",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0016"',
-        defenseclaw_action="RATE_LIMIT",
+        acme_output_guard_action="RATE_LIMIT",
         quality_tier="reviewed",
     ),
 
@@ -875,7 +875,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["defence-evasion", "audit-evasion", "log-tampering"],
         detection_signal="otel_log_gap_detected_in_continuous_stream",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0052" | timechart count span=1m | where count=0',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -905,7 +905,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["discovery", "vector-db", "rag-probing", "data-mapping"],
         detection_signal="vector_retrieval_rate_anomaly",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0037" galileo_observe_alert="true"',
-        defenseclaw_action="RATE_LIMIT",
+        acme_output_guard_action="RATE_LIMIT",
         galileo_check="VECTOR_RETRIEVAL_ANOMALY",
         quality_tier="reviewed",
     ),
@@ -931,7 +931,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["discovery", "vector-db", "exfiltration", "embedding-reconstruction"],
         detection_signal="vector_retrieval_volume_anomaly_70x_baseline",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0038" galileo_anomaly_score > 0.9',
-        defenseclaw_action="QUARANTINE",
+        acme_output_guard_action="QUARANTINE",
         galileo_check="VECTOR_EXFILTRATION_DETECTED",
         quality_tier="reviewed",
     ),
@@ -956,7 +956,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["discovery", "tool-schema", "mcp", "capability-mapping"],
         detection_signal="tool_schema_enumeration_detected",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0043"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -986,7 +986,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["collection", "local-data", "pii", "conversation-log"],
         detection_signal="local_ai_data_read_by_unexpected_process",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0035"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -1011,7 +1011,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["collection", "tool-abuse", "data-theft", "enterprise-integration"],
         detection_signal="bulk_data_collection_via_agent_tool",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0036" | stats sum(records_accessed) by agent.id | where sum > 1000',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1040,7 +1040,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["exfiltration", "model-theft", "covert-channel"],
         detection_signal="unusual_outbound_data_from_model_server",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0030"',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
 
@@ -1065,7 +1065,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["exfiltration", "output-exfil", "markdown-injection", "llm-exfil"],
         detection_signal="outbound_url_in_model_output_to_unknown_domain",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0031" exfil_url_detected="true"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1095,7 +1095,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["impact", "availability", "dos", "cascading-failure"],
         detection_signal="agent_service_latency_spike_and_error_rate_elevation",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0029" | timechart avg(latency_ms) span=1m | where avg > 5000',
-        defenseclaw_action="RATE_LIMIT",
+        acme_output_guard_action="RATE_LIMIT",
         quality_tier="reviewed",
     ),
 
@@ -1119,7 +1119,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["impact", "model-integrity", "weight-corruption"],
         detection_signal="model_performance_degradation_and_hash_mismatch",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0034" cisco_aibom_status="HASH_MISMATCH"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1145,11 +1145,11 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         description="Adversary manipulates an agent into invoking tools or APIs outside its authorised scope, escalating from a low-privilege agent context to privileged operations on integrated systems.",
         impact="Unauthorised execution of privileged operations: file writes, database mutations, financial transactions",
         affected_components=["tool_executor", "mcp_scope", "api_gateway"],
-        mitigations=["Enforce MCP tool scope allowlists", "Require human approval for privileged tool calls", "DefenseClaw OpenShell sandbox enforcement"],
+        mitigations=["Enforce MCP tool scope allowlists", "Require human approval for privileged tool calls", "AcmeSentinel OpenShell sandbox enforcement"],
         tags=["privilege-escalation", "tool-abuse", "scope-escape", "mcp"],
         detection_signal="tool_invoked_outside_approved_scope",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0050" scope_violation="true"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1173,7 +1173,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["privilege-escalation", "identity-spoofing", "a2a", "zero-trust"],
         detection_signal="did_signature_mismatch_on_agent_delegation",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0058" cryptographic_passport_valid="false"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1202,7 +1202,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["lateral-movement", "a2a", "session-smuggling", "trust-chain"],
         detection_signal="a2a_session_integrity_check_failed",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0045" event_type="A2A_SESSION_SMUGGLING_DETECTED"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
         real_world_incident="Palo Alto Unit 42 A2A session smuggling demonstration, Nov 2025",
     ),
@@ -1227,7 +1227,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["lateral-movement", "trust-chain", "cascading", "multi-agent"],
         detection_signal="trust_propagation_anomaly_in_agent_chain",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0046"',
-        defenseclaw_action="QUARANTINE",
+        acme_output_guard_action="QUARANTINE",
         quality_tier="reviewed",
     ),
 
@@ -1256,7 +1256,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["c2", "covert-channel", "prompt-c2", "persistent"],
         detection_signal="encoded_instruction_pattern_in_agent_io",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0060"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1280,7 +1280,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["c2", "malicious-plugin", "relay", "mcp"],
         detection_signal="tool_calling_unexpected_external_domain",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0061"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1310,7 +1310,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["credential-access", "secret-theft", "tool-abuse"],
         detection_signal="credential_store_accessed_by_agent",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0062" tool_invoked="read_secret"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1335,7 +1335,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["credential-access", "phishing", "social-engineering", "human-exploit"],
         detection_signal="agent_generating_credential_harvesting_content",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0063"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1361,11 +1361,11 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         description="Adversary manipulates an AI code execution tool (Jupyter kernel, sandbox interpreter, shell tool) to achieve container breakout and gain access to the underlying host or Kubernetes node.",
         impact="Full host compromise; access to all co-resident AI workloads and infrastructure",
         affected_components=["code_execution_tool", "container_runtime", "host_os"],
-        mitigations=["Enforce gVisor or Firecracker sandboxing for code execution", "DefenseClaw OpenShell namespace enforcement", "Block host mounts from code execution containers"],
+        mitigations=["Enforce gVisor or Firecracker sandboxing for code execution", "AcmeSentinel OpenShell namespace enforcement", "Block host mounts from code execution containers"],
         tags=["escape", "container-breakout", "rce", "code-execution"],
         detection_signal="agent_code_execution_accesses_host_namespace",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0064" rce_payload_detected="true"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1390,7 +1390,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["escape", "ssrf", "cloud-metadata", "web-tool"],
         detection_signal="agent_tool_requesting_cloud_metadata_endpoint",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0065" target_url LIKE "%169.254.169.254%"',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
         real_world_incident="BlueRock Security: 36.7% of scanned MCP servers SSRF-vulnerable, 2026",
     ),
@@ -1419,7 +1419,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["mcp", "supply-chain", "tool-manifest", "emerging-2026"],
         detection_signal="tool_manifest_tampered=true",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0070" tool_manifest_tampered=true',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
     TechniqueEntry(
@@ -1443,7 +1443,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["skill-poisoning", "supply-chain", "registry-trust", "emerging-2026"],
         detection_signal="skill.provenance_valid=false",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0071" skill.provenance_valid=false',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
     TechniqueEntry(
@@ -1467,7 +1467,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["memory-drift", "multi-turn", "behavioral", "emerging-2026"],
         detection_signal="memory.drift_detected=true",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0072" memory.drift_detected=true | timechart avg(memory_entry_trust_score) avg(approval_rate_by_session)',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
     TechniqueEntry(
@@ -1491,7 +1491,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["privilege-creep", "identity", "scope-drift", "emerging-2026"],
         detection_signal="privilege_creep_detected=true",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0073" privilege_creep_detected=true | table granted_scope used_scope scope_delta',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
     TechniqueEntry(
@@ -1515,7 +1515,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["hitl", "governance", "financial-controls", "emerging-2026"],
         detection_signal="hitl_bypassed=true",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0074" hitl_required=true hitl_bypassed=true',
-        defenseclaw_action="ALERT",
+        acme_output_guard_action="ALERT",
         quality_tier="reviewed",
     ),
     TechniqueEntry(
@@ -1539,7 +1539,7 @@ TECHNIQUE_REGISTRY: List[TechniqueEntry] = [
         tags=["a2a", "mitm", "provenance", "emerging-2026"],
         detection_signal="message.provenance_valid=false",
         splunk_spl_template='sourcetype="otel:agentic:json" technique_id="AML.T0075" message.provenance_valid=false',
-        defenseclaw_action="HARD_DENY",
+        acme_output_guard_action="HARD_DENY",
         quality_tier="reviewed",
     ),
 
@@ -1776,7 +1776,7 @@ def export_csv_lookup() -> str:
         "owasp_llm", "owasp_asi", "maestro_layers", "nist_ai_rmf",
         "cvss_score", "severity", "attack_vector", "kill_chain_stage",
         "kill_chain_order", "description", "impact",
-        "defenseclaw_action", "galileo_check",
+        "acme_output_guard_action", "galileo_check",
         "detection_signal", "splunk_spl_template",
         "real_world_incident", "quality_tier", "learning_tier", "redundant_with",
     ]

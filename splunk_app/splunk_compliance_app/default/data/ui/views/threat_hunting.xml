@@ -48,7 +48,7 @@
 | search technique_id="$technique_id$*" OR "$technique_id$"="*"
 | search incident_id="$incident_id$*" OR "$incident_id$"="*"
 | search agent.id="$agent_id$*" OR "$agent_id$"="*"
-| table _time, incident_id, technique_id, framework.technique_name, agent.id, execution_mode, testbed_mode, defenseclaw_blocked, codeguard_blocked, rogue_actor_story, risk_statement
+| table _time, incident_id, technique_id, framework.technique_name, agent.id, execution_mode, testbed_mode, acme_output_guard_blocked, acme_input_guard_blocked, rogue_actor_story, risk_statement
 | sort - _time</query>
         </search>
       </table>
@@ -61,7 +61,7 @@
       <chart>
         <search>
           <query>`acme_genai_index` $time_range$
-| eval blocked=if(defenseclaw_blocked="true" OR codeguard_blocked="true" OR workflow.blocked="true" OR tool_manifest_tampered="true" OR memory.drift_detected="true" OR privilege_creep_detected="true", "BLOCKED", "ALLOWED")
+| eval blocked=if(acme_output_guard_blocked="true" OR acme_input_guard_blocked="true" OR workflow.blocked="true" OR tool_manifest_tampered="true" OR memory.drift_detected="true" OR privilege_creep_detected="true", "BLOCKED", "ALLOWED")
 | stats count by technique_id, blocked
 | sort - count</query>
         </search>

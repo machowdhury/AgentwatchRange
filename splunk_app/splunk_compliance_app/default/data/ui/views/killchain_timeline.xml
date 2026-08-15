@@ -177,20 +177,20 @@ incident_id=$incident_filter$ testbed_mode=KILL_CHAIN_ACTIVE scenario_family=$sc
 | convert ctime(_time) AS "Time"
 | table Time stage_num stage_name framework.technique_id framework.technique_name
     framework.tactic_name framework.kill_chain_stage kill_chain.stage campaign_week framework.severity framework.cvss_score
-    agent.id defenseclaw_action framework.detection_signal
+    agent.id acme_output_guard_action framework.detection_signal
 | rename stage_num AS "Stage", stage_name AS "Stage Name",
   framework.technique_id AS "Technique ID", framework.technique_name AS "Technique",
   framework.tactic_name AS "Tactic", framework.kill_chain_stage AS "Kill-Chain Stage",
   kill_chain.stage AS "Stage Field", campaign_week AS "Campaign Week",
   framework.severity AS "Severity", framework.cvss_score AS "CVSS",
-  agent.id AS "Agent", defenseclaw_action AS "DefenseClaw", framework.detection_signal AS "Detection Signal"</query>
+  agent.id AS "Agent", acme_output_guard_action AS "AcmeSentinel", framework.detection_signal AS "Detection Signal"</query>
         </search>
         <option name="drilldown">none</option>
         <option name="wrap">false</option>
         <format type="color" field="Severity">
           <colorPalette type="map">{"Critical":#dc4e41,"High":#f1813f,"Medium":#f8be34,"Low":#53a051}</colorPalette>
         </format>
-        <format type="color" field="DefenseClaw">
+        <format type="color" field="AcmeSentinel">
           <colorPalette type="map">{"HARD_DENY":#dc4e41,"QUARANTINE":#f1813f,"RATE_LIMIT":#f8be34,"ALERT":#006d9c}</colorPalette>
         </format>
       </table>
@@ -203,7 +203,7 @@ incident_id=$incident_filter$ testbed_mode=KILL_CHAIN_ACTIVE scenario_family=$sc
         <h3>Splunk correlation search for this incident</h3>
         <p>Copy this SPL into Search to replay the full incident timeline:</p>
         <pre><code>sourcetype="otel:agentic:json" incident_id="$selected_incident$"
-| table _time stage_num stage_name framework.technique_id framework.severity defenseclaw_action agent.id
+| table _time stage_num stage_name framework.technique_id framework.severity acme_output_guard_action agent.id
 | sort stage_num</code></pre>
       </html>
     </panel>

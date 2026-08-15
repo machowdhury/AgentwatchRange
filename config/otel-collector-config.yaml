@@ -92,7 +92,7 @@ exporters:
 
   # Archive: raw event JSONL on shared volume
   file:
-    path: /var/log/defenseclaw/otel-raw-genai.jsonl
+    path: /var/log/acme_sentinel/otel-raw-genai.jsonl
     rotation:
       max_megabytes: 200
       max_days: 7

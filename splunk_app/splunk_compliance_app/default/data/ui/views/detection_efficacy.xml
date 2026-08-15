@@ -25,7 +25,7 @@
       <single>
         <title>MTTD (seconds, blocked events)</title>
         <search>
-          <query>`acme_genai_index` $time_range$ (workflow.blocked=true OR defenseclaw_blocked=true OR codeguard_blocked=true)
+          <query>`acme_genai_index` $time_range$ (workflow.blocked=true OR acme_output_guard_blocked=true OR acme_input_guard_blocked=true)
 | stats avg(gen_ai.client.operation.duration_ms) as avg_ms
 | eval mttd_sec=round(avg_ms/1000,2) | fields mttd_sec</query>
         </search>

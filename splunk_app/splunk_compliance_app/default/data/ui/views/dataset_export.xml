@@ -165,7 +165,7 @@ framework.severity=*
         <p><strong>Dataset schema</strong> (HF-compatible fields)</p>
         <pre><code>GET http://localhost:5000/api/v1/dataset/schema</code></pre>
         <p>Compatible with: emmanuelgjr/genai-incidents schema v2026.05<br/>
-        Output: /var/log/defenseclaw/acme_synthetic_dataset.jsonl</p>
+        Output: /var/log/acme_sentinel/acme_synthetic_dataset.jsonl</p>
       </html>
     </panel>
   </row>

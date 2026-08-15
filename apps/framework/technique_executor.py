@@ -158,8 +158,8 @@ class TechniqueExecutor:
             )
             body = response.json() if response.content else {}
             blocked = bool(
-                body.get("defenseclaw_blocked")
-                or body.get("codeguard_blocked")
+                body.get("acme_output_guard_blocked")
+                or body.get("acme_input_guard_blocked")
                 or body.get("workflow_blocked")
                 or body.get("blocked")
             )

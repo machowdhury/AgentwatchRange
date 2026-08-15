@@ -287,7 +287,7 @@ Expect `BASELINE_TRAFFIC` after a few minutes even if you have not attacked yet.
 | **Start lab from scratch** | Broken Splunk / lost config | `./scripts/lab_fresh_start.sh` (destroys volumes) |
 | `connection reset by peer` on port 8088 | HEC disabled or index missing | `./scripts/splunk_local_bootstrap.sh` |
 | App install `bundle_tmp` / Permission denied | Prior `splunk` CLI as root | `git pull` then `./scripts/splunk_install_apps.sh` (copies to `etc/apps`, repairs ownership) |
-| `permission denied` on `otel-raw-genai.jsonl` | Shared volume permissions | Bootstrap script `chmod 1777` on `/var/log/defenseclaw`; restart otel |
+| `permission denied` on `otel-raw-genai.jsonl` | Shared volume permissions | Bootstrap script `chmod 1777` on `/var/log/acme_sentinel`; restart otel |
 | `permission denied` on scripts | Scripts not executable | `chmod +x scripts/*.sh` |
 | Out of disk | Model + Splunk growth | `df -h`; expand volume or `docker system prune` |
 | Slow LLM on VM | CPU-only inference | Expected; first response 10–30+ seconds |

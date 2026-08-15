@@ -24,15 +24,15 @@ controls:
     fail_signal: foundry.orchestrator_override=true
     splunk_macro: acme_campaign_w2
 
-  - id: CTRL-W3-CODEGUARD
+  - id: CTRL-W3-ACMEGATE
     nist_function: MANAGE
     nist_subcategory: MANAGE-2.4
     campaign_week: 3
     attack_class: insecure_codegen
     workflow_surface: prompt
-    description: CodeGuard blocks unsanitized markup in agent input
-    pass_signal: codeguard.status=PASS
-    fail_signal: codeguard_blocked=true
+    description: AcmeGate blocks unsanitized markup in agent input
+    pass_signal: acme_input_guard.status=PASS
+    fail_signal: acme_input_guard_blocked=true
     splunk_macro: acme_campaign_w3
 
   - id: CTRL-W4-SLM
@@ -46,15 +46,15 @@ controls:
     fail_signal: slm.unapproved=true
     splunk_macro: acme_campaign_w4
 
-  - id: CTRL-W5-DEFENSECLAW
+  - id: CTRL-W5-ACMESENTINEL
     nist_function: MANAGE
     nist_subcategory: MANAGE-2.4
     campaign_week: 5
     attack_class: semantic_jailbreak
     workflow_surface: prompt
     description: Runtime gateway HARD_DENY on jailbreak execution signatures
-    pass_signal: defenseclaw.action=PASS
-    fail_signal: defenseclaw.action=HARD_DENY
+    pass_signal: acme_output_guard.action=PASS
+    fail_signal: acme_output_guard.action=HARD_DENY
     splunk_macro: acme_campaign_w5
 
   - id: CTRL-W6-MCP

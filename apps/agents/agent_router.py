@@ -186,8 +186,8 @@ def run_agent_pipeline(
             "output_tokens":       result["output_tokens"],
             "latency_ms":          result["latency_ms"],
             "model":               result["model"],
-            "defenseclaw_blocked": result["defenseclaw_blocked"],
-            "codeguard_blocked":   result["codeguard_blocked"],
+            "acme_output_guard_blocked": result["acme_output_guard_blocked"],
+            "acme_input_guard_blocked":   result["acme_input_guard_blocked"],
             "workflow_blocked":    result.get("workflow_blocked", False),
             "block_reason":        result.get("block_reason"),
             "workflow_surface":    result.get("workflow_surface"),
@@ -198,12 +198,12 @@ def run_agent_pipeline(
         pipeline_result["agents"].append(agent_record)
 
         # If any agent blocked, halt pipeline and report
-        if result.get("workflow_blocked") or result["defenseclaw_blocked"] or result["codeguard_blocked"]:
+        if result.get("workflow_blocked") or result["acme_output_guard_blocked"] or result["acme_input_guard_blocked"]:
             pipeline_result["pipeline_blocked"] = True
             pipeline_result["block_reason"] = (
                 result.get("block_reason")
-                or ("DEFENSECLAW_HARD_DENY" if result["defenseclaw_blocked"]
-                    else "CODEGUARD_SBD_VIOLATION")
+                or ("ACME_OUTPUT_GUARD_HARD_DENY" if result["acme_output_guard_blocked"]
+                    else "ACMEGATE_SBD_VIOLATION")
             )
             pipeline_result["final_output"] = result["response"]
             logger.warning(f"[Pipeline] BLOCKED at {agent_id}: {pipeline_result['block_reason']}")

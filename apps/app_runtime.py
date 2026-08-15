@@ -86,7 +86,7 @@ def call_single_agent(agent_id):
         session_id=session_id,
         temperature=agent.get("temperature", 0.7),
         max_tokens=agent.get("max_tokens", 512),
-        skip_defenseclaw=data.get("skip_defenseclaw", False),
+        skip_acmesentinel=data.get("skip_acmesentinel", False),
         incident_id=data.get("incident_id"),
         technique_id=data.get("technique_id", ""),
         testbed_mode=data.get("testbed_mode", "BANKING_LIVE"),
@@ -133,8 +133,8 @@ def get_config():
         "ollama_url":   _OLLAMA_URL,
         "ollama_model": _OLLAMA_MODEL,
         "otel_endpoint": os.environ.get("OTEL_COLLECTOR_HTTP", ""),
-        "defenseclaw":   os.environ.get("DEFENSECLAW_ENABLED", "true"),
-        "codeguard":     os.environ.get("CODEGUARD_ENABLED", "true"),
+        "acme_output_guard":   os.environ.get("ACME_OUTPUT_GUARD_ENABLED", "true"),
+        "acme_input_guard":     os.environ.get("ACME_INPUT_GUARD_ENABLED", "true"),
     })
 
 
@@ -233,7 +233,7 @@ select#agent-select{background:#fff;border:1px solid #d0d7de;color:#1f2328;paddi
       <div class="section-title">Agent Pipeline — Submit Banking Request</div>
       <div style="font-size:.75rem;color:#57606a;margin-bottom:10px">
         Input is routed through all 4 agents in sequence. Each agent calls the real LLM.
-        DefenseClaw and CodeGuard middleware inspect every response.
+        AcmeSentinel and AcmeGate middleware inspect every response.
       </div>
       <textarea id="user-input" class="input-area" placeholder="Enter a banking request (or adversarial payload)...
 Examples:
@@ -345,8 +345,8 @@ async function runPipeline() {
       out += `  Model:    ${a.model}\n`;
       out += `  Tokens:   ${a.input_tokens} in / ${a.output_tokens} out\n`;
       out += `  Latency:  ${a.latency_ms}ms\n`;
-      out += `  DClaw:    ${a.defenseclaw_blocked ? '🔴 HARD_DENY' : '🟢 PASS'}\n`;
-      out += `  CGuard:   ${a.codeguard_blocked ? '🔴 BLOCKED' : '🟢 PASS'}\n`;
+      out += `  DClaw:    ${a.acme_output_guard_blocked ? '🔴 HARD_DENY' : '🟢 PASS'}\n`;
+      out += `  CGuard:   ${a.acme_input_guard_blocked ? '🔴 BLOCKED' : '🟢 PASS'}\n`;
       out += `  TraceID:  ${a.trace_id.slice(0,16)}...\n`;
       out += `  Response:\n${a.response}\n`;
       out += `${'─'.repeat(60)}\n`;
@@ -380,7 +380,7 @@ async function runSingleAgent() {
     });
     const d = await r.json();
     resp.textContent = JSON.stringify(d, null, 2);
-    resp.className = d.defenseclaw_blocked || d.codeguard_blocked ? 'resp blocked' : 'resp';
+    resp.className = d.acme_output_guard_blocked || d.acme_input_guard_blocked ? 'resp blocked' : 'resp';
   } catch(e) {
     resp.textContent = 'Error: ' + e.message;
   }
@@ -468,7 +468,7 @@ register_framework_routes(app)
 register_chain_routes(app)
 register_cisco_routes(app)
 register_maestro_routes(app)
-register_export_routes(app, base_output_dir="/var/log/defenseclaw")
+register_export_routes(app, base_output_dir="/var/log/acme_sentinel")
 
 
 @app.route("/api/v1/traffic/status", methods=["GET"])

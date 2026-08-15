@@ -68,7 +68,7 @@ Read this if you want the full picture after completing [Start here](../README.m
 1. You start five Docker containers (or four if you use external Splunk).
 2. The **banking app** runs four AI agents in a row; each agent asks **Ollama** a question and gets a real text answer.
 3. The **attack panel** sends malicious prompts to those same agents on purpose.
-4. Before and after every LLM call, **CodeGuard** (input) and **DefenseClaw** (output) scan text with pattern rules. If something looks like an injection or escape, the call is **blocked** and logged.
+4. Before and after every LLM call, **AcmeGate** (input) and **AcmeSentinel** (output) scan text with pattern rules. If something looks like an injection or escape, the call is **blocked** and logged.
 5. Every call also emits **OpenTelemetry** data (tokens, latency, agent name, block/allow decision).
 6. The **OTel Collector** receives that data and forwards it to **Splunk** over HTTP Event Collector (HEC).
 7. The **Splunk compliance app** is a separate install — it reads that index and shows dashboards. Splunk does not run the AI.
@@ -94,7 +94,7 @@ Nothing in step 4–7 happens inside Ollama. Nothing in step 6–7 requires the 
 | Container | What it does | What it does **not** do | Host port |
 |-----------|--------------|-------------------------|-----------|
 | **ollama** | Serves a local LLM; pulls one model from `OLLAMA_MODEL` | Pick models automatically; call Splunk; enforce security policy | 11434 |
-| **banking_app** | 4-agent loan pipeline, REST APIs, OTel export, CodeGuard/DefenseClaw | Connect to OpenAI/Anthropic; embed a Splunk client | 5000 |
+| **banking_app** | 4-agent loan pipeline, REST APIs, OTel export, CodeGuard/AcmeSentinel | Connect to OpenAI/Anthropic; embed a Splunk client | 5000 |
 | **attack_panel** | UI + API that POSTs adversarial payloads to banking_app | Run its own LLM; bypass banking_app middleware | 5001 |
 | **otel_collector** | Receives OTLP; batches; exports to Splunk HEC + JSONL file | Store long-term data by itself; run detections | 4317, 4318 |
 | **splunk** (local mode) | Indexes HEC events; hosts Web UI | Start automatically with dashboards pre-installed | 8000, 8088 |
@@ -107,9 +107,9 @@ All containers talk on an internal Docker network (`acme_mesh`). Only the ports 
 You type a loan request on :5000
     → banking_app receives POST /api/v1/process
     → Agent 1 (Intake) builds a prompt + calls Ollama /api/generate
-         → CodeGuard checks your input text
+         → AcmeGate checks your input text
          → Ollama returns text
-         → DefenseClaw checks model output text
+         → AcmeSentinel checks model output text
          → OTel span + metrics sent to otel_collector:4318
     → Agent 2, 3, 4 repeat (each with its own system prompt)
     → Final APPROVED / DENIED shown in UI
@@ -126,28 +126,34 @@ You click a scenario on :5001
     → attack_panel POSTs to banking_app /api/v1/agent/<target_agent_id>
     → Same middleware + Ollama path as above, but input is a crafted attack string
     → Outcome is non-deterministic:
-         BLOCKED  = CodeGuard or DefenseClaw matched a pattern → HARD_DENY telemetry
+         BLOCKED  = AcmeGate or AcmeSentinel matched a pattern → HARD_DENY telemetry
          INJECTED = Model responded without triggering a rule (logged for gap analysis)
     → Either way, telemetry should land in Splunk if HEC is configured
 ```
 
-Attacks are **real HTTP requests** with **real model inference**. Outcomes are **not scripted** — a small model may sometimes refuse an attack without DefenseClaw firing, or occasionally comply in ways rules miss. That is intentional for detection engineering practice.
+Attacks are **real HTTP requests** with **real model inference**. Outcomes are **not scripted** — a small model may sometimes refuse an attack without AcmeSentinel firing, or occasionally comply in ways rules miss. That is intentional for detection engineering practice.
 
-### DefenseClaw and CodeGuard — full transparency
+### AcmeSentinel and AcmeGate — full transparency
 
 These names reference **Cisco AI Defense-style runtime controls**, but in this repository they are **open-source Python middleware** in `apps/agents/llm_client.py`:
 
 | Control | When it runs | How it works in this lab | Production equivalent |
 |---------|--------------|--------------------------|---------------------|
-| **CodeGuard** | Before the prompt is sent to Ollama | Regex scan for markup/injection patterns in user input | Input sanitization / secure prompt assembly |
-| **DefenseClaw** | After Ollama returns text | Regex scan for jailbreak success, shell escape, wire-transfer strings, etc. | Output-side AI firewall / policy gateway |
+| **AcmeGate** | Before the prompt is sent to Ollama | Regex scan for markup/injection patterns in user input | Input sanitization / secure prompt assembly |
+| **AcmeSentinel** | After Ollama returns text | Regex scan for jailbreak success, shell escape, wire-transfer strings, etc. | Output-side AI firewall / policy gateway |
 
 - They are **not** Cisco product binaries you install separately.
 - They are **not** ML classifiers — they are explicit pattern lists you can read in source code.
-- They **can** be disabled via `DEFENSECLAW_ENABLED=false` / `CODEGUARD_ENABLED=false` in environment (see `docker-compose.yml`).
-- When they block, they emit telemetry fields (`defenseclaw_blocked`, `codeguard_blocked`, rule IDs) shaped for Splunk lookups and framework crosswalks.
+- They **can** be disabled via `ACME_OUTPUT_GUARD_ENABLED=false` / `ACME_INPUT_GUARD_ENABLED=false` in environment (see `docker-compose.yml`).
+- When they block, they emit telemetry fields (`acme_output_guard_blocked`, `acme_input_guard_blocked`, rule IDs) shaped for Splunk lookups and framework crosswalks.
 
 This lab is meant to **demonstrate the telemetry and workflow** you would get with enterprise AI defense tooling, not to replace a vendor appliance.
+
+### Why Splunk for agentic AI security (Phase 6)
+
+Agentic apps will **never** agree on a native schema. The value of a SIEM here is not collecting more logs — it is **normalizing heterogeneous agentic telemetry** into one framework-mappable model (`norm_*` fields in `props.conf`), so compliance and detection logic does not get rewritten per app.
+
+Open **GenAI Compliance Monitor → Cross-App Normalization** after Tier 3 to compare raw vs normalized events across `otel:agentic:json`, `acme:agentic:vendorsim:json`, and `acme:agentic:thirdparty:json`.
 
 ### Splunk — full transparency on the integration
 
@@ -159,7 +165,7 @@ This lab is meant to **demonstrate the telemetry and workflow** you would get wi
 | What does the Splunk app do? | **Read-only:** dashboards, lookups, scheduled searches on that index. |
 | Does Splunk run Ollama or agents? | **No.** |
 | Local vs Cloud? | **Local:** Splunk container in compose. **Cloud/Enterprise:** you point HEC env vars at your stack; no Splunk container. |
-| Two Splunk apps in repo? | **Primary:** `splunk_compliance_app` (`acme_genai_compliance`). **Legacy optional:** `App-Agentic-Compliance` for older `cisco:aidefense:json` sourcetype. Use the primary one. |
+| Two Splunk apps in repo? | **Primary:** `splunk_compliance_app` (`acme_genai_compliance`). **Legacy optional:** `App-Agentic-Compliance` for synthetic `acme:agentic:vendorsim:json` vendor-sim telemetry. Use the primary one. |
 
 **Three places must agree on HEC settings** or you will see no events: `.env`, `docker-compose.yml` environment injection into the collector, and Splunk’s HEC token configuration (index + sourcetype permissions).
 
@@ -232,7 +238,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 | Capability | How OrchestraACME Delivers It |
 |------------|-------------------------------|
 | **Red-team testing** | Ten-scenario adversarial lifecycle console fires real prompt injection, tool escape, identity spoofing, and autonomous agent attacks |
-| **Runtime defense** | Workflow guards (MCP, A2A, memory, orchestration) + DefenseClaw/CodeGuard on every LLM call |
+| **Runtime defense** | Workflow guards (MCP, A2A, memory, orchestration) + DefenseClaw/AcmeGate on every LLM call |
 | **Multi-agent chain testing** | 4-agent loan pipeline (Intake → Extraction → Risk → Compliance) mirrors real enterprise agent orchestration |
 | **Non-deterministic reasoning** | Live Ollama `llama3.2:1b` calls — attacks test actual model behavior, not canned responses |
 
@@ -242,7 +248,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 |------------|-------------------------------|
 | **GenAI semantic conventions** | OpenTelemetry emits `gen_ai.system`, `gen_ai.request.model`, `gen_ai.prompt`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` |
 | **Distributed tracing** | Full agent chain traced end-to-end through OTel Collector |
-| **Threat alerting** | Security events streamed as `otel:agentic:json` with MITRE ATLAS technique IDs, OWASP LLM/ASI mappings, and DefenseClaw actions |
+| **Threat alerting** | Security events streamed as `otel:agentic:json` with MITRE ATLAS technique IDs, OWASP LLM/ASI mappings, and AcmeSentinel actions |
 | **Token anomaly detection** | Splunk CTSM forecasting panel detects abnormal GenAI token consumption patterns |
 
 ### 3. Compliance (Framework Alignment)
@@ -292,14 +298,14 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 │                    └─────────────────┘     └──────────────────────────┘   │
 │                                                                             │
 │  Network: acme_mesh (Docker bridge)                                         │
-│  Volume: shared_telemetry → /var/log/defenseclaw                            │
+│  Volume: shared_telemetry → /var/log/acme_sentinel                            │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Data Flow
 
 1. **Banking App** (`app_runtime.py`) runs a 4-agent transaction chain. Each agent calls Ollama for real LLM inference.
-2. **DefenseClaw / CodeGuard** middleware scans every prompt and model response. On threat detection the pipeline is blocked and a security event is emitted.
+2. **AcmeSentinel / CodeGuard** middleware scans every prompt and model response. On threat detection the pipeline is blocked and a security event is emitted.
 3. **OpenTelemetry** exports GenAI metrics, traces, and security logs to the OTel Collector on port `4318`.
 4. **OTel Collector** forwards everything to Splunk HEC as `sourcetype=otel:agentic:json` in the `acme_agentic_telemetry` index.
 5. **Attack Panel** (`exploit_ui.py`) fires real adversarial payloads at targeted banking agents.

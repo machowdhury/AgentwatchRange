@@ -69,7 +69,7 @@ def integration_status() -> Dict[str, Any]:
         "mcp_config": str(_MCP_CONFIG),
         "docs": {
             "cisco_ai_defense": "https://github.com/cisco-ai-defense",
-            "defenseclaw": "https://github.com/cisco-ai-defense/defenseclaw",
+            "acme_output_guard": "https://github.com/cisco-ai-defense/defenseclaw",
             "aibom": "https://github.com/cisco-ai-defense/aibom",
             "mcp_scanner": "https://github.com/cisco-ai-defense/mcp-scanner",
             "foundation_sec_8b": "https://huggingface.co/fdtn-ai/Foundation-Sec-8B",

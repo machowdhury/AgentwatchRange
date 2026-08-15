@@ -104,7 +104,7 @@ Customers retarget data by editing `acme_genai_index` only.
 1. **MLTK / CTSM** — Forecast panel requires Splunk MLTK + Cisco Time Series Model; hunts using `cisco_tsm_anomaly_score` work without MLTK.
 2. **HITL T0074** — When `HITL_GATE_ENABLED=false`, events appear as governance gaps (`ATTEMPTED_NOT_DETECTED`) until gate is enabled or a dedicated governance alert is tuned.
 3. **Control attestation** — `control.status` events populate only after Workshop control-validation paths; otherwise panel shows `NOT_RUN` / campaign-week `OBSERVED`.
-4. **Phase 6 rename** — Dashboards still reference DefenseClaw/CodeGuard field names; AcmeGate/AcmeSentinel rename is planned for Phase 6.
+4. **Phase 6 rename (complete)** — AcmeGate/AcmeSentinel middleware and `acme_*_guard_*` telemetry fields; vendor-sim sourcetype `acme:agentic:vendorsim:json`; Cross-App Normalization dashboard.
 5. **Official ATLAS catalog** — Lab ships 51 executable techniques; full MITRE ATLAS remains larger (gaps expected).
 
 ---
