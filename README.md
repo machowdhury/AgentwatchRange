@@ -133,11 +133,13 @@ Expected: `HEC HTTP 200` (not `000`).
 
 ### Step 3 — Open the lab and check status
 
-| App | URL | You should see |
-|-----|-----|----------------|
-| **Attack Panel** | http://localhost:5001 | Header: **TARGET ONLINE** + **LLM ONLINE** (green) |
-| **Banking app** | http://localhost:5000 | Loan pipeline UI loads |
-| **Splunk** | http://localhost:8000 | Login: `admin` / password from `.env` (default `ACMEPassword2026!` — see the credential note in Step 1) |
+| App | URL (local) | Cloud VM / Splunk SaaS | You should see |
+|-----|-------------|------------------------|----------------|
+| **Attack Panel** | http://localhost:5001 | `http://<VM-PUBLIC-IP>:5001` — lab VM public or VPN IP ([Pattern A/B](docs/CLOUD_VM_DEPLOYMENT.md)) | Header: **TARGET ONLINE** + **LLM ONLINE** (green) |
+| **Banking app** | http://localhost:5000 | `http://<VM-PUBLIC-IP>:5000` — same lab VM as Attack Panel | Loan pipeline UI loads |
+| **Splunk** | http://localhost:8000 | **Same VM (Pattern A):** `http://<VM-PUBLIC-IP>:8000` (use HTTPS in production). **Splunk Cloud (Pattern B):** your tenant URL, e.g. `https://<stack>.splunkcloud.com` — hunts run in Splunk Cloud; lab VM only serves `:5000`/`:5001` | Login: `admin` / password from `.env` (default `ACMEPassword2026!` — see the credential note in Step 1). Splunk Cloud: your org login, not the lab `.env` password |
+
+> **Cloud VM:** Replace `<VM-PUBLIC-IP>` with your instance's public or VPN-reachable address. Restrict `:5000`, `:5001`, and `:8000` to learner/admin CIDRs — never `0.0.0.0/0`. Change default Splunk password and HEC token in `.env` before opening ports. Full firewall patterns: [docs/CLOUD_VM_DEPLOYMENT.md](docs/CLOUD_VM_DEPLOYMENT.md).
 
 Attack Panel tabs (left to right): **Top 10 Scenarios** (default) → All 51 → Threat Chains → Custom → **Workshop** (last).
 
