@@ -9,6 +9,7 @@ SPLUNK_HOST="${SPLUNK_HOST:-splunk}"
 SPLUNK_PASSWORD="${SPLUNK_PASSWORD:-ACMEPassword2026!}"
 HEC_TOKEN="${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}"
 HEC_INDEX="${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}"
+SIM_INDEX="${SPLUNK_SIM_INDEX:-security}"
 HEC_SOURCETYPE="${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}"
 HEC_INPUT_NAME="${SPLUNK_HEC_INPUT_NAME:-agentwatch-otel}"
 AUTH="admin:${SPLUNK_PASSWORD}"
@@ -51,6 +52,24 @@ wait_for_mgmt_api() {
     sleep 5
   done
   log "ERROR: Splunk management API not ready after 7.5 minutes."
+  return 1
+}
+
+ensure_index() {
+  idx="$1"
+  log "Ensuring index '${idx}' exists..."
+  index_code="$(mgmt_code GET "/services/data/indexes/${idx}")"
+  if [ "$index_code" = "200" ]; then
+    log "Index '${idx}' already exists."
+    return 0
+  fi
+  create_code="$(mgmt_code POST "/services/data/indexes" -d "name=${idx}" -d "datatype=event")"
+  if [ "$create_code" = "200" ] || [ "$create_code" = "201" ]; then
+    log "Index '${idx}' created."
+    return 0
+  fi
+  log "ERROR: failed to create index '${idx}' (HTTP ${create_code})"
+  mgmt_request GET "/services/data/indexes" -d "output_mode=json" | head -c 500 || true
   return 1
 }
 
@@ -107,29 +126,17 @@ else
   log "HEC enableSSL=0 returned HTTP ${ssl_code} (may already be set)."
 fi
 
-# Splunk Docker image may already have created HEC from SPLUNK_HEC_TOKEN — test before mutating inputs.
+# Splunk Docker image may already have created HEC from SPLUNK_HEC_TOKEN — ensure indexes first.
+ensure_index "${HEC_INDEX}" || exit 1
+ensure_index "${SIM_INDEX}" || exit 1
+
 log "Checking if HEC already accepts events (Splunk image auto-config)..."
 early_code="$(test_hec_url "${HEC_URL_HTTP}")"
 if [ "$early_code" = "200" ]; then
-  log "PASS — HEC already working (HTTP 200). Skipping token recreate."
+  log "PASS — HEC already working (HTTP 200). Indexes ${HEC_INDEX} and ${SIM_INDEX} ensured."
   exit 0
 fi
 log "HEC not ready yet (HTTP ${early_code}); continuing bootstrap..."
-
-log "Ensuring index '${HEC_INDEX}' exists..."
-index_code="$(mgmt_code GET "/services/data/indexes/${HEC_INDEX}")"
-if [ "$index_code" = "200" ]; then
-  log "Index already exists."
-else
-  create_code="$(mgmt_code POST "/services/data/indexes" -d "name=${HEC_INDEX}" -d "datatype=event")"
-  if [ "$create_code" = "200" ] || [ "$create_code" = "201" ]; then
-    log "Index created."
-  else
-    log "ERROR: failed to create index (HTTP ${create_code})"
-    mgmt_request GET "/services/data/indexes" -d "output_mode=json" | head -c 500 || true
-    exit 1
-  fi
-fi
 
 log "Configuring HEC token input '${HEC_INPUT_NAME}'..."
 for delete_name in "${HEC_INPUT_NAME}" "http%3A%2F%2F${HEC_INPUT_NAME}"; do
@@ -143,6 +150,7 @@ token_code="$(mgmt_code POST "/services/data/inputs/http" \
   -d "name=${HEC_INPUT_NAME}" \
   -d "token=${HEC_TOKEN}" \
   -d "index=${HEC_INDEX}" \
+  -d "indexes=${HEC_INDEX},${SIM_INDEX}" \
   -d "sourcetype=${HEC_SOURCETYPE}" \
   -d "disabled=0")"
 if [ "$token_code" = "200" ] || [ "$token_code" = "201" ]; then

@@ -21,6 +21,7 @@ SPLUNK_PASSWORD="${SPLUNK_PASSWORD:-ACMEPassword2026!}"
 SPLUNK_CONTAINER="${SPLUNK_CONTAINER:-acme_splunk}"
 HEC_TOKEN="${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}"
 HEC_INDEX="${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}"
+SIM_INDEX="${SPLUNK_SIM_INDEX:-security}"
 HEC_SOURCETYPE="${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}"
 HEC_INPUT_NAME="${SPLUNK_HEC_INPUT_NAME:-agentwatch-otel}"
 AUTH="admin:${SPLUNK_PASSWORD}"
@@ -118,6 +119,21 @@ else
   fi
 fi
 
+echo "[bootstrap] Creating sim index '${SIM_INDEX}' (if missing)..."
+sim_code="$(splunk_http_code GET "/services/data/indexes/${SIM_INDEX}" 2>/dev/null || echo "404")"
+if [[ "$sim_code" == "200" ]]; then
+  echo "[bootstrap] Sim index already exists."
+else
+  sim_create="$(splunk_http_code POST "/services/data/indexes" \
+    -d "name=${SIM_INDEX}" -d "datatype=event" 2>/dev/null || echo "000")"
+  if [[ "$sim_create" == "200" || "$sim_create" == "201" ]]; then
+    echo "[bootstrap] Sim index created."
+  else
+    echo "[bootstrap] ERROR: failed to create sim index (HTTP ${sim_create})"
+    exit 1
+  fi
+fi
+
 echo "[bootstrap] Configuring HEC token (input: ${HEC_INPUT_NAME})..."
 # Remove stale input with same name so re-runs are idempotent
 delete_code="$(splunk_http_code DELETE "/services/data/inputs/http/${HEC_INPUT_NAME}" 2>/dev/null || echo "404")"
@@ -129,6 +145,7 @@ token_code="$(splunk_http_code POST "/services/data/inputs/http" \
   -d "name=${HEC_INPUT_NAME}" \
   -d "token=${HEC_TOKEN}" \
   -d "index=${HEC_INDEX}" \
+  -d "indexes=${HEC_INDEX},${SIM_INDEX}" \
   -d "sourcetype=${HEC_SOURCETYPE}" \
   -d "disabled=0" 2>/dev/null || echo "000")"
 if [[ "$token_code" == "200" || "$token_code" == "201" ]]; then
