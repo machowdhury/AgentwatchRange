@@ -1,5 +1,5 @@
 """
-Cisco AI Defense + Splunk ML toolkit integration for OrchestraACME.
+Cisco AI Defense + Splunk ML toolkit integration for AgentWatch Range.
 
 Optional tools from https://github.com/cisco-ai-defense (AIBOM, MCP Scanner, etc.)
 run in teach mode (log-only) or enforce mode (may block). See docs/CISCO_INTEGRATION.md.

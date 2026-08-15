@@ -1,5 +1,5 @@
 # =============================================================================
-# OrchestraACME — Live AI Security Range
+# AgentWatch Range — Live AI Security Range
 # 5-service mesh: banking_app | attack_panel | otel_collector | ollama | splunk
 #
 # SPLUNK MODE (set in .env):
@@ -183,7 +183,7 @@ services:
       - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
       - SPLUNK_HEC_INDEX=${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}
       - SPLUNK_HEC_SOURCETYPE=${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}
-      - SPLUNK_HEC_INPUT_NAME=${SPLUNK_HEC_INPUT_NAME:-orchestra-acme-otel}
+      - SPLUNK_HEC_INPUT_NAME=${SPLUNK_HEC_INPUT_NAME:-agentwatch-otel}
     volumes:
       - ./scripts/splunk_hec_init.sh:/splunk_hec_init.sh:ro
     entrypoint: ["/bin/sh", "/splunk_hec_init.sh"]

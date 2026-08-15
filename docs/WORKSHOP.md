@@ -1,4 +1,4 @@
-# OrchestraACME Workshop Curriculum
+# AgentWatch Range Workshop Curriculum
 
 **Ordered learning path** for security analysts, detection engineers, architects, and compliance teams.
 
@@ -35,11 +35,11 @@ Use this as your checklist. Each level builds on the previous one.
 
 ---
 
-## About the OrchestraACME Workshop
+## About the AgentWatch Range Workshop
 
 ### What it is
 
-The **OrchestraACME Workshop** is a hands-on security lab curriculum — live exercises in a running environment, not lecture-only training. Learners operate a realistic **multi-agent loan-processing application** under attack, observe how **runtime controls** behave (block, allow, detect-only), and prove outcomes in **Splunk** using the same workflows they use in production SOC and detection engineering.
+The **AgentWatch Range Workshop** is a hands-on security lab curriculum — live exercises in a running environment, not lecture-only training. Learners operate a realistic **multi-agent loan-processing application** under attack, observe how **runtime controls** behave (block, allow, detect-only), and prove outcomes in **Splunk** using the same workflows they use in production SOC and detection engineering.
 
 Two tools work together:
 
@@ -214,7 +214,7 @@ Skills are mapped by role. You do not need every level; follow the [role quick-s
 
 ### What makes this different from “AI security awareness” training
 
-| Typical awareness session | OrchestraACME Workshop |
+| Typical awareness session | AgentWatch Range Workshop |
 |---------------------------|------------------------|
 | Theory-only prompt injection training | Live injection against Ollama with logged outcome |
 | Generic “monitor your LLM” | Specific fields: `workflow.block_reason`, `technique_id`, `framework.maestro_layers` |
@@ -297,7 +297,7 @@ Ask your facilitator or IT contact if you are unsure. You need:
 - [ ] At least **16 GB RAM** recommended if Splunk runs on the same machine  
 - [ ] Internet access for the first startup (downloads the AI model, ~1.3 GB)  
 - [ ] A web browser (Chrome, Edge, or Firefox)  
-- [ ] The OrchestraACME project folder (from `git clone` or a zip from your instructor)  
+- [ ] The AgentWatch Range project folder (from `git clone` or a zip from your instructor)  
 - [ ] About **30–60 minutes** on first boot — Splunk and the AI model take time to start  
 
 **You do not need:** a Splunk license separately (local lab includes one in Docker), or your own OpenAI API key.
@@ -460,7 +460,7 @@ chmod +x scripts/splunk_local_bootstrap.sh
 
 **Quick UI check (optional):**
 
-1. Splunk → **Settings → Data inputs → HTTP Event Collector** — HEC enabled, token `orchestra-acme-otel` exists.
+1. Splunk → **Settings → Data inputs → HTTP Event Collector** — HEC enabled, token `agentwatch-otel` exists.
 2. **GenAI Compliance Monitor → Setup Guide** — index `acme_agentic_telemetry`, sourcetype `otel:agentic:json`.
 
 If events never appear after Step 0.6, re-run bootstrap and verify `SPLUNK_HEC_TOKEN` in `.env` — see [USER_GUIDE.md](USER_GUIDE.md).

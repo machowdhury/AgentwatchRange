@@ -1,4 +1,4 @@
-# OrchestraACME — Reference
+# AgentWatch Range — Reference
 
 > **Last updated:** 2026-08-15 · **Docs version:** 2.4.0
 
@@ -342,7 +342,7 @@ docker compose exec -u splunk splunk /opt/splunk/bin/splunk restart
 
 **Option B — Splunk Cloud / Enterprise (no local Splunk):**
 
-See **[splunk_app/INSTALL.md](../splunk_app/INSTALL.md)** — build the package, upload to Splunk Cloud, install MLTK from Splunkbase, configure HEC, then run OrchestraACME in external mode.
+See **[splunk_app/INSTALL.md](../splunk_app/INSTALL.md)** — build the package, upload to Splunk Cloud, install MLTK from Splunkbase, configure HEC, then run AgentWatch Range in external mode.
 
 ### Step 6 — Enable HEC and create the index
 
@@ -481,7 +481,7 @@ Full installation guide: **[splunk_app/INSTALL.md](../splunk_app/INSTALL.md)**
 
 ### Deployment Modes
 
-| Mode | Splunk | OrchestraACME Command |
+| Mode | Splunk | AgentWatch Range Command |
 |------|--------|----------------------|
 | **Local lab** | Docker Splunk container | `docker compose --profile local up --build -d` then `./scripts/splunk_local_bootstrap.sh` |
 | **Splunk Cloud** | Your Cloud stack | `docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -d` |
@@ -514,7 +514,7 @@ After install, open **GenAI Compliance Monitor → Setup Guide** for health chec
 1. **Install app** — upload `dist/acme_genai_compliance-*.tar.gz`
 2. **Create index** — `acme_agentic_telemetry`
 3. **Create HEC token** — sourcetype `otel:agentic:json`, index `acme_agentic_telemetry`
-4. **Configure OrchestraACME `.env`** — set `SPLUNK_MODE=external` and your Cloud HEC URL/token
+4. **Configure AgentWatch Range `.env`** — set `SPLUNK_MODE=external` and your Cloud HEC URL/token
 5. **Start external stack** — `docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -d`
 6. **Verify** — `index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 20`
 

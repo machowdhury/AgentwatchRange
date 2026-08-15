@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — Install Splunk MLTK + GenAI Compliance app (local Docker)
+# AgentWatch Range — Install Splunk MLTK + GenAI Compliance app (local Docker)
 # =============================================================================
 set -euo pipefail
 
@@ -76,7 +76,7 @@ docker exec -u root "$SPLUNK_CONTAINER" bash -c "
 # 1) MLTK (required for MLTK Anomaly Hunting dashboard)
 install_tarball_app "$MLTK_TARBALL" "$MLTK_APP_ID" "Splunk ML Toolkit"
 
-# 2) OrchestraACME compliance app
+# 2) AgentWatch Range compliance app
 COMPLIANCE_TARBALL="${1:-}"
 if [[ -z "$COMPLIANCE_TARBALL" ]]; then
   echo "[install] Packaging GenAI Compliance app..."

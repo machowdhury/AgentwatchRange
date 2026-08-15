@@ -1,10 +1,10 @@
-# OrchestraACME Splunk App Installation Guide
+# AgentWatch Range Splunk App Installation Guide
 
 **Before Splunk setup:** Complete stack prerequisites in **[docs/PREREQUISITES.md](../docs/PREREQUISITES.md)** (Docker, Ollama, HEC alignment).
 
 This guide covers installing the **GenAI Compliance Monitor** app (`acme_genai_compliance`) in three deployment modes.
 
-| Mode | Splunk Location | OrchestraACME Stack |
+| Mode | Splunk Location | AgentWatch Range Stack |
 |------|-----------------|---------------------|
 | **Local Lab** | Docker Splunk container | `docker compose --profile local up` |
 | **Splunk Cloud** | Your Splunk Cloud stack | `docker compose -f docker-compose.yml -f docker-compose.external.yml up` |
@@ -14,7 +14,7 @@ This guide covers installing the **GenAI Compliance Monitor** app (`acme_genai_c
 
 ## 1. Build the Install Package
 
-From the OrchestraACME repository root:
+From the AgentWatch Range repository root:
 
 ```bash
 chmod +x scripts/validate_splunk_app.sh scripts/package_splunk_app.sh
@@ -33,7 +33,7 @@ The tarball uses the correct Splunk app folder name (`acme_genai_compliance`) re
 
 - Splunk Cloud admin or app-install privileges
 - Permission to create indexes and HEC tokens (or admin assistance)
-- OrchestraACME OTel Collector configured to ship to Splunk Cloud HEC
+- AgentWatch Range OTel Collector configured to ship to Splunk Cloud HEC
 
 ### Step A — Install the App
 
@@ -57,7 +57,7 @@ The tarball uses the correct Splunk app folder name (`acme_genai_compliance`) re
 
 1. **Settings → Data Inputs → HTTP Event Collector → Global Settings** → Enable
 2. **New Token**
-   - Name: `orchestra-acme-otel`
+   - Name: `agentwatch-otel`
    - Source type: `otel:agentic:json`
    - Index: `acme_agentic_telemetry`
 3. Copy the token value
@@ -72,9 +72,9 @@ https://http-inputs-<YOUR_STACK>.splunkcloud.com/services/collector/event
 
 Find the exact URL in **Settings → Data Inputs → HTTP Event Collector**.
 
-### Step E — Configure OrchestraACME (External Mode)
+### Step E — Configure AgentWatch Range (External Mode)
 
-On your OrchestraACME Docker host, edit `.env`:
+On your AgentWatch Range Docker host, edit `.env`:
 
 ```bash
 SPLUNK_MODE=external
@@ -216,7 +216,7 @@ All dashboards and saved searches inherit this macro automatically.
 
 ## 6. Optional: Legacy Cisco AI Defense App
 
-For `cisco:aidefense:json` sourcetype (legacy OrchestraACME telemetry), install separately:
+For `cisco:aidefense:json` sourcetype (legacy AgentWatch Range telemetry), install separately:
 
 ```
 splunk_app/App-Agentic-Compliance/

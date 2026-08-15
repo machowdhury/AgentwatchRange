@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — Full lab reset (containers, volumes, .env, Splunk setup)
+# AgentWatch Range — Full lab reset (containers, volumes, .env, Splunk setup)
 #
 # Usage:
 #   ./scripts/lab_fresh_start.sh          # prompts for confirmation
 #   ./scripts/lab_fresh_start.sh --yes    # no prompt (CI / scripted VMs)
 #
 # What this removes:
-#   - All OrchestraACME containers
+#   - All AgentWatch Range containers
 #   - Docker volumes (Ollama model cache, shared telemetry)
 #   - Recreates .env from .env.example (backs up existing .env if present)
 #
@@ -116,7 +116,7 @@ echo "[fresh] Installing Splunk apps (compliance + MLTK)..."
 
 echo ""
 echo "=============================================="
-echo "  OrchestraACME fresh lab is ready"
+echo "  AgentWatch Range fresh lab is ready"
 echo "=============================================="
 echo ""
 echo "  Banking app:   http://localhost:5000"

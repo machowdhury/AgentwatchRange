@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — Splunk App Cloud / Enterprise Validation
+# AgentWatch Range — Splunk App Cloud / Enterprise Validation
 # Checks packaging requirements aligned with Splunk Cloud vetting:
 # https://dev.splunk.com/enterprise/docs/releaseapps/cloudvetting/
 # =============================================================================
@@ -101,6 +101,19 @@ if grep -rE 'style="[^"]*(color|background):#' "${VIEWS_DIR}" 2>/dev/null | grep
   fail "inline HTML color/background styles — use Splunk theme inheritance"
 else
   pass "HTML panels avoid inline color/background styles"
+fi
+
+# Phase 8 — OrchestraACME project rename (allowed legacy strings: README migration note, GitHub slug, clone folder)
+PHASE8_HITS="$(rg -i 'orchestraacme|orchestra-acme|orchestra_acme' \
+  --glob '!scripts/phase8_bulk_rename.py' \
+  --glob '!README.md' \
+  --glob '!prevbuild/**' \
+  "${ROOT_DIR}" 2>/dev/null | rg -v 'github.com/machowdhury/OrchestraACME|cd OrchestraACME' || true)"
+if [[ -n "${PHASE8_HITS}" ]]; then
+  echo "${PHASE8_HITS}"
+  fail "Phase 8 rename incomplete — unexpected OrchestraACME/orchestra-acme references"
+else
+  pass "Phase 8 rename grep clean (except README migration + GitHub slug)"
 fi
 
 echo ""

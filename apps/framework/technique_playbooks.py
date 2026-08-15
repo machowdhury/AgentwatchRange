@@ -1,6 +1,6 @@
 """
 Technique playbooks — execution mode, payloads, threat-hunt guidance, and narratives
-for all 45 MITRE ATLAS techniques in the OrchestraACME registry.
+for all 45 MITRE ATLAS techniques in the AgentWatch Range registry.
 """
 
 from __future__ import annotations
@@ -160,7 +160,7 @@ def _generate_payload(technique: TechniqueEntry) -> str:
     if week and week in EXPLOITS:
         return EXPLOITS[week]["payload"]
 
-    return f"""[ORCHESTRAACME LAB REPLAY — {technique.technique_id}]
+    return f"""[AGENTWATCH RANGE LAB REPLAY — {technique.technique_id}]
 Technique: {technique.technique_name}
 Tactic: {technique.tactic_name} | Stage: {technique.kill_chain_stage}
 

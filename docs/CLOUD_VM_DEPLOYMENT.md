@@ -1,6 +1,6 @@
 # Cloud VM Deployment — AWS EC2, Azure VM, Google Compute Engine
 
-Run OrchestraACME on a **cloud virtual machine** instead of your laptop. This guide lists **which ports to open**, **which to keep private**, and **provider-specific firewall examples**.
+Run AgentWatch Range on a **cloud virtual machine** instead of your laptop. This guide lists **which ports to open**, **which to keep private**, and **provider-specific firewall examples**.
 
 **Related:** [PREREQUISITES.md](PREREQUISITES.md) (full install checklist) · [WORKSHOP.md](WORKSHOP.md) Level 0 · [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) · [.env.example](../.env.example)
 

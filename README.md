@@ -1,4 +1,6 @@
-# OrchestraACME
+# AgentWatch Range
+
+> **Previously named OrchestraACME.** This project was renamed to **AgentWatch Range**. The **ACME Bank** fictional scenario used throughout the labs is unrelated to the old project name and remains unchanged. The GitHub repository slug is still [`OrchestraACME`](https://github.com/machowdhury/OrchestraACME) until the maintainer renames it to `agentwatch-range` (manual step).
 
 > **Last updated:** 2026-08-15 · **Docs version:** 2.4.0
 
@@ -11,7 +13,7 @@ ACME Bank deployed four AI agents to speed up loan approvals. Six weeks later, t
 [![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-GenAI-000000?logo=opentelemetry&logoColor=white)](apps/app_runtime.py)
 [![Splunk](https://img.shields.io/badge/Splunk-GenAI_Compliance-65A637?logo=splunk&logoColor=white)](splunk_app/splunk_compliance_app/)
 
-> **Repository:** [github.com/machowdhury/OrchestraACME](https://github.com/machowdhury/OrchestraACME)  
+> **Repository:** [github.com/machowdhury/OrchestraACME](https://github.com/machowdhury/OrchestraACME) (GitHub slug may become `agentwatch-range` after maintainer rename)  
 > **Author:** Mahamudul Alam Chowdhury ([@machowdhury](https://github.com/machowdhury))
 
 ---
@@ -208,7 +210,7 @@ Cloud VM: replace `localhost` with your server IP — [docs/CLOUD_VM_DEPLOYMENT.
 
 ## License & Attribution
 
-OrchestraACME Lab — Principal DevSecOps Systems Engineering range for agentic AI security validation.
+AgentWatch Range Lab — Principal DevSecOps Systems Engineering range for agentic AI security validation.
 
 **Third-party / reference names:** AcmeGate and AcmeSentinel are **lab-original** Python middleware. Optional [Cisco AI Defense overlay](docs/CISCO_INTEGRATION.md) uses real third-party tools when enabled. Splunk and Ollama run as described in their respective containers/images. See [NOTICE.md](NOTICE.md).
 

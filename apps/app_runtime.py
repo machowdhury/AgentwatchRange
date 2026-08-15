@@ -1,6 +1,6 @@
 """
 =============================================================================
-OrchestraACME — Banking App Runtime v3.0
+AgentWatch Range — Banking App Runtime v3.0
 =============================================================================
 Real 4-agent LLM loop backed by Ollama (llama3.2:1b).
 Every agent turn makes an actual HTTP call to the local model.

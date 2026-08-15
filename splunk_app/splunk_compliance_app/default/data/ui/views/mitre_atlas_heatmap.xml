@@ -1,6 +1,6 @@
 <dashboard version="1.1">
   <label>MITRE ATLAS Matrix Heatmap</label>
-  <description>ATT&amp;CK-style coverage matrix for MITRE ATLAS tactics and techniques. Shows GAP / OBSERVED / DETECTED per cell, tactic coverage %, and drilldown hunts. Run OrchestraACME Workshop → Deep Workshop to populate all lab-executable techniques. Reference: https://atlas.mitre.org/</description>
+  <description>ATT&amp;CK-style coverage matrix for MITRE ATLAS tactics and techniques. Shows GAP / OBSERVED / DETECTED per cell, tactic coverage %, and drilldown hunts. Run AgentWatch Range Workshop → Deep Workshop to populate all lab-executable techniques. Reference: https://atlas.mitre.org/</description>
 
   <fieldset submitButton="true" autoRun="true">
     <input type="time" token="time_range" searchWhenChanged="false">
@@ -219,8 +219,8 @@
     <panel>
       <html>
         <h3>How this compares to Splunkbase apps</h3>
-        <p><strong><a href="https://splunkbase.splunk.com/app/5742" target="_blank" rel="noopener noreferrer">ATT&amp;CK Heatmap (5742)</a></strong> — custom viz for Enterprise ATT&amp;CK. This dashboard uses Splunk native heatmap + matrix table for <strong>MITRE ATLAS</strong> with labeled GAP / OBSERVED / DETECTED states tied to OrchestraACME telemetry.</p>
-        <p><strong><a href="https://splunkbase.splunk.com/app/8527" target="_blank" rel="noopener noreferrer">ATLAS AI Threat Detection (8527)</a></strong> — 10 generic SPL rules for production LLM logs. OrchestraACME adds <strong>45 reproducible lab playbooks</strong>, Workshop paths, kill chains, NIST attestation, and hunts that light up after you click attacks.</p>
+        <p><strong><a href="https://splunkbase.splunk.com/app/5742" target="_blank" rel="noopener noreferrer">ATT&amp;CK Heatmap (5742)</a></strong> — custom viz for Enterprise ATT&amp;CK. This dashboard uses Splunk native heatmap + matrix table for <strong>MITRE ATLAS</strong> with labeled GAP / OBSERVED / DETECTED states tied to AgentWatch Range telemetry.</p>
+        <p><strong><a href="https://splunkbase.splunk.com/app/8527" target="_blank" rel="noopener noreferrer">ATLAS AI Threat Detection (8527)</a></strong> — 10 generic SPL rules for production LLM logs. AgentWatch Range adds <strong>45 reproducible lab playbooks</strong>, Workshop paths, kill chains, NIST attestation, and hunts that light up after you click attacks.</p>
         <p><strong>Full ATLAS catalog:</strong> Lab ships <strong>45 executable techniques</strong> across <strong>16 tactics</strong>. Official <a href="https://atlas.mitre.org/" target="_blank" rel="noopener noreferrer">MITRE ATLAS</a> is larger — expand via future STIX sync; gaps show as <code>GAP</code> until fired or enriched.</p>
       </html>
     </panel>

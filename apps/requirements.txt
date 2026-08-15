@@ -1,5 +1,5 @@
 # =============================================================================
-# OrchestraACME v3 — Python Dependencies
+# AgentWatch Range v3 — Python Dependencies
 # Shared by banking_app and attack_panel containers
 # =============================================================================
 

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dashboard version="1.1">
   <label>Splunk Cloud &amp; External Setup Guide</label>
-  <description>Step-by-step instructions for installing this app on Splunk Cloud or Splunk Enterprise when OrchestraACME runs without the local Splunk container.</description>
+  <description>Step-by-step instructions for installing this app on Splunk Cloud or Splunk Enterprise when AgentWatch Range runs without the local Splunk container.</description>
 
   <row>
     <panel>
       <html>
         <![CDATA[
         <div class="dashboard-body">
-          <h2>OrchestraACME → Splunk Cloud Installation</h2>
+          <h2>AgentWatch Range → Splunk Cloud Installation</h2>
           <p>Use this guide when your telemetry lands in <strong>Splunk Cloud</strong> or an external <strong>Splunk Enterprise</strong> instance instead of the local Docker Splunk container.</p>
 
           <h3>Step 1 — Package &amp; Install This App</h3>
           <ol>
-            <li>On your OrchestraACME host, build the install package:<br/>
+            <li>On your AgentWatch Range host, build the install package:<br/>
               <code>./scripts/package_splunk_app.sh</code></li>
             <li>Download <code>dist/acme_genai_compliance-2.4.0.tar.gz</code></li>
             <li>In Splunk Cloud: <strong>Apps → Browse more apps → Upload app</strong> (or ask your Splunk Cloud admin)</li>
@@ -26,7 +26,7 @@
               Name: <code>acme_agentic_telemetry</code> (or your preferred name)</li>
             <li><strong>Settings → Data Inputs → HTTP Event Collector → New Token</strong>
               <ul>
-                <li>Name: <code>orchestra-acme-otel</code></li>
+                <li>Name: <code>agentwatch-otel</code></li>
                 <li>Source type: <code>otel:agentic:json</code></li>
                 <li>Index: <code>acme_agentic_telemetry</code></li>
               </ul>
@@ -35,8 +35,8 @@
               Format: <code>https://http-inputs-&lt;stack&gt;.splunkcloud.com:443/services/collector/event</code></li>
           </ol>
 
-          <h3>Step 3 — Point OrchestraACME OTel Collector at Splunk Cloud</h3>
-          <p>Edit <code>.env</code> on the OrchestraACME Docker host:</p>
+          <h3>Step 3 — Point AgentWatch Range OTel Collector at Splunk Cloud</h3>
+          <p>Edit <code>.env</code> on the AgentWatch Range Docker host:</p>
           <pre>
 SPLUNK_MODE=external
 SPLUNK_HEC_ENDPOINT=https://http-inputs-YOUR_STACK.splunkcloud.com/services/collector/event

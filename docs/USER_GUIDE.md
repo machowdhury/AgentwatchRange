@@ -1,4 +1,4 @@
-# OrchestraACME — User Guide
+# AgentWatch Range — User Guide
 
 Run the lab from the **Attack Panel**, generate telemetry, hunt in Splunk, and **light up** the GenAI Compliance Monitor app.
 
@@ -59,7 +59,7 @@ Open http://localhost:5001 — default tab is **Top 10 Scenarios**. Check header
 > **Start here:** **[WORKSHOP.md → Exercise map](WORKSHOP.md#exercise-map-follow-in-order)** — numbered checklist from install through first hunt.  
 > **Full curriculum:** **[WORKSHOP.md](WORKSHOP.md)** — Levels 0–5, hunt questions Q101–Q503, role tracks.
 
-The OrchestraACME Workshop is a **hands-on lab**, not theory-only training: learners attack a live multi-agent banking app, observe runtime controls (block / allow / detect-only), and **prove outcomes in Splunk**.
+The AgentWatch Range Workshop is a **hands-on lab**, not theory-only training: learners attack a live multi-agent banking app, observe runtime controls (block / allow / detect-only), and **prove outcomes in Splunk**.
 
 Use the Attack Panel **Workshop** tab (**last menu item**) for one-click guided paths. Use **Top 10 Scenarios** (default tab) for individual exercises. **Splunk Search** is where learners answer hunt questions — same pattern as [Splunk BOTS](https://github.com/splunk/botsv3).
 
@@ -405,7 +405,7 @@ Splunk Threat Hunting + SPL macros (practitioner hunts)
 
 ## What we built the Workshop with (lab stack)
 
-The Workshop is not a separate product — it orchestrates components already in OrchestraACME. Understanding the stack helps you explain the lab credibly and troubleshoot when something does not light up.
+The Workshop is not a separate product — it orchestrates components already in AgentWatch Range. Understanding the stack helps you explain the lab credibly and troubleshoot when something does not light up.
 
 ### End-to-end flow
 
@@ -629,7 +629,7 @@ Static HTML walkthrough (not data-driven).
 |---------|----------------|
 | Package & install | Build `.tar.gz` from repo; upload to Splunk Cloud or Enterprise |
 | Index + HEC | Create `acme_agentic_telemetry` and token for `otel:agentic:json` |
-| OTel collector | Point OrchestraACME `.env` at your HEC endpoint |
+| OTel collector | Point AgentWatch Range `.env` at your HEC endpoint |
 | Macros | Edit `` `acme_genai_index` `` if your index name differs |
 | Health check SPL | Verify events before opening other dashboards |
 

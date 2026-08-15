@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — Splunk App Packaging Script
+# AgentWatch Range — Splunk App Packaging Script
 # Builds an installable .tar.gz for Splunk Cloud and Splunk Enterprise.
 #
 # Usage:
@@ -21,7 +21,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_DIR="${ROOT_DIR}/splunk_app/splunk_compliance_app"
 DIST_DIR="${ROOT_DIR}/dist"
 APP_ID="acme_genai_compliance"
-VERSION="2.8.0"
+VERSION="2.9.0"
 PACKAGE_NAME="${APP_ID}-${VERSION}"
 STAGING_DIR="$(mktemp -d)"
 TARGET_DIR="${STAGING_DIR}/${APP_ID}"

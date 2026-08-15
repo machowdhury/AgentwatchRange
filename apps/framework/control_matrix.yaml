@@ -1,5 +1,5 @@
 # NIST AI RMF control evidence matrix — measurable pass/fail per function.
-# Each control maps to OTel detection signals emitted by OrchestraACME workflow guards.
+# Each control maps to OTel detection signals emitted by AgentWatch Range workflow guards.
 
 controls:
   - id: CTRL-W1-AIBOM

@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# OrchestraACME — Ollama Container Initialisation Script
+# AgentWatch Range — Ollama Container Initialisation Script
 # Starts the Ollama server, waits for readiness, then pulls llama3.2:1b
 # =============================================================================
 set -e

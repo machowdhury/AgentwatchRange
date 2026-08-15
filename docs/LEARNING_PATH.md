@@ -1,6 +1,6 @@
 # Learning Path — Difficulty Tiers (0–6)
 
-Structured curriculum for OrchestraACME / AgentWatch Range. This is a **navigation layer** on top of existing tabs — nothing was removed, only ordered by progression.
+Structured curriculum for AgentWatch Range. This is a **navigation layer** on top of existing tabs — nothing was removed, only ordered by progression.
 
 **Start here if you are new:** complete [README golden path](../README.md#start-here--your-first-30-minutes) (Tier 0 exit criteria), then enter Tier 1.
 

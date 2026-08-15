@@ -1,5 +1,5 @@
 """
-CSA MAESTRO threat-modeling workshop helpers for OrchestraACME.
+CSA MAESTRO threat-modeling workshop helpers for AgentWatch Range.
 
 Generates architecture descriptions for paste into the official CSA MAESTRO
 Threat Analyzer (https://github.com/CloudSecurityAlliance/MAESTRO) and maps
@@ -57,7 +57,7 @@ def get_scenario_layer_map() -> list[dict[str, Any]]:
 
 def get_architecture_description() -> str:
     """Architecture narrative optimized for CSA MAESTRO Threat Analyzer input."""
-    return """OrchestraACME — ACME Bank Agentic Loan Processing System
+    return """AgentWatch Range — ACME Bank Agentic Loan Processing System
 
 SYSTEM PURPOSE
 A multi-agent AI system that processes small-business loan applications end-to-end:
@@ -121,7 +121,7 @@ TELEMETRY & VALIDATION
 
 THREAT MODELING GOAL
 Identify traditional and agentic threats per MAESTRO layer, then validate predictions by firing
-OrchestraACME Scenarios 6 (MCP), 8 (A2A), 9 (RAG), and 10 (memory/guardrail) and comparing
+AgentWatch Range Scenarios 6 (MCP), 8 (A2A), 9 (RAG), and 10 (memory/guardrail) and comparing
 Splunk observed layers to MAESTRO predictions.
 """
 

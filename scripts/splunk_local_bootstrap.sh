@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — One-time local Splunk bootstrap (Docker Pattern A)
+# AgentWatch Range — One-time local Splunk bootstrap (Docker Pattern A)
 # Creates index + HEC token to match .env, fixes shared telemetry volume perms.
 # Uses Splunk REST API (curl) — avoids splunk CLI permission issues as root.
 # =============================================================================
@@ -22,7 +22,7 @@ SPLUNK_CONTAINER="${SPLUNK_CONTAINER:-acme_splunk}"
 HEC_TOKEN="${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}"
 HEC_INDEX="${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}"
 HEC_SOURCETYPE="${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}"
-HEC_INPUT_NAME="${SPLUNK_HEC_INPUT_NAME:-orchestra-acme-otel}"
+HEC_INPUT_NAME="${SPLUNK_HEC_INPUT_NAME:-agentwatch-otel}"
 AUTH="admin:${SPLUNK_PASSWORD}"
 MGMT_URL="https://127.0.0.1:8089"
 

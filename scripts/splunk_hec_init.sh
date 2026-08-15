@@ -1,6 +1,6 @@
 #!/bin/sh
 # =============================================================================
-# OrchestraACME — In-network Splunk HEC bootstrap (runs inside Docker Compose)
+# AgentWatch Range — In-network Splunk HEC bootstrap (runs inside Docker Compose)
 # Enables HEC, creates index + token to match .env, verifies ingest on :8088.
 # =============================================================================
 set -eu
@@ -10,7 +10,7 @@ SPLUNK_PASSWORD="${SPLUNK_PASSWORD:-ACMEPassword2026!}"
 HEC_TOKEN="${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}"
 HEC_INDEX="${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}"
 HEC_SOURCETYPE="${SPLUNK_HEC_SOURCETYPE:-otel:agentic:json}"
-HEC_INPUT_NAME="${SPLUNK_HEC_INPUT_NAME:-orchestra-acme-otel}"
+HEC_INPUT_NAME="${SPLUNK_HEC_INPUT_NAME:-agentwatch-otel}"
 AUTH="admin:${SPLUNK_PASSWORD}"
 MGMT_URL="https://${SPLUNK_HOST}:8089"
 HEC_URL_HTTP="http://${SPLUNK_HOST}:8088/services/collector/event"

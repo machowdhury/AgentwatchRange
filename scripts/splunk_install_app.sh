@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — Install GenAI Compliance Splunk app into local Docker Splunk
+# AgentWatch Range — Install GenAI Compliance Splunk app into local Docker Splunk
 # Delegates to splunk_install_apps.sh (MLTK + compliance).
 # =============================================================================
 set -euo pipefail

@@ -1,6 +1,6 @@
 # Agentic Threat Surfaces (2025–2026)
 
-OrchestraACME exercises **nine threat surface categories** (eight Top 10 surfaces plus **Supply Chain / Registry Trust**) when organizations move from chatbots to tool-using, multi-agent systems.
+AgentWatch Range exercises **nine threat surface categories** (eight Top 10 surfaces plus **Supply Chain / Registry Trust**) when organizations move from chatbots to tool-using, multi-agent systems.
 
 ---
 
@@ -57,7 +57,7 @@ Traditional LLM testing focuses on **prompt injection strings**. Production agen
 | **Orchestration** | Supervisor overrides, eval harness bypass, multi-agent routing |
 | **Runtime** | Unapproved models on endpoints outside IT governance |
 
-OrchestraACME enforces and instruments these in `apps/framework/workflow_guard.py` — not only in prompt text.
+AgentWatch Range enforces and instruments these in `apps/framework/workflow_guard.py` — not only in prompt text.
 
 ---
 

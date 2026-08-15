@@ -1,4 +1,4 @@
-# OrchestraACME — Concepts
+# AgentWatch Range — Concepts
 
 > **Last updated:** 2026-08-15 · **Docs version:** 2.4.0 (Phase 2 restructure)
 
@@ -14,7 +14,7 @@ ACME Bank deployed four AI agents to speed up loan approvals: intake, document e
 
 ## Agentic Security Architecture
 
-OrchestraACME targets **workflow-realistic** agentic security validation, not prompt-only red teaming.
+AgentWatch Range targets **workflow-realistic** agentic security validation, not prompt-only red teaming.
 
 - Attacks exploit **tools, RAG, memory, A2A, and orchestration** surfaces — not just strings sent to one agent
 - Defense is **enforced in code paths** (MCP gateway, memory policy, A2A verifier, orchestration guard) plus regex output inspection
@@ -238,7 +238,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 | **No compliance mapping** | Security teams cannot tie runtime AI events to OWASP LLM, MITRE ATLAS, or internal control frameworks |
 | **No detection validation** | SIEM rules for AI threats are written blind — without a range to fire real attacks and confirm alerts fire |
 
-**OrchestraACME closes this gap** by giving security engineers a repeatable lab to **build, break, detect, and report** on agentic AI risk.
+**AgentWatch Range closes this gap** by giving security engineers a repeatable lab to **build, break, detect, and report** on agentic AI risk.
 
 ---
 
@@ -249,7 +249,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 
 ### 1. Agent Security (Offense + Defense)
 
-| Capability | How OrchestraACME Delivers It |
+| Capability | How AgentWatch Range Delivers It |
 |------------|-------------------------------|
 | **Red-team testing** | Ten-scenario adversarial lifecycle console fires real prompt injection, tool escape, identity spoofing, and autonomous agent attacks |
 | **Runtime defense** | Workflow guards (MCP, A2A, memory, orchestration) + DefenseClaw/AcmeGate on every LLM call |
@@ -258,7 +258,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 
 ### 2. Security Monitoring (Observability)
 
-| Capability | How OrchestraACME Delivers It |
+| Capability | How AgentWatch Range Delivers It |
 |------------|-------------------------------|
 | **GenAI semantic conventions** | OpenTelemetry emits `gen_ai.system`, `gen_ai.request.model`, `gen_ai.prompt`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` |
 | **Distributed tracing** | Full agent chain traced end-to-end through OTel Collector |
@@ -267,7 +267,7 @@ Enterprises are deploying **multi-agent AI systems** that chain LLMs across inta
 
 ### 3. Compliance (Framework Alignment)
 
-| Capability | How OrchestraACME Delivers It |
+| Capability | How AgentWatch Range Delivers It |
 |------------|-------------------------------|
 | **Framework crosswalk** | 45+ technique registry spanning MITRE ATLAS, OWASP LLM Top 10, OWASP ASI, CSA MAESTRO, and NIST AI RMF |
 | **Compliance dashboards** | Detection Efficacy, Control Attestation, Technique Coverage, kill-chain timeline, NIST RMF |

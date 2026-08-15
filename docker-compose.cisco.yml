@@ -1,5 +1,5 @@
 # =============================================================================
-# OrchestraACME — Cisco AI Defense + MLTK overlay
+# AgentWatch Range — Cisco AI Defense + MLTK overlay
 # Use with: docker compose -f docker-compose.yml -f docker-compose.cisco.yml --profile local up --build
 #
 # Integrates optional tools from https://github.com/cisco-ai-defense

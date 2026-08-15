@@ -1,7 +1,7 @@
 {
   "name": "acme-banking-mcp-gateway",
   "version": "1.0.0",
-  "description": "Lab MCP tool catalog for OrchestraACME Scenario 6 — scanned by cisco-ai-defense/mcp-scanner when enabled",
+  "description": "Lab MCP tool catalog for AgentWatch Range Scenario 6 — scanned by cisco-ai-defense/mcp-scanner when enabled",
   "tools": [
     {
       "name": "validate_document_format",

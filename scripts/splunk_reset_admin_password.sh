@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — Reset local Docker Splunk admin password to match .env
+# AgentWatch Range — Reset local Docker Splunk admin password to match .env
 # Use when .env was lost or you cannot log in to Splunk Web.
 # =============================================================================
 set -euo pipefail

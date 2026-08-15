@@ -1,5 +1,5 @@
 """
-Framework and kill-chain API route registration for OrchestraACME banking fabric.
+Framework and kill-chain API route registration for AgentWatch Range banking fabric.
 """
 
 from __future__ import annotations

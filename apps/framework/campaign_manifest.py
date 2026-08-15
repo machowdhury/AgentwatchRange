@@ -1,5 +1,5 @@
 """
-10-week blog campaign manifest — single source of truth for OrchestraACME.
+10-week blog campaign manifest — single source of truth for AgentWatch Range.
 
 Drives attack panel labels, OTel enrichment, Splunk lookups, and docs/campaign/.
 """

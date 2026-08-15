@@ -1,5 +1,5 @@
 """
-Continuous baseline traffic for OrchestraACME — realistic benign banking requests
+Continuous baseline traffic for AgentWatch Range — realistic benign banking requests
 that flow through live Ollama agents and emit OTel → Splunk between attacks.
 
 Controlled by environment variables (see .env.example).

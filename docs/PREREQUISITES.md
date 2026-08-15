@@ -1,4 +1,4 @@
-# OrchestraACME — Prerequisites
+# AgentWatch Range — Prerequisites
 
 Complete this checklist **before** `docker compose up` or the workshop. Use it on **laptop**, **Ubuntu cloud VM**, or **Splunk Cloud + lab VM** deployments.
 
@@ -309,7 +309,7 @@ Logs show `Listening on [::]:11434` but the container exits with **Ollama did no
 **Recovery on the VM:**
 
 ```bash
-cd ~/OrchestraACME
+cd ~/AgentWatch Range
 git pull
 docker compose --profile local down
 docker compose --profile local up --build -d

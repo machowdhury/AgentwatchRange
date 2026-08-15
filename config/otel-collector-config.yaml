@@ -1,5 +1,5 @@
 # =============================================================================
-# OrchestraACME — OpenTelemetry Collector Configuration v3
+# AgentWatch Range — OpenTelemetry Collector Configuration v3
 # Full GenAI Semantic Convention pipeline
 # =============================================================================
 
@@ -41,7 +41,7 @@ processors:
       - key: service.namespace
         value: "acme-banking-group"
         action: upsert
-      - key: orchestraacme.version
+      - key: agentwatch.version
         value: "3.0.0"
         action: upsert
       - key: llm.runtime

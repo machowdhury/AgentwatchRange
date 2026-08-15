@@ -1,6 +1,6 @@
 """
 =============================================================================
-OrchestraACME — LLM Client + Security Middleware
+AgentWatch Range — LLM Client + Security Middleware
 =============================================================================
 Wraps every call to the local Ollama endpoint with:
 

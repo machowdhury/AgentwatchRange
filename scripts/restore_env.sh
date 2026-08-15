@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrchestraACME — Restore .env from .env.example if missing
+# AgentWatch Range — Restore .env from .env.example if missing
 # =============================================================================
 set -euo pipefail
 

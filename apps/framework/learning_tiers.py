@@ -1,5 +1,5 @@
 """
-Learning tier assignments (Tier 0–6) for OrchestraACME curriculum navigation.
+Learning tier assignments (Tier 0–6) for AgentWatch Range curriculum navigation.
 
 Tier numbers are stable identifiers used in taxonomy, Attack Panel badges,
 Splunk lookups (Phase 5), and docs/LEARNING_PATH.md.

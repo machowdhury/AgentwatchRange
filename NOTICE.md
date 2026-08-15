@@ -1,6 +1,6 @@
 # Third-Party Tools & Attribution
 
-This lab integrates or references the following **real** third-party software. OrchestraACME / AgentWatch Range does **not** claim authorship of these tools.
+This lab integrates or references the following **real** third-party software. AgentWatch Range does **not** claim authorship of these tools.
 
 | Component | Source | License | Usage in this repo |
 |-----------|--------|---------|-------------------|

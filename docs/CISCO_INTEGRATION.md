@@ -1,6 +1,6 @@
 # Cisco AI Defense + Splunk MLTK Integration
 
-OrchestraACME integrates **optional** tooling from [Cisco AI Defense](https://github.com/cisco-ai-defense), [Foundation-Sec-8B](https://huggingface.co/fdtn-ai/Foundation-Sec-8B), and [Splunk Cisco Time Series Model](https://github.com/splunk/cisco-time-series-model) without breaking Workshop attacks.
+AgentWatch Range integrates **optional** tooling from [Cisco AI Defense](https://github.com/cisco-ai-defense), [Foundation-Sec-8B](https://huggingface.co/fdtn-ai/Foundation-Sec-8B), and [Splunk Cisco Time Series Model](https://github.com/splunk/cisco-time-series-model) without breaking Workshop attacks.
 
 ---
 
@@ -47,7 +47,7 @@ ACME_INPUT_GUARD_ENABLED=false
 
 ## What integrates with what
 
-| Tool | Repo | OrchestraACME usage |
+| Tool | Repo | AgentWatch Range usage |
 |------|------|-------------------|
 | **AI BOM** | [cisco-ai-defense/aibom](https://github.com/cisco-ai-defense/aibom) | Scenario 1 telemetry + preflight scan |
 | **MCP Scanner** | [cisco-ai-defense/mcp-scanner](https://github.com/cisco-ai-defense/mcp-scanner) | Scenario 6 preflight + `data/mcp/acme_banking_mcp.json` |

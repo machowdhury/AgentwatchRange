@@ -3,7 +3,7 @@
 # https://github.com/cisco-ai-defense
 set -euo pipefail
 
-echo "=== OrchestraACME — optional Cisco AI Defense tools ==="
+echo "=== AgentWatch Range — optional Cisco AI Defense tools ==="
 echo "Lab teach mode works without these; install for full scanner fidelity."
 echo ""
 

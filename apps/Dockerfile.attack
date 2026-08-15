@@ -1,11 +1,11 @@
 # =============================================================================
-# OrchestraACME — Attack Panel Container v3
+# AgentWatch Range — Attack Panel Container v3
 # Build context: repository root
 # =============================================================================
 FROM python:3.11-slim
 
-LABEL maintainer="OrchestraACME"
-LABEL description="OrchestraACME Multi-Stage Attack Simulator"
+LABEL maintainer="AgentWatch Range"
+LABEL description="AgentWatch Range Multi-Stage Attack Simulator"
 
 WORKDIR /app
 

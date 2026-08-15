@@ -1,10 +1,10 @@
 # =============================================================================
-# OrchestraACME — Banking App Container v3
+# AgentWatch Range — Banking App Container v3
 # Build context: repository root
 # =============================================================================
 FROM python:3.11-slim
 
-LABEL maintainer="OrchestraACME"
+LABEL maintainer="AgentWatch Range"
 LABEL description="ACME Banking Multi-Agent Fabric — Real Ollama LLM loop"
 
 WORKDIR /app

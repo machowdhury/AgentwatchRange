@@ -2,7 +2,7 @@
 
 **Not for public workshop or customer materials.** Copy to `docs/private/BLOG_LAB_ALIGNMENT.md` on your machine.
 
-Maps OrchestraACME Workshop scenarios to blog narrative tracks in `apps/framework/campaign_manifest.py`. Use when writing Splunk/Cisco blog posts or internal teaching from the lab.
+Maps AgentWatch Range Workshop scenarios to blog narrative tracks in `apps/framework/campaign_manifest.py`. Use when writing Splunk/Cisco blog posts or internal teaching from the lab.
 
 | Week | Scenario | Blog track 1 (story) | Blog track 2 (Splunk demo) | Cisco / Splunk tech |
 |------|----------|----------------------|----------------------------|---------------------|

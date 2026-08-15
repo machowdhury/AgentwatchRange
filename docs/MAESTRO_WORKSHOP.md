@@ -2,18 +2,18 @@
 
 **Workshop Level 5A** in the ordered curriculum — see **[WORKSHOP.md](WORKSHOP.md)** for full path (Levels 0–5) and role tracks.
 
-Design-time threat modeling with the [CSA MAESTRO Threat Analyzer](https://github.com/CloudSecurityAlliance/MAESTRO), then validate predictions in OrchestraACME and Splunk.
+Design-time threat modeling with the [CSA MAESTRO Threat Analyzer](https://github.com/CloudSecurityAlliance/MAESTRO), then validate predictions in AgentWatch Range and Splunk.
 
-> **Disclaimer:** CSA MAESTRO and OrchestraACME are educational tools. AI-generated threats and mitigations are not a substitute for professional security review. See the [MAESTRO README](https://github.com/CloudSecurityAlliance/MAESTRO#disclaimer).
+> **Disclaimer:** CSA MAESTRO and AgentWatch Range are educational tools. AI-generated threats and mitigations are not a substitute for professional security review. See the [MAESTRO README](https://github.com/CloudSecurityAlliance/MAESTRO#disclaimer).
 
 ## Why add this to the lab?
 
-OrchestraACME already tags telemetry with `framework.maestro_layers` (L1–L7) and shows **MAESTRO Layer Risk Coverage** in Splunk. What was missing is the **predict → attack → prove** loop:
+AgentWatch Range already tags telemetry with `framework.maestro_layers` (L1–L7) and shows **MAESTRO Layer Risk Coverage** in Splunk. What was missing is the **predict → attack → prove** loop:
 
 | Phase | Tool | Question answered |
 |-------|------|-------------------|
 | **Model** | CSA MAESTRO Threat Analyzer | What could go wrong per layer? |
-| **Attack** | OrchestraACME Workshop | Do our scenarios hit those layers? |
+| **Attack** | AgentWatch Range Workshop | Do our scenarios hit those layers? |
 | **Prove** | Splunk NIST AI RMF | Which layers actually lit up in telemetry? |
 
 This complements (does not replace) the **Cisco + MLTK** path: Cisco scanners focus on runtime supply-chain and MCP posture; MAESTRO focuses on architecture-level agentic threat identification.
@@ -24,7 +24,7 @@ This complements (does not replace) the **Cisco + MLTK** path: Cisco scanners fo
 
 | Requirement | Notes |
 |-------------|-------|
-| OrchestraACME running | `docker compose --profile local up -d` |
+| AgentWatch Range running | `docker compose --profile local up -d` |
 | Splunk compliance app installed | For MAESTRO coverage % panel |
 | Node.js 18+ | For CSA MAESTRO only |
 | LLM for MAESTRO | Gemini, OpenAI, or **Ollama** (reuse lab Ollama on host: `http://localhost:11434`) |
@@ -42,7 +42,7 @@ npm install
 Create `.env` in the MAESTRO repo:
 
 ```bash
-# Reuse OrchestraACME Ollama (published on host port 11434)
+# Reuse AgentWatch Range Ollama (published on host port 11434)
 LLM_PROVIDER=ollama
 OLLAMA_SERVER_ADDRESS=http://localhost:11434
 LLM_MODEL=llama3.2:1b
@@ -63,7 +63,7 @@ Reference: [CSA MAESTRO Getting Started](https://github.com/CloudSecurityAllianc
 
 ---
 
-## Part 2 — Get the OrchestraACME architecture blurb
+## Part 2 — Get the AgentWatch Range architecture blurb
 
 **Option A — Attack Panel workshop (recommended)**
 
@@ -88,7 +88,7 @@ curl -s http://localhost:5000/api/v1/maestro/validation-guide | jq .
 ## Part 3 — Threat model in MAESTRO
 
 1. Open http://localhost:9002
-2. Paste the OrchestraACME architecture into the architecture textarea
+2. Paste the AgentWatch Range architecture into the architecture textarea
 3. Run analysis — review **traditional** and **agentic** threats per layer
 4. Note which layers MAESTRO ranks highest (typically **L3**, **L4**, **L5**, **L6** for this lab)
 
@@ -181,7 +181,7 @@ Full map: `GET /api/v1/maestro/architecture` → `scenario_layer_map`
 | Minutes | Activity |
 |---------|----------|
 | 0–5 | Intro MAESTRO 7-layer model ([CSA paper](https://cloudsecurityalliance.org/artifacts/agentic-ai-threat-modeling-framework-maestro)) |
-| 5–15 | Learners run MAESTRO analysis on OrchestraACME architecture |
+| 5–15 | Learners run MAESTRO analysis on AgentWatch Range architecture |
 | 15–25 | **MAESTRO Validate** workshop path in Attack Panel |
 | 25–35 | Splunk compare: predicted layers vs `framework.maestro_layers` |
 
@@ -202,5 +202,5 @@ Full map: `GET /api/v1/maestro/architecture` → `scenario_layer_map`
 
 - [CSA MAESTRO Threat Analyzer (GitHub)](https://github.com/CloudSecurityAlliance/MAESTRO)
 - [Agentic AI Threat Modeling Framework: MAESTRO (CSA)](https://cloudsecurityalliance.org/artifacts/agentic-ai-threat-modeling-framework-maestro)
-- OrchestraACME [USER_GUIDE.md](USER_GUIDE.md) — Workshop paths
-- OrchestraACME [CISCO_INTEGRATION.md](CISCO_INTEGRATION.md) — Runtime scanning overlay
+- AgentWatch Range [USER_GUIDE.md](USER_GUIDE.md) — Workshop paths
+- AgentWatch Range [CISCO_INTEGRATION.md](CISCO_INTEGRATION.md) — Runtime scanning overlay

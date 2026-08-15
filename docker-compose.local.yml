@@ -1,5 +1,5 @@
 # =============================================================================
-# OrchestraACME — Local Splunk overlay
+# AgentWatch Range — Local Splunk overlay
 # =============================================================================
 # Merge with docker-compose.yml for local lab startup ordering.
 # Keeps profile-gated services (splunk, splunk_hec_init) out of the base file

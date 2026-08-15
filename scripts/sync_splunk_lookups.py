@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Export OrchestraACME technique playbooks to Splunk lookup CSV files.
+Export AgentWatch Range technique playbooks to Splunk lookup CSV files.
 Run from repo root: python3 scripts/sync_splunk_lookups.py
 """
 

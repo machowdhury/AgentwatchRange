@@ -1,6 +1,6 @@
 """
 =============================================================================
-OrchestraACME — Agent Definitions
+AgentWatch Range — Agent Definitions
 =============================================================================
 Four agents, each with a distinct system prompt, role, and tool scope.
 All reasoning is performed by the real local Ollama LLM — no mocking.
