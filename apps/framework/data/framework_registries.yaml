@@ -1,0 +1,335 @@
+maestro_layers:
+  L1:
+    id: L1
+    name: Foundation Models
+    description: Base LLMs, multimodal models, embeddings, and fine-tuned variants
+    primary_threats:
+    - model poisoning
+    - weight theft
+    - backdoor injection
+    - adversarial inputs
+  L2:
+    id: L2
+    name: Data Operations
+    description: Training data pipelines, RAG retrieval stores, vector databases, context assembly
+    primary_threats:
+    - training data poisoning
+    - vector DB exfiltration
+    - retrieval manipulation
+    - context injection
+  L3:
+    id: L3
+    name: Agent Frameworks
+    description: 'Orchestration layers: LangChain, AutoGen, CrewAI, MCP, A2A protocol surfaces'
+    primary_threats:
+    - prompt injection
+    - tool schema abuse
+    - framework misconfiguration
+    - MCP tool escape
+  L4:
+    id: L4
+    name: Agent Capabilities
+    description: Tool integrations, API access, code execution, browser control, file system access
+    primary_threats:
+    - excessive agency
+    - RCE via tool abuse
+    - SSRF
+    - capability boundary violation
+  L5:
+    id: L5
+    name: Multi-Agent Systems
+    description: Agent-to-agent communication, delegation chains, trust propagation, orchestrator/subagent topologies
+    primary_threats:
+    - A2A identity spoofing
+    - trust chain hijack
+    - cascading failures
+    - session smuggling
+  L6:
+    id: L6
+    name: Security & Compliance
+    description: Policy enforcement, audit logging, compliance controls, guardrails, human-in-the-loop
+    primary_threats:
+    - guardrail bypass
+    - audit evasion
+    - HITL fatigue
+    - policy drift
+  L7:
+    id: L7
+    name: Agent Ecosystem
+    description: Third-party plugins, skill/tool marketplaces, supply chain, deployment infrastructure
+    primary_threats:
+    - supply chain compromise
+    - malicious plugin
+    - shadow AI
+    - model substitution
+nist_ai_rmf_functions:
+  GOVERN-1.1: Policies, processes, and procedures are established for AI risk management
+  GOVERN-1.2: Organizational teams committed to AI risk management
+  GOVERN-2.1: Organizational policies exist for AI risk prioritization
+  GOVERN-4.1: Teams are committed to AI transparency and explainability
+  GOVERN-5.1: Policies established for organizational AI risk tolerance
+  GOVERN-6.1: Policies for AI risks from third-party entities
+  MAP-1.1: AI system context is established and understood
+  MAP-1.5: AI risks are identified and prioritized
+  MAP-2.1: AI entity characteristics and behaviors are monitored
+  MAP-3.5: AI system performance metrics are established
+  MAP-5.1: Likelihood of AI risk occurrence is estimated
+  MEASURE-1.1: AI risk measurement methodologies are established
+  MEASURE-2.1: AI risk metrics are developed
+  MEASURE-2.5: AI system performance is evaluated
+  MEASURE-2.7: AI risk is tracked on an ongoing basis
+  MEASURE-2.10: Privacy risk in AI is monitored
+  MEASURE-4.1: AI risk measurement methodologies are continually updated
+  MANAGE-1.1: AI risks based on assessments are prioritized
+  MANAGE-2.1: AI risk treatments are determined and documented
+  MANAGE-2.4: Mechanisms are established to collect AI incidents
+  MANAGE-3.1: AI risks are monitored on an ongoing basis
+  MANAGE-4.1: AI incidents are documented and analyzed
+owasp_llm_registry:
+  LLM01:
+    id: LLM01
+    name: Prompt Injection
+    description: Malicious inputs manipulate LLM behaviour, bypassing safety controls or causing unauthorised actions
+    severity: Critical
+    maestro_layers:
+    - L3
+    - L4
+    atlas_techniques:
+    - AML.T0051
+    - AML.T0054
+    - AML.T0055
+  LLM02:
+    id: LLM02
+    name: Sensitive Information Disclosure
+    description: LLM reveals confidential data from training, context window, or integrated systems
+    severity: High
+    maestro_layers:
+    - L1
+    - L2
+    atlas_techniques:
+    - AML.T0024
+    - AML.T0031
+    - AML.T0038
+  LLM03:
+    id: LLM03
+    name: Supply Chain Vulnerabilities
+    description: Compromised models, datasets, plugins, or dependencies introduce vulnerabilities
+    severity: Critical
+    maestro_layers:
+    - L1
+    - L7
+    atlas_techniques:
+    - AML.T0018
+    - AML.T0025
+    - AML.T0048
+  LLM04:
+    id: LLM04
+    name: Data and Model Poisoning
+    description: Training data or RLHF feedback manipulated to embed biases or backdoors
+    severity: Critical
+    maestro_layers:
+    - L1
+    - L2
+    atlas_techniques:
+    - AML.T0018
+    - AML.T0034
+  LLM05:
+    id: LLM05
+    name: Improper Output Handling
+    description: LLM outputs not validated before downstream use, enabling XSS, SSRF, code injection
+    severity: High
+    maestro_layers:
+    - L3
+    - L4
+    atlas_techniques:
+    - AML.T0031
+    - AML.T0065
+  LLM06:
+    id: LLM06
+    name: Excessive Agency
+    description: LLM granted too many capabilities or permissions, enabling unintended high-impact actions
+    severity: High
+    maestro_layers:
+    - L4
+    - L5
+    atlas_techniques:
+    - AML.T0050
+    - AML.T0064
+  LLM07:
+    id: LLM07
+    name: System Prompt Leakage
+    description: Confidential system prompt content revealed through model outputs
+    severity: Medium
+    maestro_layers:
+    - L3
+    - L6
+    atlas_techniques:
+    - AML.T0003
+  LLM08:
+    id: LLM08
+    name: Vector and Embedding Weaknesses
+    description: Vulnerabilities in RAG pipelines, embedding models, and vector stores
+    severity: High
+    maestro_layers:
+    - L2
+    atlas_techniques:
+    - AML.T0037
+    - AML.T0038
+  LLM09:
+    id: LLM09
+    name: Misinformation
+    description: LLM generates or amplifies false, misleading, or harmful information at scale
+    severity: High
+    maestro_layers:
+    - L1
+    - L3
+    atlas_techniques:
+    - AML.T0063
+  LLM10:
+    id: LLM10
+    name: Unbounded Consumption
+    description: LLM processes excessive inputs consuming disproportionate resources, enabling DoS or financial drain
+    severity: High
+    maestro_layers:
+    - L3
+    - L4
+    atlas_techniques:
+    - AML.T0040
+owasp_asi_registry:
+  ASI01:
+    id: ASI01
+    name: Agent Goal Hijack
+    description: Attacker alters an agent's objectives or decision path through malicious content in the agent's planning
+      or reasoning context
+    severity: Critical
+    maestro_layers:
+    - L3
+    - L4
+    atlas_techniques:
+    - AML.T0051
+    - AML.T0054
+    - AML.T0055
+    llm_relationship:
+    - LLM01
+    - LLM06
+  ASI02:
+    id: ASI02
+    name: Tool Misuse and Exploitation
+    description: Agent's tool access is abused to perform unauthorised actions beyond intended scope
+    severity: Critical
+    maestro_layers:
+    - L4
+    atlas_techniques:
+    - AML.T0043
+    - AML.T0050
+    - AML.T0064
+    llm_relationship:
+    - LLM06
+  ASI03:
+    id: ASI03
+    name: Agent Identity and Privilege Abuse
+    description: Agent identity is spoofed or privileges are abused to gain unauthorised access in multi-agent systems
+    severity: Critical
+    maestro_layers:
+    - L5
+    - L6
+    atlas_techniques:
+    - AML.T0058
+    - AML.T0062
+    llm_relationship:
+    - LLM08
+  ASI04:
+    id: ASI04
+    name: Agentic Supply Chain Compromise
+    description: Malicious components introduced via plugins, tools, models, or datasets in the AI supply chain
+    severity: Critical
+    maestro_layers:
+    - L1
+    - L7
+    atlas_techniques:
+    - AML.T0048
+    - AML.T0049
+    - AML.T0018
+    llm_relationship:
+    - LLM03
+  ASI05:
+    id: ASI05
+    name: Unexpected Code Execution
+    description: Agent executes arbitrary code via code execution tools, achieving sandbox escape or host access
+    severity: Critical
+    maestro_layers:
+    - L4
+    atlas_techniques:
+    - AML.T0064
+    - AML.T0065
+    llm_relationship:
+    - LLM06
+  ASI06:
+    id: ASI06
+    name: Memory and Context Poisoning
+    description: Agent's persistent memory or context window is poisoned, corrupting reasoning across sessions
+    severity: High
+    maestro_layers:
+    - L2
+    - L3
+    atlas_techniques:
+    - AML.T0055
+    - AML.T0056
+    - AML.T0057
+    llm_relationship:
+    - LLM01
+    - LLM04
+  ASI07:
+    id: ASI07
+    name: Insecure Inter-Agent Communication
+    description: Messages between agents are spoofed, intercepted, or manipulated due to lack of authentication or integrity
+      controls
+    severity: Critical
+    maestro_layers:
+    - L5
+    atlas_techniques:
+    - AML.T0045
+    - AML.T0046
+    - AML.T0058
+    llm_relationship:
+    - LLM08
+  ASI08:
+    id: ASI08
+    name: Cascading Agent Failures
+    description: Failures or attacks propagate through multi-agent pipelines, amplifying impact across the system
+    severity: High
+    maestro_layers:
+    - L5
+    - L6
+    atlas_techniques:
+    - AML.T0029
+    - AML.T0040
+    - AML.T0046
+    llm_relationship:
+    - LLM04
+    - LLM10
+  ASI09:
+    id: ASI09
+    name: Human-Agent Trust Exploitation
+    description: Agent manipulates human operators into approving harmful actions through overconfident or misleading outputs
+    severity: High
+    maestro_layers:
+    - L6
+    atlas_techniques:
+    - AML.T0063
+    llm_relationship:
+    - LLM09
+  ASI10:
+    id: ASI10
+    name: Rogue Agents
+    description: Compromised, misaligned, or drifting agents operate autonomously in unintended and harmful ways
+    severity: Critical
+    maestro_layers:
+    - L5
+    - L6
+    atlas_techniques:
+    - AML.T0026
+    - AML.T0060
+    - AML.T0061
+    llm_relationship:
+    - LLM06
