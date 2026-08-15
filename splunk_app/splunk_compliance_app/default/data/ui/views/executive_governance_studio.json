@@ -1,6 +1,6 @@
 {
-  "title": "Executive AI Governance",
-  "description": "CISO and auditor front door \u2014 framework readiness, regulatory control gap, portfolio risk, agent inventory (running vs shadow), and guardrail efficacy. Dashboard Studio view.",
+  "title": "Executive AI Governance (Studio)",
+  "description": "Dashboard Studio view \u2014 Splunk 10+ recommended.",
   "inputs": {
     "input_time": {
       "type": "input.timerange",
@@ -84,14 +84,13 @@
   "visualizations": {
     "viz_header": {
       "type": "splunk.markdown",
-      "title": "Executive AI Governance \u2014 AgentWatch Range",
       "options": {
-        "markdown": "### Executive AI Governance \u2014 AgentWatch Range\n\nSingle-screen posture for **CISO**, **risk**, and **audit** audiences. Metrics derive from live OTel telemetry (`otel:agentic:json`), agent registry snapshots (`acme:agentic:registry:json`), and framework lookups.\n\n**Baseline filter:** attack panels exclude benign traffic with `NOT testbed_mode=BASELINE_TRAFFIC`.\n\n**Drill-down:** [NIST AI RMF Scoring](/app/acme_genai_compliance/nist_rmf_compliance) \u00b7 [Technique Coverage Matrix](/app/acme_genai_compliance/technique_coverage_matrix) \u00b7 [Threat Hunting](/app/acme_genai_compliance/threat_hunting) \u00b7 [Cross-App Normalization](/app/acme_genai_compliance/cross_app_normalization) \u00b7 [Exercise Runner](/app/acme_genai_compliance/exercise_runner)"
+        "markdown": "### Executive AI Governance (Dashboard Studio)\n\nSplunk 10+ Studio layout with the same SPL as the Classic landing dashboard."
       }
     },
     "viz_readiness": {
       "type": "splunk.singlevalue",
-      "title": "Framework Readiness Score (% techniques with telemetry)",
+      "title": "Framework Readiness Score",
       "dataSources": {
         "primary": "ds_readiness"
       },
@@ -106,14 +105,11 @@
       "title": "Readiness breakdown",
       "dataSources": {
         "primary": "ds_readiness"
-      },
-      "options": {
-        "count": 5
       }
     },
     "viz_regulatory_gap": {
       "type": "splunk.singlevalue",
-      "title": "Regulatory Gap Metric (% high-severity events without control block)",
+      "title": "Regulatory Gap Metric",
       "dataSources": {
         "primary": "ds_regulatory_gap"
       },
@@ -125,17 +121,14 @@
     },
     "viz_regulatory_detail": {
       "type": "splunk.table",
-      "title": "Control efficacy on Critical/High severity",
+      "title": "Control efficacy",
       "dataSources": {
         "primary": "ds_regulatory_gap"
-      },
-      "options": {
-        "count": 5
       }
     },
     "viz_portfolio": {
       "type": "splunk.table",
-      "title": "AI Portfolio Risk Matrix (registry \u00d7 attack volume)",
+      "title": "AI Portfolio Risk Matrix",
       "dataSources": {
         "primary": "ds_portfolio_risk"
       },
@@ -146,17 +139,14 @@
     },
     "viz_agent_counts": {
       "type": "splunk.table",
-      "title": "Agent inventory \u2014 running vs shadow (latest snapshot in window)",
+      "title": "Agent inventory",
       "dataSources": {
         "primary": "ds_agent_counts"
-      },
-      "options": {
-        "count": 5
       }
     },
     "viz_agent_registry": {
       "type": "splunk.table",
-      "title": "Registered agents (deduped latest per agent_id)",
+      "title": "Registered agents",
       "dataSources": {
         "primary": "ds_agent_registry"
       },
@@ -167,24 +157,21 @@
     },
     "viz_guardrail_chart": {
       "type": "viz.line",
-      "title": "Guardrail blocks over time (by technique)",
+      "title": "Guardrail blocks over time",
       "dataSources": {
         "primary": "ds_guardrail_timechart"
       }
     },
     "viz_eu_ai_act": {
       "type": "splunk.table",
-      "title": "EU AI Act risk tier \u2014 crosswalk inventory",
+      "title": "EU AI Act crosswalk",
       "dataSources": {
         "primary": "ds_eu_ai_act"
-      },
-      "options": {
-        "count": 10
       }
     },
     "viz_hitl": {
       "type": "splunk.table",
-      "title": "Human-in-the-loop governance events",
+      "title": "HITL governance events",
       "dataSources": {
         "primary": "ds_hitl_table"
       },
@@ -195,147 +182,128 @@
     }
   },
   "layout": {
-    "options": {
-      "submitButton": true,
-      "submitOnDashboardLoad": true,
-      "showTitleAndDescription": true
-    },
+    "type": "absolute",
     "globalInputs": [
       "input_time"
     ],
-    "tabs": {
-      "items": [
-        {
-          "layoutId": "layout_main",
-          "label": "Executive AI Governance"
-        }
-      ],
-      "options": {
-        "barPosition": "top",
-        "showTabBar": false
-      }
+    "options": {
+      "submitButton": true,
+      "submitOnDashboardLoad": true,
+      "display": "auto-scale",
+      "width": 1440,
+      "height": 2100
     },
-    "layoutDefinitions": {
-      "layout_main": {
-        "type": "absolute",
-        "options": {
-          "display": "auto-scale",
-          "width": 1440,
-          "height": 2100
-        },
-        "structure": [
-          {
-            "item": "viz_header",
-            "type": "block",
-            "position": {
-              "x": 0,
-              "y": 0,
-              "w": 1440,
-              "h": 200
-            }
-          },
-          {
-            "item": "viz_readiness",
-            "type": "block",
-            "position": {
-              "x": 0,
-              "y": 210,
-              "w": 350,
-              "h": 120
-            }
-          },
-          {
-            "item": "viz_readiness_detail",
-            "type": "block",
-            "position": {
-              "x": 360,
-              "y": 210,
-              "w": 320,
-              "h": 120
-            }
-          },
-          {
-            "item": "viz_regulatory_gap",
-            "type": "block",
-            "position": {
-              "x": 700,
-              "y": 210,
-              "w": 350,
-              "h": 120
-            }
-          },
-          {
-            "item": "viz_regulatory_detail",
-            "type": "block",
-            "position": {
-              "x": 1060,
-              "y": 210,
-              "w": 380,
-              "h": 120
-            }
-          },
-          {
-            "item": "viz_portfolio",
-            "type": "block",
-            "position": {
-              "x": 0,
-              "y": 340,
-              "w": 1440,
-              "h": 260
-            }
-          },
-          {
-            "item": "viz_agent_counts",
-            "type": "block",
-            "position": {
-              "x": 0,
-              "y": 610,
-              "w": 420,
-              "h": 100
-            }
-          },
-          {
-            "item": "viz_agent_registry",
-            "type": "block",
-            "position": {
-              "x": 440,
-              "y": 610,
-              "w": 1000,
-              "h": 220
-            }
-          },
-          {
-            "item": "viz_guardrail_chart",
-            "type": "block",
-            "position": {
-              "x": 0,
-              "y": 840,
-              "w": 900,
-              "h": 280
-            }
-          },
-          {
-            "item": "viz_eu_ai_act",
-            "type": "block",
-            "position": {
-              "x": 920,
-              "y": 840,
-              "w": 520,
-              "h": 280
-            }
-          },
-          {
-            "item": "viz_hitl",
-            "type": "block",
-            "position": {
-              "x": 0,
-              "y": 1130,
-              "w": 1440,
-              "h": 320
-            }
-          }
-        ]
+    "structure": [
+      {
+        "item": "viz_header",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 1440,
+          "h": 200
+        }
+      },
+      {
+        "item": "viz_readiness",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 210,
+          "w": 350,
+          "h": 120
+        }
+      },
+      {
+        "item": "viz_readiness_detail",
+        "type": "block",
+        "position": {
+          "x": 360,
+          "y": 210,
+          "w": 320,
+          "h": 120
+        }
+      },
+      {
+        "item": "viz_regulatory_gap",
+        "type": "block",
+        "position": {
+          "x": 700,
+          "y": 210,
+          "w": 350,
+          "h": 120
+        }
+      },
+      {
+        "item": "viz_regulatory_detail",
+        "type": "block",
+        "position": {
+          "x": 1060,
+          "y": 210,
+          "w": 380,
+          "h": 120
+        }
+      },
+      {
+        "item": "viz_portfolio",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 340,
+          "w": 1440,
+          "h": 260
+        }
+      },
+      {
+        "item": "viz_agent_counts",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 610,
+          "w": 420,
+          "h": 100
+        }
+      },
+      {
+        "item": "viz_agent_registry",
+        "type": "block",
+        "position": {
+          "x": 440,
+          "y": 610,
+          "w": 1000,
+          "h": 220
+        }
+      },
+      {
+        "item": "viz_guardrail_chart",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 840,
+          "w": 900,
+          "h": 280
+        }
+      },
+      {
+        "item": "viz_eu_ai_act",
+        "type": "block",
+        "position": {
+          "x": 920,
+          "y": 840,
+          "w": 520,
+          "h": 280
+        }
+      },
+      {
+        "item": "viz_hitl",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 1130,
+          "w": 1440,
+          "h": 320
+        }
       }
-    }
+    ]
   }
 }

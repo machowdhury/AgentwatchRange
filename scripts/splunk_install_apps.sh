@@ -100,16 +100,17 @@ docker exec "$SPLUNK_CONTAINER" bash -c "
   APP='${APPS_ROOT}/${COMPLIANCE_APP_ID}'
   VER=\$(grep -E '^version' \"\${APP}/default/app.conf\" | head -1 | tr -d ' ')
   echo \"  app.conf: \${VER}\"
-  if [[ -f \"\${APP}/default/data/ui/views/executive_governance.json\" ]]; then
-    if grep -q 'splunk.markdown' \"\${APP}/default/data/ui/views/executive_governance.json\" 2>/dev/null; then
-      echo '  executive_governance.json: Dashboard Studio'
-    else
-      echo '  WARNING: executive_governance.json missing splunk.markdown (invalid Studio?)' >&2
-    fi
-  elif [[ -f \"\${APP}/default/data/ui/views/executive_governance.xml\" ]]; then
-    echo '  WARNING: executive_governance.xml is Classic XML — expected Dashboard Studio JSON on Splunk 10+' >&2
+  if [[ -f \"\${APP}/default/data/ui/views/executive_governance.xml\" ]]; then
+    echo '  executive_governance.xml: Classic (nav default — always registered)'
   else
-    echo '  WARNING: executive_governance view missing' >&2
+    echo '  ERROR: executive_governance.xml missing — landing page will 404' >&2
+    exit 1
+  fi
+  if [[ -f \"\${APP}/default/data/ui/views/executive_governance_studio.json\" ]]; then
+    echo '  executive_governance_studio.json: Dashboard Studio (Splunk 10+)'
+  fi
+  if [[ -f \"\${APP}/default/data/ui/views/executive_governance.json\" ]]; then
+    echo '  WARNING: legacy executive_governance.json present — remove; causes 404 on some builds' >&2
   fi
   if grep -q 'layout_tier0' \"\${APP}/default/data/ui/views/exercise_runner.json\" 2>/dev/null; then
     echo '  exercise_runner.json: tabbed (Phase 17.2+)'
