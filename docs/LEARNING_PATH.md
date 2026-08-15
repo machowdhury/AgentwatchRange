@@ -31,7 +31,7 @@ Structured curriculum for AgentWatch Range. This is a **navigation layer** on to
 
 **Splunk proof:** `` `acme_campaign_w3` `` and `` `acme_campaign_w5` `` — compare `acme_input_guard_blocked` vs `acme_output_guard_action=HARD_DENY`.
 
-**Recommended UI:** **GenAI Compliance Monitor → Exercise Runner** — select Tier 1 techniques after firing scenarios in the Attack Panel.
+**Recommended UI:** **GenAI Compliance Monitor → Exercise Runner → Tier 1 tab** — work through both Beginner cells after firing scenarios in the Attack Panel.
 
 **Workshop shortcut:** [15-Minute First Win](WORKSHOP.md) includes Scenario 5 (and 6, 9 for contrast).
 
@@ -49,7 +49,7 @@ Structured curriculum for AgentWatch Range. This is a **navigation layer** on to
 
 **Splunk proof:** `` `acme_campaign_w6` earliest=-30m \| stats count by workflow.blocked `` (README golden path variant).
 
-**Recommended UI:** **Exercise Runner** (Tier 2 filter) — predict BLOCKED before running hunt SPL for Scenario 6.
+**Recommended UI:** **Exercise Runner → Tier 2 tab** — predict BLOCKED before running hunt SPL for Scenario 6.
 
 ---
 
@@ -65,7 +65,7 @@ Structured curriculum for AgentWatch Range. This is a **navigation layer** on to
 
 **Splunk proof:** `incident_id=*` \| Actor Chain Story · Kill-Chain Timeline · emerging saved searches (Phase 3).
 
-**Recommended UI:** **Exercise Runner** (Tier 3 filter) — work through emerging techniques AML.T0070–T0075 with triage runbooks before revealing explanations.
+**Recommended UI:** **Exercise Runner → Tier 3 tab** — work through emerging techniques AML.T0070–T0075 with triage runbooks before revealing explanations.
 
 ---
 
