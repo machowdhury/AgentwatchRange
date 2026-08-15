@@ -1,6 +1,6 @@
 {
-  "title": "Executive AI Governance (Studio)",
-  "description": "Dashboard Studio view \u2014 Splunk 10+ recommended.",
+  "title": "Executive AI Governance",
+  "description": "CISO and auditor front door \u2014 framework readiness, regulatory control gap, portfolio risk, agent inventory, and guardrail efficacy.",
   "inputs": {
     "input_time": {
       "type": "input.timerange",
@@ -85,7 +85,7 @@
     "viz_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "### Executive AI Governance (Dashboard Studio)\n\nSplunk 10+ Studio layout with the same SPL as the Classic landing dashboard."
+        "markdown": "### Executive AI Governance \u2014 AgentWatch Range\n\nCISO and auditor front door \u2014 framework readiness, regulatory control gap, portfolio risk, agent inventory, and guardrail efficacy.\n\n**Drill-down:** [NIST AI RMF](/app/acme_genai_compliance/nist_rmf_compliance) \u00b7 [Exercise Runner](/app/acme_genai_compliance/exercise_runner)"
       }
     },
     "viz_readiness": {

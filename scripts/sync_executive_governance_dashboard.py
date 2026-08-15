@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate Executive AI Governance dashboards (Classic XML + Dashboard Studio JSON).
+Generate Executive AI Governance dashboard (Dashboard Studio JSON only).
 
-- executive_governance.xml       — Classic Simple XML; registered as nav view on all Splunk versions
-- executive_governance_studio.json — Dashboard Studio; Splunk 10+ (separate nav item)
+- executive_governance.json — sole nav view (no Classic .xml twin; avoids name collision)
 
 Run from repo root: python3 scripts/sync_executive_governance_dashboard.py
 """
@@ -11,15 +10,14 @@ Run from repo root: python3 scripts/sync_executive_governance_dashboard.py
 from __future__ import annotations
 
 import json
-import xml.sax.saxutils as xml_escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VIEWS = ROOT / "splunk_app" / "splunk_compliance_app" / "default" / "data" / "ui" / "views"
-OUT_XML = VIEWS / "executive_governance.xml"
-OUT_STUDIO = VIEWS / "executive_governance_studio.json"
-# Remove legacy name that 404s when Splunk cannot register JSON as executive_governance.
-OUT_LEGACY_JSON = VIEWS / "executive_governance.json"
+OUT_JSON = VIEWS / "executive_governance.json"
+# Removed dual-dashboard outputs (pre-18.1 name-collision workaround).
+LEGACY_XML = VIEWS / "executive_governance.xml"
+LEGACY_STUDIO = VIEWS / "executive_governance_studio.json"
 
 W = 1440
 
@@ -79,161 +77,6 @@ QUERIES = {
 }
 
 
-def _xq(query: str) -> str:
-    return xml_escape.escape(query)
-
-
-def build_xml() -> str:
-    q = {k: _xq(v) for k, v in QUERIES.items()}
-    return f"""<dashboard version="1.1">
-  <label>Executive AI Governance</label>
-  <description>CISO and auditor front door — framework readiness, regulatory control gap, portfolio risk, agent inventory, and guardrail efficacy.</description>
-
-  <fieldset submitButton="true" autoRun="true">
-    <input type="time" token="time_range">
-      <label>Time Range</label>
-      <default><earliest>-24h</earliest><latest>now</latest></default>
-    </input>
-  </fieldset>
-
-  <row>
-    <panel>
-      <html>
-        <h3>Executive AI Governance — AgentWatch Range</h3>
-        <p>Classic dashboard (always available). For Dashboard Studio layout on Splunk 10+, open <strong>Executive AI Governance (Studio)</strong> in the nav.</p>
-        <p><strong>Drill-down:</strong>
-          <a href="/app/acme_genai_compliance/nist_rmf_compliance">NIST AI RMF</a> ·
-          <a href="/app/acme_genai_compliance/exercise_runner">Exercise Runner</a>
-        </p>
-      </html>
-    </panel>
-  </row>
-
-  <row>
-    <panel>
-      <title>Framework Readiness Score</title>
-      <single>
-        <search>
-          <query>{q['readiness']}| table readiness_score</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-        <option name="drilldown">none</option>
-        <option name="unit">%</option>
-        <option name="unitPosition">after</option>
-      </single>
-    </panel>
-    <panel>
-      <title>Readiness breakdown</title>
-      <table>
-        <search>
-          <query>{q['readiness']}| table readiness_score governance_status techniques_observed total_techniques</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-      </table>
-    </panel>
-    <panel>
-      <title>Regulatory Gap Metric</title>
-      <single>
-        <search>
-          <query>{q['regulatory']}| table regulatory_gap</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-        <option name="unit">%</option>
-        <option name="unitPosition">after</option>
-      </single>
-    </panel>
-    <panel>
-      <title>Control efficacy</title>
-      <table>
-        <search>
-          <query>{q['regulatory']}| table regulatory_gap governance_status control_efficacy high_severity_events blocked_events</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-      </table>
-    </panel>
-  </row>
-
-  <row>
-    <panel>
-      <title>AI Portfolio Risk Matrix</title>
-      <table>
-        <search>
-          <query>{q['portfolio']}</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-        <option name="count">15</option>
-      </table>
-    </panel>
-  </row>
-
-  <row>
-    <panel>
-      <title>Agent inventory — running vs shadow</title>
-      <table>
-        <search>
-          <query>{q['agent_counts']}</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-      </table>
-    </panel>
-    <panel>
-      <title>Registered agents</title>
-      <table>
-        <search>
-          <query>{q['agent_registry']}</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-        <option name="count">10</option>
-      </table>
-    </panel>
-  </row>
-
-  <row>
-    <panel>
-      <title>Guardrail blocks over time</title>
-      <chart>
-        <search>
-          <query>{q['guardrail']}</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-        <option name="charting.chart">line</option>
-      </chart>
-    </panel>
-    <panel>
-      <title>EU AI Act crosswalk</title>
-      <table>
-        <search>
-          <query>{q['eu_ai_act']}</query>
-        </search>
-      </table>
-    </panel>
-  </row>
-
-  <row>
-    <panel>
-      <title>HITL governance events</title>
-      <table>
-        <search>
-          <query>{q['hitl']}</query>
-          <earliest>$time_range.earliest$</earliest>
-          <latest>$time_range.latest$</latest>
-        </search>
-        <option name="count">25</option>
-      </table>
-    </panel>
-  </row>
-</dashboard>
-"""
-
-
 def _ds(name: str, query: str) -> dict:
     return {"type": "ds.search", "name": name, "options": {"query": query}}
 
@@ -263,8 +106,8 @@ def build_studio_json() -> dict:
         {"item": "viz_hitl", "type": "block", "position": {"x": 0, "y": 1130, "w": W, "h": 320}},
     ]
     return {
-        "title": "Executive AI Governance (Studio)",
-        "description": "Dashboard Studio view — Splunk 10+ recommended.",
+        "title": "Executive AI Governance",
+        "description": "CISO and auditor front door — framework readiness, regulatory control gap, portfolio risk, agent inventory, and guardrail efficacy.",
         "inputs": {
             "input_time": {
                 "type": "input.timerange",
@@ -289,7 +132,7 @@ def build_studio_json() -> dict:
             "viz_header": {
                 "type": "splunk.markdown",
                 "options": {
-                    "markdown": "### Executive AI Governance (Dashboard Studio)\n\nSplunk 10+ Studio layout with the same SPL as the Classic landing dashboard."
+                    "markdown": "### Executive AI Governance — AgentWatch Range\n\nCISO and auditor front door — framework readiness, regulatory control gap, portfolio risk, agent inventory, and guardrail efficacy.\n\n**Drill-down:** [NIST AI RMF](/app/acme_genai_compliance/nist_rmf_compliance) · [Exercise Runner](/app/acme_genai_compliance/exercise_runner)"
                 },
             },
             "viz_readiness": {
@@ -365,15 +208,13 @@ def build_studio_json() -> dict:
 
 def main() -> None:
     VIEWS.mkdir(parents=True, exist_ok=True)
-    OUT_XML.write_text(build_xml(), encoding="utf-8")
-    OUT_STUDIO.write_text(json.dumps(build_studio_json(), indent=2) + "\n", encoding="utf-8")
-    if OUT_LEGACY_JSON.is_file():
-        OUT_LEGACY_JSON.unlink()
-    json.loads(OUT_STUDIO.read_text(encoding="utf-8"))
-    print(f"Wrote {OUT_XML} (Classic — nav default executive_governance)")
-    print(f"Wrote {OUT_STUDIO} (Dashboard Studio — nav executive_governance_studio)")
-    if OUT_LEGACY_JSON.is_file():
-        print(f"Removed legacy {OUT_LEGACY_JSON}")
+    OUT_JSON.write_text(json.dumps(build_studio_json(), indent=2) + "\n", encoding="utf-8")
+    for legacy in (LEGACY_XML, LEGACY_STUDIO):
+        if legacy.is_file():
+            legacy.unlink()
+            print(f"Removed legacy {legacy.name}")
+    json.loads(OUT_JSON.read_text(encoding="utf-8"))
+    print(f"Wrote {OUT_JSON.name} (Dashboard Studio — nav default executive_governance)")
 
 
 if __name__ == "__main__":
