@@ -48,6 +48,15 @@ TIER_TABS = [
 ]
 
 
+def _layout_item(item: str, y: int, h: int) -> dict:
+    """Canvas inputs must use type=input; visualizations use type=block (Splunk DS)."""
+    return {
+        "item": item,
+        "type": "input" if item.startswith("input_") else "block",
+        "position": {"x": 0, "y": y, "w": CELL_WIDTH, "h": h},
+    }
+
+
 def _token(technique_id: str) -> str:
     return technique_id.replace(".", "_")
 
@@ -260,11 +269,7 @@ def _add_technique_cell(
     ])
 
     for item, height in blocks:
-        structure.append({
-            "item": item,
-            "type": "block",
-            "position": {"x": 0, "y": y, "w": CELL_WIDTH, "h": height},
-        })
+        structure.append(_layout_item(item, y, height))
         y += height + CELL_GAP
 
     return y
@@ -278,6 +283,7 @@ def _tier0_layout(
     structure: List[dict] = []
     visualizations["viz_tier0_intro"] = {
         "type": "splunk.markdown",
+        "title": "Tier 0 — Orientation",
         "options": {
             "markdown": (
                 "### Tier 0 — Orientation (no attacks)\n\n"
@@ -321,11 +327,7 @@ def _tier0_layout(
         ("input_run_tier0", BUTTON_H),
         ("viz_tier0_baseline", 220),
     ]:
-        structure.append({
-            "item": item,
-            "type": "block",
-            "position": {"x": 0, "y": y, "w": CELL_WIDTH, "h": h},
-        })
+        structure.append(_layout_item(item, y, h))
         y += h + CELL_GAP
     return structure, y
 
@@ -338,6 +340,7 @@ def _tier5_layout(
     structure: List[dict] = []
     visualizations["viz_tier5_intro"] = {
         "type": "splunk.markdown",
+        "title": "Tier 5 — Vendor-realistic tooling",
         "options": {
             "markdown": (
                 "### Tier 5 — Vendor-realistic tooling (Cisco overlay)\n\n"
@@ -386,20 +389,12 @@ def _tier5_layout(
         }
 
     y = 0
-    structure.append({
-        "item": "viz_tier5_intro",
-        "type": "block",
-        "position": {"x": 0, "y": y, "w": CELL_WIDTH, "h": 360},
-    })
+    structure.append(_layout_item("viz_tier5_intro", y, 360))
     y += 380
     for tid in ["AML.T0015", "AML.T0050"]:
         tok = _token(tid)
         for item, h in [(f"input_run_t5_{tok}", BUTTON_H), (f"viz_t5_{tok}", 180)]:
-            structure.append({
-                "item": item,
-                "type": "block",
-                "position": {"x": 0, "y": y, "w": CELL_WIDTH, "h": h},
-            })
+            structure.append(_layout_item(item, y, h))
             y += h + CELL_GAP
     return structure, y
 
@@ -407,6 +402,7 @@ def _tier5_layout(
 def _tier6_layout(visualizations: Dict[str, Any]) -> Tuple[List[dict], int]:
     visualizations["viz_tier6_intro"] = {
         "type": "splunk.markdown",
+        "title": "Tier 6 — Capstone / Blue Team",
         "options": {
             "markdown": (
                 "### Tier 6 — Capstone / Blue Team\n\n"
@@ -421,11 +417,7 @@ def _tier6_layout(visualizations: Dict[str, Any]) -> Tuple[List[dict], int]:
             )
         },
     }
-    structure = [{
-        "item": "viz_tier6_intro",
-        "type": "block",
-        "position": {"x": 0, "y": 0, "w": CELL_WIDTH, "h": 420},
-    }]
+    structure = [_layout_item("viz_tier6_intro", 0, 420)]
     return structure, 440
 
 
@@ -493,11 +485,7 @@ def build_dashboard() -> dict:
             "dataSources": {"primary": f"ds_tier{tier}_progress"},
             "options": {"count": 5},
         }
-        structure.append({
-            "item": f"viz_{tok}_progress",
-            "type": "block",
-            "position": {"x": 0, "y": y, "w": CELL_WIDTH, "h": 100},
-        })
+        structure.append(_layout_item(f"viz_{tok}_progress", y, 100))
         y += 120
         for row in by_tier.get(tier, []):
             y = _add_technique_cell(
