@@ -100,23 +100,30 @@ docker exec "$SPLUNK_CONTAINER" bash -c "
   APP='${APPS_ROOT}/${COMPLIANCE_APP_ID}'
   VER=\$(grep -E '^version' \"\${APP}/default/app.conf\" | head -1 | tr -d ' ')
   echo \"  app.conf: \${VER}\"
-  if [[ -f \"\${APP}/default/data/ui/views/executive_governance.json\" ]]; then
-    echo '  executive_governance.json: Dashboard Studio (nav default — Splunk 10+)'
-  else
-    echo '  ERROR: executive_governance.json missing — landing page will 404' >&2
-    exit 1
-  fi
   if [[ -f \"\${APP}/default/data/ui/views/executive_governance.xml\" ]]; then
-    echo '  ERROR: executive_governance.xml present — name collision with Studio JSON; remove Classic twin' >&2
+    if grep -q 'version=\"2\"' \"\${APP}/default/data/ui/views/executive_governance.xml\" 2>/dev/null \
+      && grep -q '<definition>' \"\${APP}/default/data/ui/views/executive_governance.xml\" 2>/dev/null; then
+      echo '  executive_governance.xml: Dashboard Studio v2 (nav default)'
+    else
+      echo '  ERROR: executive_governance.xml is Classic Simple XML, not Dashboard Studio v2' >&2
+      exit 1
+    fi
+  else
+    echo '  ERROR: executive_governance.xml missing — landing page will 404' >&2
     exit 1
   fi
-  if [[ -f \"\${APP}/default/data/ui/views/executive_governance_studio.json\" ]]; then
-    echo '  WARNING: legacy executive_governance_studio.json present — remove' >&2
+  if [[ -f \"\${APP}/default/data/ui/views/executive_governance.json\" ]]; then
+    echo '  ERROR: bare executive_governance.json present — Splunk will not register it; use v2 XML wrapper' >&2
+    exit 1
   fi
-  if grep -q 'layout_tier0' \"\${APP}/default/data/ui/views/exercise_runner.json\" 2>/dev/null; then
-    echo '  exercise_runner.json: tabbed (Phase 17.2+)'
+  if [[ -f \"\${APP}/default/data/ui/views/exercise_runner.xml\" ]] \
+    && grep -q 'layout_tier0' \"\${APP}/default/data/ui/views/exercise_runner.xml\" 2>/dev/null; then
+    echo '  exercise_runner.xml: tabbed Dashboard Studio v2 (Phase 17.2+)'
+  elif [[ -f \"\${APP}/default/data/ui/views/exercise_runner.json\" ]]; then
+    echo '  ERROR: bare exercise_runner.json present — wrap as exercise_runner.xml' >&2
+    exit 1
   else
-    echo '  WARNING: exercise_runner.json looks like pre-17.2 (no tier tabs)' >&2
+    echo '  WARNING: exercise_runner dashboard missing or pre-17.2' >&2
   fi
 "
 

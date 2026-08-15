@@ -81,8 +81,8 @@ exporters:
       queue_size: 1000
     timeout: 15s
     idle_conn_timeout: 10s
-    heartbeat:
-      interval: 30s
+    # Heartbeat events omit index and can hit _internal; token allowlist rejects them (HTTP 400).
+    # Health is covered by collector health_check extension on :13133.
 
   # Debug: stdout for pipeline validation
   debug:

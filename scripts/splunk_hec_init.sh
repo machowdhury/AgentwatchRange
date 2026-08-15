@@ -133,7 +133,11 @@ ensure_index "${SIM_INDEX}" || exit 1
 log "Checking if HEC already accepts events (Splunk image auto-config)..."
 early_code="$(test_hec_url "${HEC_URL_HTTP}")"
 if [ "$early_code" = "200" ]; then
-  log "PASS — HEC already working (HTTP 200). Indexes ${HEC_INDEX} and ${SIM_INDEX} ensured."
+  log "PASS — HEC already working (HTTP 200). Ensuring token allows ${HEC_INDEX} and ${SIM_INDEX}..."
+  mgmt_request POST "/services/data/inputs/http/${HEC_INPUT_NAME}" \
+    -d "index=${HEC_INDEX}" \
+    -d "indexes=${HEC_INDEX},${SIM_INDEX}" >/dev/null 2>&1 || true
+  log "Indexes ${HEC_INDEX} and ${SIM_INDEX} ensured."
   exit 0
 fi
 log "HEC not ready yet (HTTP ${early_code}); continuing bootstrap..."

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate Executive AI Governance dashboard (Dashboard Studio JSON only).
+Generate Executive AI Governance dashboard (Dashboard Studio, single view).
 
-- executive_governance.json — sole nav view (no Classic .xml twin; avoids name collision)
+- executive_governance.xml — Dashboard Studio v2 wrapper (nav default; no Classic twin)
 
 Run from repo root: python3 scripts/sync_executive_governance_dashboard.py
 """
@@ -10,14 +10,17 @@ Run from repo root: python3 scripts/sync_executive_governance_dashboard.py
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from splunk_studio_xml import wrap_studio_dashboard_xml
+
 VIEWS = ROOT / "splunk_app" / "splunk_compliance_app" / "default" / "data" / "ui" / "views"
-OUT_JSON = VIEWS / "executive_governance.json"
-# Removed dual-dashboard outputs (pre-18.1 name-collision workaround).
-LEGACY_XML = VIEWS / "executive_governance.xml"
-LEGACY_STUDIO = VIEWS / "executive_governance_studio.json"
+OUT_STUDIO_XML = VIEWS / "executive_governance.xml"
+LEGACY_JSON = VIEWS / "executive_governance.json"
+LEGACY_STUDIO_JSON = VIEWS / "executive_governance_studio.json"
 
 W = 1440
 
@@ -208,13 +211,17 @@ def build_studio_json() -> dict:
 
 def main() -> None:
     VIEWS.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(json.dumps(build_studio_json(), indent=2) + "\n", encoding="utf-8")
-    for legacy in (LEGACY_XML, LEGACY_STUDIO):
+    studio = build_studio_json()
+    OUT_STUDIO_XML.write_text(
+        wrap_studio_dashboard_xml(studio["title"], studio["description"], studio),
+        encoding="utf-8",
+    )
+    for legacy in (LEGACY_JSON, LEGACY_STUDIO_JSON):
         if legacy.is_file():
             legacy.unlink()
             print(f"Removed legacy {legacy.name}")
-    json.loads(OUT_JSON.read_text(encoding="utf-8"))
-    print(f"Wrote {OUT_JSON.name} (Dashboard Studio — nav default executive_governance)")
+    json.loads(json.dumps(studio))
+    print(f"Wrote {OUT_STUDIO_XML.name} (Dashboard Studio v2 — nav default executive_governance)")
 
 
 if __name__ == "__main__":
