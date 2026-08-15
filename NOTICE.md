@@ -20,3 +20,5 @@ This lab integrates or references the following **real** third-party software. A
 | **Third-party sim telemetry** | Synthetic `acme:agentic:thirdparty:json` from `scripts/emit_thirdparty_telemetry.py` |
 
 AcmeGate and AcmeSentinel are **not** affiliated with Cisco DefenseClaw or any vendor product. Field names were renamed in Phase 6 to avoid implying vendor authorship.
+
+**AgentWatch Range** as a project name is not affiliated with, and makes no claim over, any similarly-named tool or framework elsewhere (for example observability or agent-monitoring products that use "agentwatch" in their name).

@@ -2,6 +2,8 @@
 
 Run AgentWatch Range on a **cloud virtual machine** instead of your laptop. This guide lists **which ports to open**, **which to keep private**, and **provider-specific firewall examples**.
 
+> **Security first:** Before opening any port beyond your VPN, change `SPLUNK_PASSWORD` and `SPLUNK_HEC_TOKEN` in `.env` from the repository defaults. Those defaults are documented in this public repo — leaving them unchanged on a reachable server means the credentials are effectively public.
+
 **Related:** [PREREQUISITES.md](PREREQUISITES.md) (full install checklist) · [WORKSHOP.md](WORKSHOP.md) Level 0 · [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) · [.env.example](../.env.example)
 
 ---
