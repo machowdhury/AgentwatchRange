@@ -61,7 +61,10 @@ class TechniqueExecutor:
         }
 
         if mode in ("LIVE", "HYBRID"):
-            result["live"] = self._run_live(playbook, incident_id)
+            if technique_id == "AML.T0072":
+                result["live"] = self._run_memory_drift_live(playbook, incident_id)
+            else:
+                result["live"] = self._run_live(playbook, incident_id)
 
         if mode in ("SIMULATED", "HYBRID"):
             result["simulated"] = self._run_simulated(playbook, technique, incident_id)
@@ -131,14 +134,19 @@ class TechniqueExecutor:
         report["threat_actor_narrative"] = self._chain_narrative(chain_id, report)
         return report
 
-    def _run_live(self, playbook: TechniquePlaybook, incident_id: str) -> dict:
+    def _run_live(
+        self,
+        playbook: TechniquePlaybook,
+        incident_id: str,
+        session_id: Optional[str] = None,
+    ) -> dict:
         path = f"/api/v1/agent/{playbook.target_agent}"
         payload = {
             "message": playbook.payload,
             "incident_id": incident_id,
             "technique_id": playbook.technique_id,
             "testbed_mode": "TECHNIQUE_LAB_LIVE",
-            "session_id": f"TECH-{playbook.technique_id}-{uuid.uuid4().hex[:6].upper()}",
+            "session_id": session_id or f"TECH-{playbook.technique_id}-{uuid.uuid4().hex[:6].upper()}",
             "campaign_week": playbook.scenario_week or 0,
         }
         try:
@@ -168,6 +176,56 @@ class TechniqueExecutor:
             logger.error("Live technique execution failed: %s", exc)
             return {"success": False, "error": str(exc)}
 
+    def _run_memory_drift_live(self, playbook: TechniquePlaybook, incident_id: str) -> dict:
+        """Multi-turn LIVE execution for AML.T0072 memory behavioral drift."""
+        from framework.emerging_threats import MEMORY_DRIFT_TURNS
+
+        session_id = f"MEM-DRIFT-{uuid.uuid4().hex[:8].upper()}"
+        agents = [
+            "acme-agent-intake-001",
+            "acme-agent-docingest-002",
+            "acme-agent-creditrisk-003",
+            "acme-agent-creditrisk-003",
+            "acme-agent-compliance-004",
+        ]
+        turns: List[dict] = []
+        for index, (turn_text, agent_id) in enumerate(zip(MEMORY_DRIFT_TURNS, agents), start=1):
+            path = f"/api/v1/agent/{agent_id}"
+            payload = {
+                "message": turn_text,
+                "incident_id": incident_id,
+                "technique_id": playbook.technique_id,
+                "testbed_mode": "TECHNIQUE_LAB_LIVE",
+                "session_id": session_id,
+                "campaign_week": 0,
+            }
+            try:
+                response = requests.post(
+                    f"{self.banking_url}{path}",
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=180,
+                )
+                body = response.json() if response.content else {}
+                turns.append({
+                    "turn": index,
+                    "agent_id": agent_id,
+                    "http_status": response.status_code,
+                    "memory_entry_trust_score": body.get("memory_entry_trust_score"),
+                    "approval_rate_by_session": body.get("approval_rate_by_session"),
+                    "memory_drift_detected": body.get("memory.drift_detected"),
+                })
+            except requests.RequestException as exc:
+                turns.append({"turn": index, "agent_id": agent_id, "error": str(exc)})
+
+        return {
+            "success": True,
+            "multi_turn": True,
+            "session_id": session_id,
+            "turns": turns,
+            "turn_count": len(turns),
+        }
+
     def _run_simulated(
         self,
         playbook: TechniquePlaybook,
@@ -186,6 +244,10 @@ class TechniqueExecutor:
             "technique_id": playbook.technique_id,
             "is_top_10": str(playbook.is_top_10).lower(),
         }
+        from framework.emerging_threats import enrich_simulated_emission
+
+        extra.update(enrich_simulated_emission(playbook.technique_id, incident_id))
+        extra["technique_id"] = playbook.technique_id
         emitted = self.engine.emit_single_technique(
             playbook.technique_id,
             playbook.target_agent,

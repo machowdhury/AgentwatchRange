@@ -340,6 +340,7 @@ def call_ollama(
 
     workflow = run_workflow_guards(
         user_message, agent_id, session_id, _OLLAMA_MODEL, incident_id, campaign_week,
+        technique_id=technique_id,
     )
 
     # --- Workflow guard (tools, A2A, memory, orchestration) ---
@@ -593,6 +594,7 @@ def call_ollama(
             "trace_id":            trace_id_hex,
             "incident_id":         incident_id,
             "control_evidence":    control_summary(controls),
+            **workflow.otel_fields,
         }
 
 

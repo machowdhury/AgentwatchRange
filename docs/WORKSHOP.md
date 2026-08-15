@@ -927,6 +927,76 @@ Open **NIST AI RMF Scoring** dashboard (OWASP panels), or:
 
 </details>
 
+<details>
+<summary><strong>Q504</strong> — MCP tool manifest poisoning (AML.T0070).</summary>
+
+Run technique **AML.T0070** from All Techniques, then:
+
+```spl
+`acme_genai_index` earliest=-30m technique_id="AML.T0070"
+| table _time tool_manifest_tampered mcp.gateway.rule_id workflow.block_reason
+```
+
+**Honest limitation:** SIMULATED path uses a lab fixture manifest; production MCP registries need separate scanning tooling.
+
+</details>
+
+<details>
+<summary><strong>Q505</strong> — Unsigned community skill install (AML.T0071).</summary>
+
+```spl
+`acme_genai_index` earliest=-30m technique_id="AML.T0071"
+| table skill.provenance_valid skill.registry agent.aibom_validated cisco_aibom_status
+```
+
+</details>
+
+<details>
+<summary><strong>Q506</strong> — Memory behavioral drift over a session (AML.T0072 / KC-F001).</summary>
+
+Execute **KC-F001** or AML.T0072 (LIVE multi-turn), then:
+
+```spl
+`acme_genai_index` earliest=-30m (technique_id="AML.T0072" OR chain_id="KC-F001")
+| timechart avg(memory_entry_trust_score) avg(approval_rate_by_session) by session.id
+```
+
+</details>
+
+<details>
+<summary><strong>Q507</strong> — Agent privilege creep (AML.T0073).</summary>
+
+```spl
+`acme_genai_index` earliest=-30m technique_id="AML.T0073"
+| table granted_scope used_scope scope_delta privilege_creep_detected
+```
+
+</details>
+
+<details>
+<summary><strong>Q508</strong> — HITL bypass on high-value loan (AML.T0074).</summary>
+
+With `HITL_GATE_ENABLED=false` (default), run AML.T0074:
+
+```spl
+`acme_genai_index` earliest=-30m technique_id="AML.T0074"
+| table hitl_required hitl_bypassed loan_amount_usd hitl.gate_enabled workflow.alert
+```
+
+Re-run with `HITL_GATE_ENABLED=true` and confirm `workflow.blocked=true`.
+
+</details>
+
+<details>
+<summary><strong>Q509</strong> — A2A message provenance tampering (AML.T0075).</summary>
+
+```spl
+`acme_genai_index` earliest=-30m technique_id="AML.T0075"
+| table message.provenance_valid message.hash_expected message.hash_received a2a.verification_failure
+```
+
+</details>
+
 **Splunk dashboards:** NIST AI RMF Scoring · Control Attestation · MITRE ATLAS Heatmap
 
 ---

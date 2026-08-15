@@ -75,7 +75,7 @@ def export_playbooks_lookup() -> Path:
 
 
 def enrich_framework_lookup() -> Path:
-    """Add execution_mode column to framework lookup from playbooks."""
+    """Sync framework lookup from TECHNIQUE_REGISTRY + playbooks (append new techniques)."""
     src = LOOKUP_DIR / "acme_framework_lookup.csv"
     if not src.is_file():
         raise FileNotFoundError(
@@ -84,19 +84,54 @@ def enrich_framework_lookup() -> Path:
         )
     playbooks = {p.technique_id: p for p in get_all_playbooks()}
 
+    existing: dict[str, dict] = {}
+    fieldnames = [
+        "technique_id", "technique_name", "tactic_id", "tactic_name",
+        "subtechnique_id", "subtechnique_name", "owasp_llm", "owasp_asi",
+        "maestro_layers", "nist_ai_rmf", "cvss_score", "severity",
+        "attack_vector", "kill_chain_stage", "kill_chain_order",
+        "description", "impact", "defenseclaw_action", "galileo_check",
+        "detection_signal", "splunk_spl_template", "real_world_incident",
+        "quality_tier", "execution_mode", "is_top_10",
+    ]
+
+    if src.is_file():
+        with src.open(encoding="utf-8") as fh:
+            reader = csv.DictReader(fh)
+            for row in reader:
+                existing[row["technique_id"]] = row
+
     rows = []
-    with src.open(encoding="utf-8") as fh:
-        reader = csv.DictReader(fh)
-        fieldnames = list(reader.fieldnames or [])
-        if "execution_mode" not in fieldnames:
-            fieldnames.append("execution_mode")
-        if "is_top_10" not in fieldnames:
-            fieldnames.append("is_top_10")
-        for row in reader:
-            pb = playbooks.get(row.get("technique_id", ""))
-            row["execution_mode"] = pb.execution_mode if pb else "SIMULATED"
-            row["is_top_10"] = str(pb.is_top_10).lower() if pb else "false"
-            rows.append(row)
+    for entry in TECHNIQUE_REGISTRY:
+        pb = playbooks.get(entry.technique_id)
+        row = existing.get(entry.technique_id, {})
+        rows.append({
+            "technique_id": entry.technique_id,
+            "technique_name": entry.technique_name,
+            "tactic_id": entry.tactic_id,
+            "tactic_name": entry.tactic_name,
+            "subtechnique_id": entry.subtechnique_id,
+            "subtechnique_name": entry.subtechnique_name,
+            "owasp_llm": _pipe_join(entry.owasp_llm),
+            "owasp_asi": _pipe_join(entry.owasp_asi),
+            "maestro_layers": _pipe_join(entry.maestro_layers),
+            "nist_ai_rmf": _pipe_join(entry.nist_ai_rmf),
+            "cvss_score": str(entry.cvss_score),
+            "severity": entry.severity,
+            "attack_vector": entry.attack_vector,
+            "kill_chain_stage": entry.kill_chain_stage,
+            "kill_chain_order": str(entry.kill_chain_order),
+            "description": entry.description,
+            "impact": entry.impact,
+            "defenseclaw_action": entry.defenseclaw_action,
+            "galileo_check": entry.galileo_check,
+            "detection_signal": entry.detection_signal,
+            "splunk_spl_template": entry.splunk_spl_template,
+            "real_world_incident": entry.real_world_incident,
+            "quality_tier": entry.quality_tier,
+            "execution_mode": pb.execution_mode if pb else row.get("execution_mode", "SIMULATED"),
+            "is_top_10": str(pb.is_top_10).lower() if pb else row.get("is_top_10", "false"),
+        })
 
     with src.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)

@@ -455,6 +455,67 @@ KILL_CHAINS: List[KillChain] = [
             '| where mvcount(agents_involved) > 1'
         ),
     ),
+
+    # =========================================================================
+    # SCENARIO F: Memory Poisoning → Behavioral Drift (Emerging 2026)
+    # Benign-looking facts accumulate across turns until compliance bias drifts
+    # =========================================================================
+    KillChain(
+        chain_id="KC-F001",
+        name="Slow Compliance Drift",
+        description="Adversary seeds individually benign loan notes across multiple pipeline interactions until the compliance agent's approval behavior drifts without a single-shot injection.",
+        threat_actor_profile="Patient insider threat manipulating session memory over multiple loan reviews",
+        target_environment="acme-banking-production",
+        scenario_family="F",
+        real_world_analogy="Cross-session context poisoning in agent memory stores (2025–2026 red-team reports)",
+        total_cvss_score=8.4,
+        stages=[
+            ChainStage(
+                technique_id="AML.T0072",
+                stage_name="Benign Preference Seed",
+                agent_id="acme-agent-intake-001",
+                inter_stage_delay_seconds=1.0,
+                custom_fields={"memory_turn": "1", "memory_entry_trust_score": "0.95"},
+            ),
+            ChainStage(
+                technique_id="AML.T0072",
+                stage_name="Verified Income Anchor",
+                agent_id="acme-agent-docingest-002",
+                inter_stage_delay_seconds=1.0,
+                custom_fields={"memory_turn": "2", "memory_entry_trust_score": "0.88"},
+            ),
+            ChainStage(
+                technique_id="AML.T0072",
+                stage_name="Customer History Normalization",
+                agent_id="acme-agent-creditrisk-003",
+                inter_stage_delay_seconds=1.0,
+                custom_fields={"memory_turn": "3", "memory_entry_trust_score": "0.72"},
+            ),
+            ChainStage(
+                technique_id="AML.T0072",
+                stage_name="Expedited Path Hint",
+                agent_id="acme-agent-creditrisk-003",
+                inter_stage_delay_seconds=1.0,
+                custom_fields={"memory_turn": "4", "memory_entry_trust_score": "0.58"},
+            ),
+            ChainStage(
+                technique_id="AML.T0072",
+                stage_name="Compliance Override Drift",
+                agent_id="acme-agent-compliance-004",
+                inter_stage_delay_seconds=0,
+                custom_fields={
+                    "memory_turn": "5",
+                    "memory.drift_detected": "true",
+                    "memory_entry_trust_score": "0.42",
+                    "approval_rate_by_session": "0.85",
+                },
+            ),
+        ],
+        splunk_correlation_search=(
+            'sourcetype="otel:agentic:json" chain_id="KC-F001" '
+            '| stats values(stage_name) as stages avg(memory_entry_trust_score) as avg_trust by incident_id'
+        ),
+    ),
 ]
 
 # Quick lookup by chain_id

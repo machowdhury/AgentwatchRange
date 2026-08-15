@@ -104,7 +104,11 @@ LEVEL 5  MAESTRO Validate + Fire All 10    ← END (architect / GRC evidence)
 | **Architect** | Level 1 | Level 5A — MAESTRO validate path |
 | **GRC / compliance** | Level 1 | Level 5B — Fire All 10 + NIST dashboards |
 
-Full hunt questions and facilitator notes: **[WORKSHOP.md](WORKSHOP.md)**.
+Full hunt questions and facilitator notes: **[WORKSHOP.md](WORKSHOP.md)** (includes emerging-threat hunts **Q504–Q509** for AML.T0070–T0075).
+
+### Emerging threats (2026 append)
+
+Six techniques (**AML.T0070–T0075**) extend the registry without changing the Top 10 golden path. See [THREAT_SURFACES.md](THREAT_SURFACES.md) and [ATTACK_PANEL_GUIDE.md](ATTACK_PANEL_GUIDE.md#1b-emerging-threat-techniques-amlt0070t0075).
 
 ---
 
