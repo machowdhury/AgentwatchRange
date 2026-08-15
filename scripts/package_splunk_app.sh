@@ -21,7 +21,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_DIR="${ROOT_DIR}/splunk_app/splunk_compliance_app"
 DIST_DIR="${ROOT_DIR}/dist"
 APP_ID="acme_genai_compliance"
-VERSION="2.4.0"
+VERSION="2.5.0"
 PACKAGE_NAME="${APP_ID}-${VERSION}"
 STAGING_DIR="$(mktemp -d)"
 TARGET_DIR="${STAGING_DIR}/${APP_ID}"
@@ -33,6 +33,7 @@ fi
 
 echo "[package] Syncing technique playbook lookups from taxonomy..."
 python3 "${ROOT_DIR}/scripts/sync_splunk_lookups.py"
+python3 "${ROOT_DIR}/scripts/sync_exercise_content.py"
 
 echo "[package] Staging ${APP_ID} v${VERSION}..."
 mkdir -p "${TARGET_DIR}"

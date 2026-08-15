@@ -31,6 +31,8 @@ Structured curriculum for OrchestraACME / AgentWatch Range. This is a **navigati
 
 **Splunk proof:** `` `acme_campaign_w3` `` and `` `acme_campaign_w5` `` — compare `codeguard_blocked` vs `defenseclaw_action=HARD_DENY`.
 
+**Recommended UI:** **GenAI Compliance Monitor → Exercise Runner** — select Tier 1 techniques after firing scenarios in the Attack Panel.
+
 **Workshop shortcut:** [15-Minute First Win](WORKSHOP.md) includes Scenario 5 (and 6, 9 for contrast).
 
 ---
@@ -47,6 +49,8 @@ Structured curriculum for OrchestraACME / AgentWatch Range. This is a **navigati
 
 **Splunk proof:** `` `acme_campaign_w6` earliest=-30m \| stats count by workflow.blocked `` (README golden path variant).
 
+**Recommended UI:** **Exercise Runner** (Tier 2 filter) — predict BLOCKED before running hunt SPL for Scenario 6.
+
 ---
 
 ## Tier 3 — Advanced: identity, memory, RAG, multi-stage
@@ -60,6 +64,8 @@ Structured curriculum for OrchestraACME / AgentWatch Range. This is a **navigati
 | Emerging **AML.T0070–T0075** | All 51 Techniques (individual EXECUTE) or Workshop Q504–Q509 |
 
 **Splunk proof:** `incident_id=*` \| Actor Chain Story · Kill-Chain Timeline · emerging saved searches (Phase 3).
+
+**Recommended UI:** **Exercise Runner** (Tier 3 filter) — work through emerging techniques AML.T0070–T0075 with triage runbooks before revealing explanations.
 
 ---
 
@@ -126,4 +132,5 @@ docker compose -f docker-compose.yml -f docker-compose.cisco.yml --profile local
 - [USER_GUIDE.md](USER_GUIDE.md) — full tab reference
 - [ATTACK_PANEL_GUIDE.md](ATTACK_PANEL_GUIDE.md) — per-scenario SPL and outcomes
 - [TECHNIQUE_AUDIT.md](TECHNIQUE_AUDIT.md) — tier assignment audit and redundancy recommendations
+- [EXERCISE_RUNNER.md](EXERCISE_RUNNER.md) — Splunk guided exercise dashboard
 - [WORKSHOP.md](WORKSHOP.md) — ordered workshop paths
