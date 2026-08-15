@@ -5,26 +5,49 @@
   <row>
     <panel>
       <single>
-        <title>Total Security Events (7d)</title>
+        <title>Critical Severity Events (7d)</title>
         <search>
-          <query>`acme_genai_index` `acme_last_7d` | stats count</query>
+          <query>`acme_genai_index` `acme_last_7d` framework.severity=Critical | stats count</query>
           <earliest>-7d</earliest>
           <latest>now</latest>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
         <option name="drilldown">none</option>
-        <option name="rangeColors">["0x53a051","0xf8be34","0xf1813f","0xdc4e41"]</option>
-        <option name="rangeValues">[0,100,500]</option>
+        <option name="rangeColors">["0x53a051","0xf8be34","0xdc4e41"]</option>
+        <option name="rangeValues">[0,1]</option>
         <option name="useColors">1</option>
       </single>
     </panel>
     <panel>
       <single>
-        <title>Critical Severity Events</title>
+        <title>Active Control Blocks (24h)</title>
         <search>
-          <query>`acme_genai_index` `acme_last_7d` framework.severity=Critical | stats count</query>
-          <earliest>-7d</earliest>
+          <query>`acme_genai_index` `acme_last_24h` `acme_control_block` | stats count</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x53a051","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,1]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Detection Gaps (Session)</title>
+        <search>
+          <query>`acme_genai_index` `acme_session_window` technique_id=AML.*
+| stats count as events by technique_id
+| join type=left technique_id [
+    search `acme_genai_index` `acme_session_window` technique_id=AML.* `acme_control_block`
+    | stats count as blocks by technique_id
+  ]
+| where events&gt;0 AND (isnull(blocks) OR blocks=0)
+| stats count as gaps</query>
+          <earliest>-15m</earliest>
           <latest>now</latest>
         </search>
         <option name="colorBy">value</option>
@@ -53,30 +76,49 @@
     </panel>
     <panel>
       <single>
-        <title>DefenseClaw HARD_DENY Blocks</title>
+        <title>Total Security Events (7d)</title>
         <search>
-          <query>`acme_genai_index` `acme_last_24h` defenseclaw_action=HARD_DENY | stats count</query>
-          <earliest>-24h</earliest>
+          <query>`acme_genai_index` `acme_last_7d` | stats count</query>
+          <earliest>-7d</earliest>
           <latest>now</latest>
         </search>
         <option name="colorBy">value</option>
         <option name="colorMode">block</option>
         <option name="drilldown">none</option>
-        <option name="rangeColors">["0x53a051","0xf1813f","0xdc4e41"]</option>
-        <option name="rangeValues">[0,1]</option>
+        <option name="rangeColors">["0x53a051","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,100,500]</option>
         <option name="useColors">1</option>
       </single>
     </panel>
+  </row>
+
+  <row>
     <panel>
-      <single>
-        <title>Unique Agents Monitored</title>
+      <table>
+        <title>Detection Gaps This Session — Attempted but Not Blocked/Detected</title>
         <search>
-          <query>`acme_genai_index` `acme_last_7d` | stats dc(agent.id) as count | fields count</query>
-          <earliest>-7d</earliest>
+          <query>`acme_genai_index` `acme_session_window` technique_id=AML.*
+| stats count as events latest(_time) as last_seen values(incident_id) as incidents by technique_id
+| join type=left technique_id [
+    search `acme_genai_index` `acme_session_window` technique_id=AML.* `acme_control_block`
+    | stats count as blocks by technique_id
+  ]
+| lookup acme_framework_lookup technique_id OUTPUT technique_name severity
+| where events&gt;0 AND (isnull(blocks) OR blocks=0)
+| eval status="ATTEMPTED_NOT_DETECTED"
+| convert ctime(last_seen)
+| table technique_id technique_name severity status events incidents last_seen
+| rename technique_id AS "Technique", technique_name AS "Name", severity AS "Severity", status AS "Gap Status", events AS "Events", incidents AS "Incident IDs", last_seen AS "Last Seen"
+| sort -events</query>
+          <earliest>-15m</earliest>
           <latest>now</latest>
         </search>
         <option name="drilldown">none</option>
-      </single>
+        <option name="wrap">true</option>
+        <format type="color" field="Gap Status">
+          <colorPalette type="map">{"ATTEMPTED_NOT_DETECTED":#f1813f}</colorPalette>
+        </format>
+      </table>
     </panel>
   </row>
 

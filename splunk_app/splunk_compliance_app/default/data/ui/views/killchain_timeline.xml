@@ -171,14 +171,17 @@ incident_id=$incident_filter$ testbed_mode=KILL_CHAIN_ACTIVE scenario_family=$sc
         <title>Stage-by-Stage Forensics — Incident: $selected_incident$</title>
         <search>
           <query>`acme_genai_index` incident_id="$selected_incident$"
-| sort stage_num
+| eval stage_num_n=tonumber(stage_num)
+| sort stage_num_n, _time
 | eval stage_num=if(isnull(stage_num),"?",stage_num)
-| table _time stage_num stage_name framework.technique_id framework.technique_name
-    framework.tactic_name framework.kill_chain_stage framework.severity framework.cvss_score
+| convert ctime(_time) AS "Time"
+| table Time stage_num stage_name framework.technique_id framework.technique_name
+    framework.tactic_name framework.kill_chain_stage kill_chain.stage campaign_week framework.severity framework.cvss_score
     agent.id defenseclaw_action framework.detection_signal
-| rename _time AS "Time", stage_num AS "Stage", stage_name AS "Stage Name",
+| rename stage_num AS "Stage", stage_name AS "Stage Name",
   framework.technique_id AS "Technique ID", framework.technique_name AS "Technique",
   framework.tactic_name AS "Tactic", framework.kill_chain_stage AS "Kill-Chain Stage",
+  kill_chain.stage AS "Stage Field", campaign_week AS "Campaign Week",
   framework.severity AS "Severity", framework.cvss_score AS "CVSS",
   agent.id AS "Agent", defenseclaw_action AS "DefenseClaw", framework.detection_signal AS "Detection Signal"</query>
         </search>

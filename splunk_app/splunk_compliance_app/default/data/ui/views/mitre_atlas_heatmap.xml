@@ -55,7 +55,7 @@
         <title>Techniques Detected / Blocked</title>
         <search>
           <query>`acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$ technique_id=AML.*
-(defenseclaw_blocked=true OR codeguard_blocked=true OR workflow.blocked=true)
+`acme_control_block`
 | stats dc(technique_id) as count</query>
         </search>
         <option name="drilldown">none</option>
@@ -98,7 +98,7 @@
   ]
 | join type=left tactic_id [
     search `acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$ technique_id=AML.*
-      (defenseclaw_blocked=true OR codeguard_blocked=true OR workflow.blocked=true)
+      `acme_control_block`
     | lookup acme_framework_lookup technique_id OUTPUT tactic_id
     | stats dc(technique_id) as detected by tactic_id
   ]
@@ -130,11 +130,13 @@
 | lookup acme_atlas_tactics_lookup tactic_id OUTPUT tactic_order
 | join type=left technique_id [
     search `acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$
-    | stats count as events,
-        sum(eval(if(defenseclaw_blocked=true OR codeguard_blocked=true OR workflow.blocked=true,1,0))) as blocks
-      by technique_id
+    | stats count as events by technique_id
   ]
-| eval heat_score=case(isnull(events) OR events=0,0, blocks&gt;0,2, events&gt;0,1, 1=1,0)
+| join type=left technique_id [
+    search `acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$ `acme_control_block`
+    | stats count as blocks by technique_id
+  ]
+| eval heat_score=case(isnull(events) OR events=0,0, coalesce(blocks,0)&gt;0,2+min(coalesce(blocks,0)/max(events,1),1), events&gt;0,1+min(events/20,0.9), 1=1,0)
 | eval short_name=technique_id." ".substr(technique_name,1,28)
 | sort tactic_order technique_id
 | chart max(heat_score) over short_name by tactic_name</query>
@@ -159,9 +161,11 @@
 | lookup acme_atlas_tactics_lookup tactic_id OUTPUT tactic_order
 | join type=left technique_id [
     search `acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$
-    | stats count as events, dc(incident_id) as incidents, latest(_time) as last_seen,
-        sum(eval(if(defenseclaw_blocked=true OR codeguard_blocked=true OR workflow.blocked=true,1,0))) as blocks
-      by technique_id
+    | stats count as events, dc(incident_id) as incidents, latest(_time) as last_seen by technique_id
+  ]
+| join type=left technique_id [
+    search `acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$ `acme_control_block`
+    | stats count as blocks by technique_id
   ]
 | lookup acme_technique_playbooks_lookup technique_id OUTPUT execution_mode is_top_10 threat_hunt_spl
 | eval events=coalesce(events,0), blocks=coalesce(blocks,0)
