@@ -1,6 +1,6 @@
 <nav search_view="search" color="#006d9c">
   <view name="executive_governance" default="true" label="Executive AI Governance"/>
-  <view name="executive_governance_studio" label="Executive AI Governance (Studio)"/>
+  <view name="executive_governance_classic" label="Executive AI Governance (Classic)"/>
   <view name="exercise_runner" label="Exercise Runner"/>
   <view name="compliance_overview" label="Overview"/>
   <view name="cross_app_normalization" label="Cross-App Normalization"/>

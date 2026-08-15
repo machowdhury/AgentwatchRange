@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Generate Dashboard Studio exercise_runner.json from exercise_content.csv.
+Generate Dashboard Studio exercise_runner.xml from exercise_content.csv.
 
 Run from repo root: python3 scripts/sync_exercise_runner_dashboard.py
 
-Regenerated during package_splunk_app.sh — edit this script, not the JSON directly.
+Regenerated during package_splunk_app.sh — edit this script, not the XML directly.
 """
 
 from __future__ import annotations
@@ -17,10 +17,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from splunk_studio_xml import wrap_studio_dashboard_xml
 CSV_PATH = ROOT / "splunk_app" / "splunk_compliance_app" / "lookups" / "exercise_content.csv"
 OUT_PATH = (
-    ROOT / "splunk_app" / "splunk_compliance_app" / "default" / "data" / "ui" / "views" / "exercise_runner.json"
+    ROOT / "splunk_app" / "splunk_compliance_app" / "default" / "data" / "ui" / "views" / "exercise_runner.xml"
 )
+LEGACY_JSON_PATH = OUT_PATH.with_suffix(".json")
 
 CELL_WIDTH = 1440
 MARKDOWN_H = 170
@@ -572,8 +575,14 @@ def main() -> None:
         raise SystemExit(f"Missing {CSV_PATH} — run scripts/sync_exercise_content.py first")
     dashboard = build_dashboard()
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(json.dumps(dashboard, indent=2) + "\n", encoding="utf-8")
-    json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    OUT_PATH.write_text(
+        wrap_studio_dashboard_xml(dashboard["title"], dashboard["description"], dashboard),
+        encoding="utf-8",
+    )
+    if LEGACY_JSON_PATH.is_file():
+        LEGACY_JSON_PATH.unlink()
+        print(f"Removed legacy {LEGACY_JSON_PATH.name}")
+    json.loads(json.dumps(dashboard))
     tier_counts = defaultdict(int)
     with CSV_PATH.open(encoding="utf-8") as fh:
         for row in csv.DictReader(fh):

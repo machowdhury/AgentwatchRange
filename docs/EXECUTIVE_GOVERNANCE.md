@@ -1,6 +1,6 @@
 # Executive AI Governance Dashboard
 
-Dashboard Studio view: **Executive AI Governance** (`executive_governance.json`) — the default landing page for CISO, risk, and audit audiences in the **AgentWatch Range — GenAI Compliance** Splunk app.
+Dashboard Studio view: **Executive AI Governance** (`executive_governance.xml`, Splunk `version="2"` wrapper with JSON in `<definition>`) — the default landing page on Splunk 10+ for CISO, risk, and audit audiences in the **AgentWatch Range — GenAI Compliance** Splunk app. A Classic Simple XML fallback lives at `executive_governance_classic.xml` in the nav.
 
 ## What it shows
 
