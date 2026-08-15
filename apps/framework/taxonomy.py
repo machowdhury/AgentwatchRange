@@ -76,6 +76,8 @@ class TechniqueEntry:
     references: List[str] = field(default_factory=list)
     real_world_incident: str = ""    # Known real incident if applicable
     quality_tier: str = "reviewed"   # reviewed | community | synthetic
+    learning_tier: int = 4           # 0–6 curriculum tier (see learning_tiers.py)
+    redundant_with: str = ""         # nullable technique_id if SIMULATED breadth-only
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -1776,7 +1778,7 @@ def export_csv_lookup() -> str:
         "kill_chain_order", "description", "impact",
         "defenseclaw_action", "galileo_check",
         "detection_signal", "splunk_spl_template",
-        "real_world_incident", "quality_tier",
+        "real_world_incident", "quality_tier", "learning_tier", "redundant_with",
     ]
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=fields, extrasaction='ignore')

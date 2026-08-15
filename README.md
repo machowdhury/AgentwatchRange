@@ -23,6 +23,7 @@ ACME Bank deployed four AI agents to speed up loan approvals. Six weeks later, t
 | **New to this? → Start Here** | [Start here — your first 30 minutes](#start-here--your-first-30-minutes) below |
 | **I know Docker/Splunk → Quick Start** | [Condensed commands](#quick-start) |
 | **I want the architecture → Concepts** | [docs/CONCEPTS.md](docs/CONCEPTS.md) |
+| **I want a structured curriculum → Learning Path** | [docs/LEARNING_PATH.md](docs/LEARNING_PATH.md) |
 
 ---
 
