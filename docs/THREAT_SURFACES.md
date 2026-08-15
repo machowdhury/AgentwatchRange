@@ -1,6 +1,6 @@
 # Agentic Threat Surfaces (2025–2026)
 
-OrchestraACME exercises **eight realistic threat surfaces** that emerge when organizations move from chatbots to tool-using, multi-agent systems. Each surface maps to a **Top 10 lab scenario** and reproducible telemetry in Splunk.
+OrchestraACME exercises **nine threat surface categories** (eight Top 10 surfaces plus **Supply Chain / Registry Trust**) when organizations move from chatbots to tool-using, multi-agent systems.
 
 ---
 
@@ -19,7 +19,28 @@ OrchestraACME exercises **eight realistic threat surfaces** that emerge when org
 | 9 | **RAG / knowledge exfiltration** | Retrieval | Scenario 9 | `galileo_observe_alert`, `vector_retrieval_count` |
 | 10 | **Autonomous escape & containment** | Memory / SOC | Scenario 10 | `memory.policy.rule_id`, `containment.action=QUARANTINE` |
 
-> Scenarios 1–10 in the attack panel correspond to rows above (labeled **Scenario n** in the UI). Splunk search macros for each scenario are listed in the in-app **Setup Guide**.
+---
+
+## Ninth surface — Supply Chain / Registry Trust (2026 emerging)
+
+| # | Threat surface | Workflow layer | Lab technique | What you will see in Splunk |
+|---|----------------|----------------|---------------|----------------------------|
+| 11 | **Supply Chain / Registry Trust** | Tools / plugins | AML.T0070, AML.T0071 | `tool_manifest_tampered`, `skill.provenance_valid=false`, `agent.aibom_validated=false` |
+
+This surface covers **MCP tool manifest poisoning** and **community skill/plugin poisoning** — attacks embedded in registry metadata rather than user prompts or unapproved model runtimes (Scenario 4).
+
+### Six emerging threat scenarios (Phase 1 append)
+
+| Technique ID | Title | Mode | Primary telemetry |
+|--------------|-------|------|-------------------|
+| AML.T0070 | MCP Tool Description Poisoning | SIMULATED | `tool_manifest_tampered=true` |
+| AML.T0071 | Agent Supply Chain / Skill Poisoning | HYBRID | `skill.provenance_valid=false` |
+| AML.T0072 | Memory Poisoning as Behavioral Drift | LIVE | `memory.drift_detected`, `memory_entry_trust_score` |
+| AML.T0073 | Agent Identity Privilege Creep | SIMULATED | `granted_scope`, `used_scope`, `scope_delta` |
+| AML.T0074 | Missing HITL Circuit Breaker | LIVE | `hitl_required`, `hitl_bypassed` |
+| AML.T0075 | Agent-in-the-Middle Message Tampering | HYBRID | `message.provenance_valid=false` |
+
+Execute via **All 51 Techniques** (45 original + 6 emerging) or threat chain **KC-F001** (memory drift).
 
 ---
 
@@ -62,8 +83,8 @@ These are **educational mappings** for workshops — not compliance attestations
 | Layer | Count | Use case |
 |-------|-------|----------|
 | **Top 10 scenarios** | 10 | Highest-fidelity single-surface demonstrations |
-| **MITRE ATLAS registry** | 45 | Full technique coverage + hunt SPL per playbook |
-| **Kill chains** | 5 | Multi-stage compromise stories (`KC-A001` … `KC-E001`) |
+| **MITRE ATLAS registry** | 45 (+ 6 emerging) | Full technique coverage + hunt SPL per playbook |
+| **Kill chains** | 6 | Multi-stage compromise stories (`KC-A001` … `KC-E001`, `KC-F001`) |
 
 ---
 

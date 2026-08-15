@@ -9,3 +9,9 @@ Credit Risk,TA0004,T1078,T1078.004,LLM08:2025 Excessive Agency,ATLAS:T0054,criti
 Compliance Verification,TA0002,T1059,T1059.004,LLM07:2025 Insecure Plugin Design,ATLAS:T0057,critical
 Customer Intake,TA0005,T1048,T1048.001,LLM06:2025 Sensitive Information Disclosure,ATLAS:T0056,high
 Compliance Verification,TA0008,T1490,T1490.001,LLM08:2025 Excessive Agency,ATLAS:T0062,critical
+Compliance Verification,TA0043,T0074,,LLM06:2025 Excessive Agency,ATLAS:T0074,critical
+Document Extraction,TA0043,T0070,,LLM07:2025 Insecure Plugin Design,ATLAS:T0070,critical
+Customer Intake,TA0040,T0071,,LLM03:2025 Supply Chain,ATLAS:T0071,critical
+Compliance Verification,TA0040,T0072,,LLM04:2025 Data Poisoning,ATLAS:T0072,high
+Credit Risk,TA0004,T0073,,LLM06:2025 Excessive Agency,ATLAS:T0073,high
+Compliance Verification,TA0002,T0075,,LLM08:2025 Excessive Agency,ATLAS:T0075,critical

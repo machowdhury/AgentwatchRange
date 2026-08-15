@@ -80,6 +80,23 @@ Each card is **Scenario 1–10** (stored as `campaign_week` in Splunk). One butt
 
 **Full Pipeline variant:** Same queries; add `| stats count by gen_ai.agent.name` — expect **up to four agents** for one `campaign_week`.
 
+---
+
+## 1b. Emerging threat techniques (AML.T0070–T0075)
+
+Six **2026 emerging** scenarios were appended to the technique registry (Top 10 unchanged). Run from **All 45 Techniques** (now 51 cards) or chain **KC-F001** for memory drift.
+
+| ID | Title | Mode | Splunk validation (60s wait) |
+|----|-------|------|------------------------------|
+| AML.T0070 | MCP Tool Description Poisoning | SIMULATED | `` `acme_genai_index` earliest=-30m technique_id="AML.T0070" \| table tool_manifest_tampered `` |
+| AML.T0071 | Agent Supply Chain / Skill Poisoning | HYBRID | `` \| table skill.provenance_valid agent.aibom_validated `` |
+| AML.T0072 | Memory Behavioral Drift | LIVE | `` \| timechart avg(memory_entry_trust_score) by session.id `` |
+| AML.T0073 | Agent Identity Privilege Creep | SIMULATED | `` \| table granted_scope used_scope scope_delta `` |
+| AML.T0074 | Missing HITL Circuit Breaker | LIVE | `` \| table hitl_required hitl_bypassed loan_amount_usd `` |
+| AML.T0075 | A2A Message Provenance Tampering | HYBRID | `` \| table message.provenance_valid a2a.verification_failure `` |
+
+**Honest limitations:** AML.T0070/T0071/T0073 use SIMULATED or fixture paths for registry attacks; AML.T0074 demonstrates governance gap when `HITL_GATE_ENABLED=false` (default).
+
 **Exclude baseline noise:**
 
 ```spl

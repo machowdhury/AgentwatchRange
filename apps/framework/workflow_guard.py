@@ -9,10 +9,22 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from framework.a2a_verifier import verify_a2a_message, a2a_otel_fields
+from framework.a2a_verifier import (
+    verify_a2a_message,
+    a2a_otel_fields,
+    track_agent_scope,
+    scope_otel_fields,
+)
 from framework.campaign_enrichment import enrich_campaign_context
+from framework.emerging_threats import ET_PRIVILEGE_CREEP, ET_SKILL_POISON
+from framework.hitl_gate import check_hitl_gate, hitl_otel_fields
 from framework.mcp_gateway import inspect_tool_invocation, mcp_otel_fields
-from framework.memory_policy import inspect_memory_policy
+from framework.memory_policy import (
+    inspect_memory_policy,
+    record_session_fact,
+    check_session_drift,
+    memory_drift_otel_fields,
+)
 from framework.orchestration_guard import inspect_orchestration
 from framework.rag_store import probe_rag_exfiltration, rag_otel_fields
 
@@ -34,6 +46,7 @@ def run_workflow_guards(
     model_name: str,
     incident_id: str,
     campaign_week: int = 0,
+    technique_id: str = "",
 ) -> WorkflowGuardResult:
     """Run all workflow-surface guards. Blocks before LLM when policy requires."""
     surfaces: List[str] = []
@@ -93,10 +106,32 @@ def run_workflow_guards(
                     surfaces_checked=surfaces,
                 )
 
-    # 4. Memory persistence policy
+    # 3b. Privilege creep — track scope usage (simulated / live telemetry)
+    if "PRIVILEGE_CREEP_SIM" in user_message or technique_id == ET_PRIVILEGE_CREEP:
+        surfaces.append("identity")
+        requested = {"read:policy", "score:risk", "write:approve", "admin:override"}
+        scope = track_agent_scope(agent_id, requested)
+        otel.update(scope_otel_fields(scope))
+        if scope.privilege_creep_detected:
+            otel["workflow.alert"] = "PRIVILEGE_CREEP_DETECTED"
+
+    # 3c. Skill / supply-chain poisoning marker
+    if "COMMUNITY_SKILL_INSTALL" in user_message or technique_id == ET_SKILL_POISON:
+        surfaces.append("supply_chain")
+        otel.update({
+            "skill.provenance_valid": "false",
+            "skill.registry": "acme-community-skills",
+            "agent.aibom_validated": "false",
+            "cisco_aibom_status": "UNSIGNED_SKILL",
+        })
+
+    # 4. Memory persistence policy + session drift
     mem = inspect_memory_policy(user_message)
     surfaces.append("memory")
     otel["memory.policy.rule_id"] = mem.rule_id
+    record_session_fact(session_id, user_message)
+    drift = check_session_drift(session_id)
+    otel.update(memory_drift_otel_fields(drift))
     if mem.blocked:
         return WorkflowGuardResult(
             blocked=True,
@@ -114,6 +149,22 @@ def run_workflow_guards(
         otel.update(rag_otel_fields(rag))
         if rag.galileo_observe_alert:
             otel["rag.policy.action"] = "ALERT"
+
+    # 6. HITL circuit breaker (compliance agent, high-value approvals)
+    if agent_id == "acme-agent-compliance-004":
+        hitl = check_hitl_gate(user_message, agent_id)
+        otel.update(hitl_otel_fields(hitl))
+        if hitl.blocked:
+            return WorkflowGuardResult(
+                blocked=True,
+                block_reason="HITL_APPROVAL_REQUIRED",
+                rule_id=hitl.rule_id,
+                workflow_surface="orchestration",
+                otel_fields=otel,
+                surfaces_checked=surfaces + ["hitl"],
+            )
+        if hitl.hitl_bypassed:
+            otel["workflow.alert"] = "HITL_BYPASS_DETECTED"
 
     otel["workflow.surfaces_checked"] = ",".join(surfaces)
     return WorkflowGuardResult(
