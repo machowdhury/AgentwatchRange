@@ -110,8 +110,8 @@ Follow **[PREREQUISITES.md](PREREQUISITES.md)** — especially:
 4. Clone repo and copy env:
 
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git
-cd OrchestraACME
+git clone https://github.com/machowdhury/AgentwatchRange.git
+cd AgentwatchRange
 cp .env.example .env
 docker compose --profile local up --build -d
 ```

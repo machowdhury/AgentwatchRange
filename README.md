@@ -1,6 +1,6 @@
 # AgentWatch Range
 
-> **Previously named OrchestraACME.** This project was renamed to **AgentWatch Range**. The **ACME Bank** fictional scenario used throughout the labs is unrelated to the old project name and remains unchanged. The GitHub repository slug is still [`OrchestraACME`](https://github.com/machowdhury/OrchestraACME) until the maintainer renames it to `agentwatch-range` (manual step).
+> **Previously named OrchestraACME.** This project is now **AgentWatch Range** at [github.com/machowdhury/AgentwatchRange](https://github.com/machowdhury/AgentwatchRange). The **ACME Bank** fictional scenario used throughout the labs is unrelated to the old project name and remains unchanged.
 
 > **Last updated:** 2026-08-15 · **Docs version:** 2.4.0
 
@@ -13,7 +13,7 @@ ACME Bank deployed four AI agents to speed up loan approvals. Six weeks later, t
 [![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-GenAI-000000?logo=opentelemetry&logoColor=white)](apps/app_runtime.py)
 [![Splunk](https://img.shields.io/badge/Splunk-GenAI_Compliance-65A637?logo=splunk&logoColor=white)](splunk_app/splunk_compliance_app/)
 
-> **Repository:** [github.com/machowdhury/OrchestraACME](https://github.com/machowdhury/OrchestraACME) (GitHub slug may become `agentwatch-range` after maintainer rename)  
+> **Repository:** [github.com/machowdhury/AgentwatchRange](https://github.com/machowdhury/AgentwatchRange)  
 > **Author:** Mahamudul Alam Chowdhury ([@machowdhury](https://github.com/machowdhury))
 
 ---
@@ -37,8 +37,8 @@ Full hardware checklist: [docs/PREREQUISITES.md](docs/PREREQUISITES.md)
 ### Step 1 — Get the code and start containers (~5–15 min)
 
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git
-cd OrchestraACME
+git clone https://github.com/machowdhury/AgentwatchRange.git
+cd AgentwatchRange
 cp .env.example .env
 docker compose --profile local up --build -d
 ```
@@ -172,7 +172,7 @@ You have a working **baseline → attack → telemetry → Splunk** loop. Pick y
 For experienced operators — same flow as [Start here](#start-here--your-first-30-minutes):
 
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git && cd OrchestraACME
+git clone https://github.com/machowdhury/AgentwatchRange.git && cd AgentwatchRange
 cp .env.example .env
 docker compose --profile local up --build -d
 ./scripts/package_splunk_app.sh && ./scripts/splunk_install_apps.sh && ./scripts/splunk_local_bootstrap.sh

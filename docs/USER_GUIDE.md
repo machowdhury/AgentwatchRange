@@ -21,8 +21,8 @@ Run the lab from the **Attack Panel**, generate telemetry, hunt in Splunk, and *
 > **Complete checklist:** **[PREREQUISITES.md](PREREQUISITES.md)** — hardware, Docker install (Ubuntu/macOS/Windows), `docker.sock` permissions, Splunk one-time setup, verification.
 
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git
-cd OrchestraACME
+git clone https://github.com/machowdhury/AgentwatchRange.git
+cd AgentwatchRange
 cp .env.example .env
 docker compose --profile local up --build -d
 ```

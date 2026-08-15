@@ -139,8 +139,8 @@ Compose v2 ignores the top-level `version:` key in `docker-compose.yml`. Safe to
 ## Clone and configure
 
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git
-cd OrchestraACME
+git clone https://github.com/machowdhury/AgentwatchRange.git
+cd AgentwatchRange
 cp .env.example .env
 ```
 

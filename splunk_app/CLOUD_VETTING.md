@@ -102,4 +102,4 @@ If you do not have AppInspect locally, upload to a Splunk Cloud **test stack** f
 
 - [INSTALL.md](INSTALL.md) — full install for local Docker, Cloud, Enterprise
 - [docs/USER_GUIDE.md](../docs/USER_GUIDE.md) — dashboard meanings and Workshop paths
-- Repository: https://github.com/machowdhury/OrchestraACME
+- Repository: https://github.com/machowdhury/AgentwatchRange

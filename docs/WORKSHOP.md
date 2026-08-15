@@ -324,7 +324,7 @@ Path **A** is the default in this guide. Path **B** skips the local Splunk conta
 2. Go to the project folder:
 
    ```bash
-   cd OrchestraACME
+   cd AgentwatchRange
    ```
 
    *(Use the actual folder name where you cloned the repo.)*

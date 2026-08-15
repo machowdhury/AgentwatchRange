@@ -12,7 +12,7 @@ Install, configure, API examples, troubleshooting. Concepts and architecture: [C
 > **Same steps as [Start here](../README.md#start-here--your-first-30-minutes)** — kept for deep links.
 
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git && cd OrchestraACME
+git clone https://github.com/machowdhury/AgentwatchRange.git && cd AgentwatchRange
 cp .env.example .env
 docker compose --profile local up --build -d
 ./scripts/package_splunk_app.sh && ./scripts/splunk_install_apps.sh && ./scripts/splunk_local_bootstrap.sh
@@ -250,8 +250,8 @@ python3 scripts/sync_splunk_lookups.py
 > **Prerequisites (Docker install, permissions, hardware):** [PREREQUISITES.md](PREREQUISITES.md)
 
 ```bash
-git clone https://github.com/machowdhury/OrchestraACME.git
-cd OrchestraACME
+git clone https://github.com/machowdhury/AgentwatchRange.git
+cd AgentwatchRange
 cp .env.example .env
 ```
 

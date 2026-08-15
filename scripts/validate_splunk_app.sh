@@ -103,12 +103,12 @@ else
   pass "HTML panels avoid inline color/background styles"
 fi
 
-# Phase 8 — OrchestraACME project rename (allowed legacy strings: README migration note, GitHub slug, clone folder)
+# Phase 8 — project rename verification (allowed legacy: README OrchestraACME mention, phase8 script)
 PHASE8_HITS="$(rg -i 'orchestraacme|orchestra-acme|orchestra_acme' \
   --glob '!scripts/phase8_bulk_rename.py' \
   --glob '!README.md' \
   --glob '!prevbuild/**' \
-  "${ROOT_DIR}" 2>/dev/null | rg -v 'github.com/machowdhury/OrchestraACME|cd OrchestraACME' || true)"
+  "${ROOT_DIR}" 2>/dev/null | rg -v 'github.com/machowdhury/AgentwatchRange|cd AgentwatchRange' || true)"
 if [[ -n "${PHASE8_HITS}" ]]; then
   echo "${PHASE8_HITS}"
   fail "Phase 8 rename incomplete — unexpected OrchestraACME/orchestra-acme references"

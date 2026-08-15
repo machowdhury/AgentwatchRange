@@ -264,6 +264,6 @@ See **[splunk_app/CLOUD_VETTING.md](CLOUD_VETTING.md)** for the full checklist a
 
 ## Support
 
-- Repository: https://github.com/machowdhury/OrchestraACME
+- Repository: https://github.com/machowdhury/AgentwatchRange
 - In-app guide: **GenAI Compliance Monitor → Setup Guide**
 - Cloud vetting: [splunk_app/CLOUD_VETTING.md](CLOUD_VETTING.md)
