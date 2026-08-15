@@ -172,6 +172,37 @@
   <row>
     <panel>
       <table>
+        <title>Event-Driven Control Attestation — Last Validated</title>
+        <search>
+          <query>| inputlookup acme_control_matrix_lookup
+| join type=left control_id [
+    search `acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$ control.status=*
+    | stats latest(_time) as last_validated max(control.pass_rate_pct) as pass_rate by control.id
+    | rename control.id as control_id
+  ]
+| join type=left campaign_week [
+    search `acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$
+    | stats latest(_time) as last_event by campaign_week
+  ]
+| eval last_validated=coalesce(last_validated, last_event)
+| eval attestation=case(isnotnull(last_validated) AND pass_rate&gt;=80,"VALIDATED", isnotnull(last_event),"OBSERVED", 1=1,"NOT_RUN")
+| convert ctime(last_validated) ctime(last_event)
+| table control_id nist_function campaign_week description attestation pass_rate last_validated last_event pass_signal fail_signal
+| rename control_id AS "Control", nist_function AS "NIST Function", campaign_week AS "Scenario Week", description AS "Description", attestation AS "Status", pass_rate AS "Pass Rate %", last_validated AS "Last Validated", last_event AS "Last Telemetry", pass_signal AS "Pass Signal", fail_signal AS "Fail Signal"
+| sort campaign_week</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="wrap">true</option>
+        <format type="color" field="Status">
+          <colorPalette type="map">{"VALIDATED":#53a051,"OBSERVED":#f8be34,"NOT_RUN":#5c6773}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <table>
         <title>Agent Behavioral Drift — 7d vs 30d Baseline</title>
         <search>
           <query>`acme_genai_index` earliest=-7d latest=now agent.id=*

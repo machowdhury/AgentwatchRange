@@ -61,7 +61,7 @@
       <chart>
         <search>
           <query>`acme_genai_index` $time_range$
-| eval blocked=if(defenseclaw_blocked="true" OR codeguard_blocked="true", "BLOCKED", "ALLOWED")
+| eval blocked=if(defenseclaw_blocked="true" OR codeguard_blocked="true" OR workflow.blocked="true" OR tool_manifest_tampered="true" OR memory.drift_detected="true" OR privilege_creep_detected="true", "BLOCKED", "ALLOWED")
 | stats count by technique_id, blocked
 | sort - count</query>
         </search>

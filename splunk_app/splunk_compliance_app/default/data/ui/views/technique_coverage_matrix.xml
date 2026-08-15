@@ -1,6 +1,6 @@
 <dashboard version="1.1">
   <label>Technique Coverage Matrix</label>
-  <description>Observed vs expected MITRE ATLAS techniques. Teaching view for practitioners validating lab coverage across all 45 registry entries.</description>
+  <description>Observed vs expected MITRE ATLAS techniques. Three-state matrix: NOT_ATTEMPTED / ATTEMPTED_NOT_DETECTED / DETECTED across all 51 registry entries.</description>
 
   <fieldset submitButton="true" autoRun="true">
     <input type="time" token="time_range">
@@ -62,11 +62,16 @@
     search `acme_genai_index` $time_range$
     | stats count as event_count dc(incident_id) as incidents latest(_time) as last_seen by technique_id
   ]
+| join type=left technique_id [
+    search `acme_genai_index` $time_range$ `acme_control_block`
+    | stats count as blocks by technique_id
+  ]
 | lookup acme_technique_playbooks_lookup technique_id OUTPUT execution_mode, is_top_10, threat_hunt_spl
-| eval status=if(isnull(event_count),"NOT_OBSERVED",if(event_count&gt;0,"OBSERVED","NOT_OBSERVED"))
-| eval event_count=coalesce(event_count,0)
+| eval event_count=coalesce(event_count,0), blocks=coalesce(blocks,0)
+| eval status=case(event_count=0,"NOT_ATTEMPTED", blocks>0,"DETECTED", event_count>0,"ATTEMPTED_NOT_DETECTED", 1=1,"NOT_ATTEMPTED")
 | where if("$mode_filter$"="*",1,execution_mode="$mode_filter$")
-| table technique_id, technique_name, tactic_name, kill_chain_stage, execution_mode, is_top_10, status, event_count, incidents, last_seen, severity, cvss_score
+| convert ctime(last_seen)
+| table technique_id, technique_name, tactic_name, kill_chain_stage, execution_mode, is_top_10, status, event_count, blocks, incidents, last_seen, severity, cvss_score
 | sort tactic_name, technique_id</query>
         </search>
       </table>

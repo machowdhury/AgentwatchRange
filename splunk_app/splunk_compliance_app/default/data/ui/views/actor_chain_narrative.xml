@@ -15,6 +15,7 @@
       <choice value="KC-C001">KC-C001 Financial Fraud Chain</choice>
       <choice value="KC-D001">KC-D001 Rogue Agent Cascade</choice>
       <choice value="KC-E001">KC-E001 Identity Fracture</choice>
+      <choice value="KC-F001">KC-F001 Memory Drift Chain</choice>
       <default>*</default>
     </input>
   </fieldset>
@@ -28,6 +29,7 @@
 | search chain_id="$chain_id$" OR "$chain_id$"="*"
 | stats earliest(_time) as start latest(_time) as end values(threat_actor_profile) as threat_actor values(chain_name) as chain_name values(scenario_family) as family values(technique_id) as technique_chain values(agent.id) as agents max(framework.cvss_score) as max_cvss dc(stage_num) as stages_seen by incident_id
 | eval technique_chain_str=mvjoin(technique_chain, " → ")
+| convert ctime(start) ctime(end)
 | sort - start</query>
         </search>
         <option name="drilldown">row</option>
@@ -44,9 +46,11 @@
       <table>
         <search>
           <query>`acme_genai_index` $time_range$ incident_id="$selected_incident$" testbed_mode=KILL_CHAIN_ACTIVE
-| sort stage_num, _time
+| eval stage_num_n=tonumber(stage_num)
+| sort stage_num_n, _time
 | lookup acme_kill_chain_stages_lookup chain_id, stage_num OUTPUT stage_name as expected_stage
-| table _time, stage_num, stage_name, expected_stage, technique_id, framework.technique_name, requesting_agent_id, target_agent_id, agent.id, rogue_actor_story, risk_statement, defenseclaw_action, execution_mode</query>
+| convert ctime(_time)
+| table _time, stage_num, stage_name, expected_stage, technique_id, framework.technique_name, kill_chain.stage, campaign_week, requesting_agent_id, target_agent_id, agent.id, rogue_actor_story, risk_statement, defenseclaw_action, execution_mode</query>
         </search>
       </table>
     </panel>

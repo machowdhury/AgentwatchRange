@@ -692,6 +692,7 @@ class ChainEngine:
         event = {
             "event_type": f"TECHNIQUE_{technique_id.replace('.', '_')}",
             "incident_id": incident_id,
+            "campaign_week": str((extra_fields or {}).get("campaign_week", "0")),
             "chain_id": "SINGLE_TECHNIQUE",
             "technique_id": technique.technique_id,
             "stage_name": technique.technique_name,
@@ -738,6 +739,7 @@ class ChainEngine:
             "threat_actor_profile": chain.threat_actor_profile,
             "real_world_analogy": chain.real_world_analogy,
             "chain_total_cvss": str(chain.total_cvss_score),
+            "campaign_week": "0",
 
             # Full technique taxonomy enrichment (all framework fields)
             **technique.to_otel_attributes(),
