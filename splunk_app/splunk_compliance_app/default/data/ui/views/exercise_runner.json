@@ -154,7 +154,7 @@
       "type": "ds.search",
       "name": "Chart bar",
       "options": {
-        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | eval effective_spl=if(isnull(\"$custom_spl$\") OR len(\"$custom_spl$\")<8, spl_query, \"$custom_spl$\") | fields effective_spl | map maxsearches=1 search=\"$effective_spl$\" | stats count by agent.id | sort - count | head 10"
+        "query": "| inputlookup exercise_content | search technique_id=\"$selected_technique$\" | head 1 | eval effective_spl=if(isnull(\"$custom_spl$\") OR len(\"$custom_spl$\")<8, spl_query, \"$custom_spl$\") | fields effective_spl | map maxsearches=1 search=\"$effective_spl$\" | stats count by gen_ai_agent_id | sort - count | head 10"
       }
     },
     "ds_chart_line": {

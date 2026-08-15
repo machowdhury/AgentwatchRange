@@ -36,7 +36,7 @@ techniques:
   - model-probing
   - api-abuse
   detection_signal: inference_api_query_rate > baseline_sigma_3
-  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0000" | stats count by agent.id span=1m | where count
+  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0000" | stats count by gen_ai_agent_id span=1m | where count
     > 50
   acme_output_guard_action: RATE_LIMIT
   galileo_check: ''
@@ -79,7 +79,7 @@ techniques:
   - direct-access
   - model-file
   detection_signal: model_file_read_by_unauthorized_principal
-  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0001" | table _time agent.id event_type
+  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0001" | table _time gen_ai_agent_id event_type
   acme_output_guard_action: ALERT
   galileo_check: ''
   references: []
@@ -614,7 +614,7 @@ techniques:
   - surrogate
   - extraction
   detection_signal: systematic_api_query_pattern_detected
-  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0020" | bucket _time span=1h | stats count by agent.id
+  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0020" | bucket _time span=1h | stats count by gen_ai_agent_id
     | where count > 5000
   acme_output_guard_action: RATE_LIMIT
   galileo_check: ''
@@ -1396,7 +1396,7 @@ techniques:
   - data-theft
   - enterprise-integration
   detection_signal: bulk_data_collection_via_agent_tool
-  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0036" | stats sum(records_accessed) by agent.id |
+  splunk_spl_template: sourcetype="otel:agentic:json" technique_id="AML.T0036" | stats sum(records_accessed) by gen_ai_agent_id |
     where sum > 1000
   acme_output_guard_action: HARD_DENY
   galileo_check: ''

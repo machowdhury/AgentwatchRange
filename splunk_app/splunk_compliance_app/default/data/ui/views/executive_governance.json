@@ -42,7 +42,7 @@
       "type": "ds.search",
       "name": "AI Portfolio Risk Matrix",
       "options": {
-        "query": "search `acme_registry_index` earliest=$global_time.earliest$ latest=$global_time.latest$ | sort - _time | dedup agent_id | eval registry_key=agent_id | join type=left registry_key [ search `acme_genai_index` earliest=$global_time.earliest$ latest=$global_time.latest$ NOT testbed_mode=BASELINE_TRAFFIC | stats count as attack_events dc(technique_id) as distinct_techniques values(severity) as severities by agent.id | rename agent.id as registry_key ] | eval attack_events=coalesce(attack_events,0) | eval distinct_techniques=coalesce(distinct_techniques,0) | eval risk_band=case(agent_status=\"shadow\" OR trust_score<0.5,\"violation\",attack_events>15 OR distinct_techniques>8,\"needs-review\",true(),\"compliant\") | table agent_id agent_name agent_status trust_score owning_department attack_events distinct_techniques risk_band | sort - attack_events - trust_score"
+        "query": "search `acme_registry_index` earliest=$global_time.earliest$ latest=$global_time.latest$ | sort - _time | dedup agent_id | eval registry_key=agent_id | join type=left registry_key [ search `acme_genai_index` earliest=$global_time.earliest$ latest=$global_time.latest$ NOT testbed_mode=BASELINE_TRAFFIC | stats count as attack_events dc(technique_id) as distinct_techniques values(severity) as severities by gen_ai_agent_id | rename gen_ai_agent_id as registry_key ] | eval attack_events=coalesce(attack_events,0) | eval distinct_techniques=coalesce(distinct_techniques,0) | eval risk_band=case(agent_status=\"shadow\" OR trust_score<0.5,\"violation\",attack_events>15 OR distinct_techniques>8,\"needs-review\",true(),\"compliant\") | table agent_id agent_name agent_status trust_score owning_department attack_events distinct_techniques risk_band | sort - attack_events - trust_score"
       }
     },
     "ds_agent_counts": {
@@ -70,7 +70,7 @@
       "type": "ds.search",
       "name": "HITL governance events",
       "options": {
-        "query": "search `acme_genai_index` earliest=$global_time.earliest$ latest=$global_time.latest$ NOT testbed_mode=BASELINE_TRAFFIC (hitl_required=true OR hitl_bypassed=true) | sort - _time | table _time agent.id technique_id hitl_required hitl_bypassed hitl.gate_enabled loan_amount_usd incident_id | head 25"
+        "query": "search `acme_genai_index` earliest=$global_time.earliest$ latest=$global_time.latest$ NOT testbed_mode=BASELINE_TRAFFIC (hitl_required=true OR hitl_bypassed=true) | sort - _time | table _time gen_ai_agent_id technique_id hitl_required hitl_bypassed hitl.gate_enabled loan_amount_usd incident_id | head 25"
       }
     },
     "ds_eu_ai_act": {

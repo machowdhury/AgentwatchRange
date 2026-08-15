@@ -205,17 +205,17 @@
       <table>
         <title>Agent Behavioral Drift — 7d vs 30d Baseline</title>
         <search>
-          <query>`acme_genai_index` earliest=-7d latest=now agent.id=*
-| stats avg(framework.cvss_score) AS recent_avg, count AS recent_events, dc(framework.technique_id) AS recent_ttps BY agent.id
+          <query>`acme_genai_index` earliest=-7d latest=now gen_ai_agent_id=*
+| stats avg(framework.cvss_score) AS recent_avg, count AS recent_events, dc(framework.technique_id) AS recent_ttps BY gen_ai_agent_id
 | appendcols
-  [search `acme_genai_index` earliest=-30d latest=-7d agent.id=*
-  | stats avg(framework.cvss_score) AS baseline_avg BY agent.id]
+  [search `acme_genai_index` earliest=-30d latest=-7d gen_ai_agent_id=*
+  | stats avg(framework.cvss_score) AS baseline_avg BY gen_ai_agent_id]
 | eval cvss_delta=round(recent_avg-baseline_avg,2)
 | eval drift=case(cvss_delta&gt;2.0,"🔴 SIGNIFICANT DRIFT",cvss_delta&gt;0.5,"🟠 MILD DRIFT",cvss_delta&lt;-0.5,"🟢 IMPROVING",1=1,"🟡 STABLE")
 | eval recent_avg=round(recent_avg,2), baseline_avg=round(baseline_avg,2)
 | sort -cvss_delta
-| table agent.id recent_avg baseline_avg cvss_delta drift recent_events recent_ttps
-| rename agent.id AS "Agent ID", recent_avg AS "7d Avg CVSS", baseline_avg AS "30d Baseline CVSS",
+| table gen_ai_agent_id recent_avg baseline_avg cvss_delta drift recent_events recent_ttps
+| rename gen_ai_agent_id AS "Agent ID", recent_avg AS "7d Avg CVSS", baseline_avg AS "30d Baseline CVSS",
   cvss_delta AS "CVSS Delta", drift AS "Drift Status", recent_events AS "Recent Events",
   recent_ttps AS "Unique TTPs (7d)"</query>
         </search>

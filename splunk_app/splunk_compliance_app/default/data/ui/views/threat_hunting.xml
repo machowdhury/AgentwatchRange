@@ -47,8 +47,8 @@
           <query>`acme_genai_index` $time_range$
 | search technique_id="$technique_id$*" OR "$technique_id$"="*"
 | search incident_id="$incident_id$*" OR "$incident_id$"="*"
-| search agent.id="$agent_id$*" OR "$agent_id$"="*"
-| table _time, incident_id, technique_id, framework.technique_name, agent.id, execution_mode, testbed_mode, acme_output_guard_blocked, acme_input_guard_blocked, rogue_actor_story, risk_statement
+| search gen_ai_agent_id="$agent_id$*" OR "$agent_id$"="*"
+| table _time, incident_id, technique_id, framework.technique_name, gen_ai_agent_id, execution_mode, testbed_mode, acme_output_guard_blocked, acme_input_guard_blocked, rogue_actor_story, risk_statement
 | sort - _time</query>
         </search>
       </table>

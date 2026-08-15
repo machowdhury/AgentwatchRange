@@ -142,8 +142,8 @@
         <search>
           <query>`acme_genai_index` earliest=$time_range.earliest$ latest=$time_range.latest$
 (mltk.ctsm_signal=true OR cisco_tsm_anomaly_score&gt;0.8 OR call_depth_detected&gt;5)
-| table _time incident_id campaign_week agent.id call_depth_detected gen_ai_input_tokens gen_ai_output_tokens tokens_consumed_in_loop cisco_tsm_anomaly_score api_cost_projected_usd technique_id
-| rename _time AS Time incident_id AS "Incident" campaign_week AS "Scenario" agent.id AS Agent call_depth_detected AS "Call Depth" gen_ai_input_tokens AS "Input Tokens" gen_ai_output_tokens AS "Output Tokens" tokens_consumed_in_loop AS "Loop Tokens" cisco_tsm_anomaly_score AS "TSM Score" api_cost_projected_usd AS "Est. Cost USD" technique_id AS Technique</query>
+| table _time incident_id campaign_week gen_ai_agent_id call_depth_detected gen_ai_input_tokens gen_ai_output_tokens tokens_consumed_in_loop cisco_tsm_anomaly_score api_cost_projected_usd technique_id
+| rename _time AS Time incident_id AS "Incident" campaign_week AS "Scenario" gen_ai_agent_id AS Agent call_depth_detected AS "Call Depth" gen_ai_input_tokens AS "Input Tokens" gen_ai_output_tokens AS "Output Tokens" tokens_consumed_in_loop AS "Loop Tokens" cisco_tsm_anomaly_score AS "TSM Score" api_cost_projected_usd AS "Est. Cost USD" technique_id AS Technique</query>
         </search>
         <option name="drilldown">row</option>
         <drilldown>
@@ -178,10 +178,10 @@
 | table _time call_depth_detected tokens_consumed_in_loop cisco_tsm_anomaly_score mltk.ctsm_signal</code></pre>
         <p><strong>Scenario 9 — RAG invisible leak (behavioral)</strong></p>
         <pre><code>`acme_genai_index` earliest=-1h campaign_week=9 galileo_observe_alert=true
-| stats count by agent.id galileo_anomaly_score framework.technique_id</code></pre>
+| stats count by gen_ai_agent_id galileo_anomaly_score framework.technique_id</code></pre>
         <p><strong>Scenario 1 — AI BOM drift</strong></p>
         <pre><code>`acme_genai_index` earliest=-1h cisco_aibom_status!=MATCH
-| table _time agent.id cisco.aibom.scanner cisco.aibom.status model_artifact_hash_expected model_artifact_hash_found</code></pre>
+| table _time gen_ai_agent_id cisco.aibom.scanner cisco.aibom.status model_artifact_hash_expected model_artifact_hash_found</code></pre>
         <p><strong>Foundation-Sec-8B enrich</strong> (banking app API):</p>
         <pre><code>curl -s -X POST http://localhost:5000/api/v1/hunt/foundation-sec \
   -H "Content-Type: application/json" \

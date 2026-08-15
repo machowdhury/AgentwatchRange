@@ -172,7 +172,7 @@
 | lookup acme_owasp_llm_lookup id AS framework.owasp_llm OUTPUTNEW name severity
 | mvexpand framework.owasp_llm
 | search framework.owasp_llm=LLM*
-| stats count AS events, max(framework.cvss_score) AS max_cvss, dc(agent.id) AS agents_affected BY framework.owasp_llm
+| stats count AS events, max(framework.cvss_score) AS max_cvss, dc(gen_ai_agent_id) AS agents_affected BY framework.owasp_llm
 | lookup acme_owasp_llm_lookup id AS framework.owasp_llm OUTPUTNEW name
 | eval risk_status=case(events>0 AND max_cvss>=9.0,"🔴 CRITICAL ACTIVE",events>0 AND max_cvss>=7.0,"🟠 HIGH ACTIVE",events>0,"🟡 ACTIVE",1=1,"🟢 NOT OBSERVED")
 | eval max_cvss=round(max_cvss,1)
@@ -196,7 +196,7 @@
           <query>`acme_genai_index` `acme_last_7d`
 | mvexpand framework.owasp_asi
 | search framework.owasp_asi=ASI*
-| stats count AS events, max(framework.cvss_score) AS max_cvss, dc(agent.id) AS agents_affected BY framework.owasp_asi
+| stats count AS events, max(framework.cvss_score) AS max_cvss, dc(gen_ai_agent_id) AS agents_affected BY framework.owasp_asi
 | lookup acme_owasp_asi_lookup id AS framework.owasp_asi OUTPUTNEW name
 | eval risk_status=case(events>0 AND max_cvss>=9.0,"🔴 CRITICAL ACTIVE",events>0 AND max_cvss>=7.0,"🟠 HIGH ACTIVE",events>0,"🟡 ACTIVE",1=1,"🟢 NOT OBSERVED")
 | eval max_cvss=round(max_cvss,1)
@@ -220,14 +220,14 @@
       <table>
         <title>Top 10 Agents by Risk Score</title>
         <search>
-          <query>`acme_genai_index` `acme_last_7d` agent.id=*
-| stats count AS events, avg(framework.cvss_score) AS avg_cvss, max(framework.cvss_score) AS max_cvss, dc(framework.technique_id) AS unique_ttps BY agent.id
+          <query>`acme_genai_index` `acme_last_7d` gen_ai_agent_id=*
+| stats count AS events, avg(framework.cvss_score) AS avg_cvss, max(framework.cvss_score) AS max_cvss, dc(framework.technique_id) AS unique_ttps BY gen_ai_agent_id
 | eval avg_cvss=round(avg_cvss,2), max_cvss=round(max_cvss,1)
 | eval risk_tier=case(max_cvss>=9.0,"CRITICAL",max_cvss>=7.0,"HIGH",max_cvss>=4.0,"MEDIUM",1=1,"LOW")
 | sort -max_cvss
 | head 10
-| table agent.id risk_tier events unique_ttps avg_cvss max_cvss
-| rename agent.id AS "Agent ID", risk_tier AS "Risk Tier", events AS "Events", unique_ttps AS "Unique TTPs", avg_cvss AS "Avg CVSS", max_cvss AS "Max CVSS"</query>
+| table gen_ai_agent_id risk_tier events unique_ttps avg_cvss max_cvss
+| rename gen_ai_agent_id AS "Agent ID", risk_tier AS "Risk Tier", events AS "Events", unique_ttps AS "Unique TTPs", avg_cvss AS "Avg CVSS", max_cvss AS "Max CVSS"</query>
           <earliest>-7d</earliest>
           <latest>now</latest>
         </search>
@@ -242,10 +242,10 @@
         <title>Recent AcmeSentinel Actions</title>
         <search>
           <query>`acme_genai_index` `acme_last_24h` acme_output_guard_action=*
-| table _time agent.id framework.technique_id framework.technique_name acme_output_guard_action acme_output_guard_rule_id framework.severity
+| table _time gen_ai_agent_id framework.technique_id framework.technique_name acme_output_guard_action acme_output_guard_rule_id framework.severity
 | sort -_time
 | head 20
-| rename _time AS "Time", agent.id AS "Agent", framework.technique_id AS "Technique", framework.technique_name AS "Technique Name", acme_output_guard_action AS "Action", acme_output_guard_rule_id AS "Rule ID", framework.severity AS "Severity"</query>
+| rename _time AS "Time", gen_ai_agent_id AS "Agent", framework.technique_id AS "Technique", framework.technique_name AS "Technique Name", acme_output_guard_action AS "Action", acme_output_guard_rule_id AS "Rule ID", framework.severity AS "Severity"</query>
           <earliest>-24h</earliest>
           <latest>now</latest>
         </search>

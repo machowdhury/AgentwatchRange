@@ -84,7 +84,7 @@ def _triage_runbook(technique, playbook) -> str:
             "1. Check `acme_input_guard_blocked` and `workflow.blocked` — confirm which control layer engaged."
         )
     steps.append(
-        "2. Pivot on `incident_id` and `agent.id` — look for multi-stage correlation in Kill-Chain Timeline."
+        "2. Pivot on `incident_id` and `gen_ai_agent_id` — look for multi-stage correlation in Kill-Chain Timeline."
     )
     if technique.detection_signal:
         steps.append(

@@ -19,7 +19,7 @@
       <html>
         <p>Real environments run <b>multiple agentic stacks</b> with incompatible field names. This lab ships three deliberate conventions:</p>
         <ul>
-          <li><code>otel:agentic:json</code> — primary OTel GenAI pipeline (<code>gen_ai.usage.input_tokens</code>, <code>acme_output_guard.action</code>)</li>
+          <li><code>otel:agentic:json</code> — primary OTel GenAI pipeline (<code>gen_ai_input_tokens</code>, <code>acme_output_guard_action</code>)</li>
           <li><code>acme:agentic:sim:json</code> — synthetic vendor-platform shape (<code>sim_objective</code>, <code>agent_name</code>)</li>
           <li><code>acme:agentic:registry:json</code> — agent inventory snapshots (<code>agent_status</code>, <code>trust_score</code>)</li>
         </ul>
@@ -36,7 +36,7 @@
           <query>`acme_agentic_all_sources` $global_time$
 | eval source_app=case(sourcetype="otel:agentic:json", "primary_otel", sourcetype="acme:agentic:sim:json", "sim", sourcetype="acme:agentic:thirdparty:json", "third_party", 1=1, "other")
 | head 15
-| table _time source_app sourcetype gen_ai.agent.name agent.id agent_name agent_id acme_output_guard.action policy_action policy_result threat_label gen_ai.usage.input_tokens gen_ai_input_tokens token_count_in</query>
+| table _time source_app sourcetype gen_ai_agent_name gen_ai_agent_id agent_name agent_id acme_output_guard_action policy_action policy_result threat_label gen_ai_input_tokens gen_ai_input_tokens token_count_in</query>
           <earliest>$global_time.earliest$</earliest>
           <latest>$global_time.latest$</latest>
         </search>

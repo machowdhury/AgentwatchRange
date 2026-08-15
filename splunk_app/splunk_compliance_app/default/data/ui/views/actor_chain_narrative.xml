@@ -27,7 +27,7 @@
         <search>
           <query>`acme_genai_index` $time_range$ testbed_mode=KILL_CHAIN_ACTIVE incident_id=*
 | search chain_id="$chain_id$" OR "$chain_id$"="*"
-| stats earliest(_time) as start latest(_time) as end values(threat_actor_profile) as threat_actor values(chain_name) as chain_name values(scenario_family) as family values(technique_id) as technique_chain values(agent.id) as agents max(framework.cvss_score) as max_cvss dc(stage_num) as stages_seen by incident_id
+| stats earliest(_time) as start latest(_time) as end values(threat_actor_profile) as threat_actor values(chain_name) as chain_name values(scenario_family) as family values(technique_id) as technique_chain values(gen_ai_agent_id) as agents max(framework.cvss_score) as max_cvss dc(stage_num) as stages_seen by incident_id
 | eval technique_chain_str=mvjoin(technique_chain, " → ")
 | convert ctime(start) ctime(end)
 | sort - start</query>
@@ -50,7 +50,7 @@
 | sort stage_num_n, _time
 | lookup acme_kill_chain_stages_lookup chain_id, stage_num OUTPUT stage_name as expected_stage
 | convert ctime(_time)
-| table _time, stage_num, stage_name, expected_stage, technique_id, framework.technique_name, kill_chain.stage, campaign_week, requesting_agent_id, target_agent_id, agent.id, rogue_actor_story, risk_statement, acme_output_guard_action, execution_mode</query>
+| table _time, stage_num, stage_name, expected_stage, technique_id, framework.technique_name, kill_chain.stage, campaign_week, requesting_agent_id, target_agent_id, gen_ai_agent_id, rogue_actor_story, risk_statement, acme_output_guard_action, execution_mode</query>
         </search>
       </table>
     </panel>

@@ -74,7 +74,7 @@
         <title>Agents Compromised Across Chains</title>
         <search>
           <query>`acme_genai_index` `acme_last_24h` incident_id=* testbed_mode=KILL_CHAIN_ACTIVE
-| stats dc(agent.id) as count</query>
+| stats dc(gen_ai_agent_id) as count</query>
         </search>
         <option name="drilldown">none</option>
       </single>
@@ -128,8 +128,8 @@ incident_id=$incident_filter$ testbed_mode=KILL_CHAIN_ACTIVE scenario_family=$sc
     dc(framework.technique_id) AS stages_fired,
     values(framework.technique_id) AS technique_chain,
     dc(framework.kill_chain_stage) AS kill_chain_stages,
-    dc(agent.id) AS agents_involved,
-    values(agent.id) AS agent_list,
+    dc(gen_ai_agent_id) AS agents_involved,
+    values(gen_ai_agent_id) AS agent_list,
     max(framework.cvss_score) AS max_cvss,
     min(_time) AS chain_start,
     max(_time) AS chain_end
@@ -177,13 +177,13 @@ incident_id=$incident_filter$ testbed_mode=KILL_CHAIN_ACTIVE scenario_family=$sc
 | convert ctime(_time) AS "Time"
 | table Time stage_num stage_name framework.technique_id framework.technique_name
     framework.tactic_name framework.kill_chain_stage kill_chain.stage campaign_week framework.severity framework.cvss_score
-    agent.id acme_output_guard_action framework.detection_signal
+    gen_ai_agent_id acme_output_guard_action framework.detection_signal
 | rename stage_num AS "Stage", stage_name AS "Stage Name",
   framework.technique_id AS "Technique ID", framework.technique_name AS "Technique",
   framework.tactic_name AS "Tactic", framework.kill_chain_stage AS "Kill-Chain Stage",
   kill_chain.stage AS "Stage Field", campaign_week AS "Campaign Week",
   framework.severity AS "Severity", framework.cvss_score AS "CVSS",
-  agent.id AS "Agent", acme_output_guard_action AS "AcmeSentinel", framework.detection_signal AS "Detection Signal"</query>
+  gen_ai_agent_id AS "Agent", acme_output_guard_action AS "AcmeSentinel", framework.detection_signal AS "Detection Signal"</query>
         </search>
         <option name="drilldown">none</option>
         <option name="wrap">false</option>
@@ -203,7 +203,7 @@ incident_id=$incident_filter$ testbed_mode=KILL_CHAIN_ACTIVE scenario_family=$sc
         <h3>Splunk correlation search for this incident</h3>
         <p>Copy this SPL into Search to replay the full incident timeline:</p>
         <pre><code>sourcetype="otel:agentic:json" incident_id="$selected_incident$"
-| table _time stage_num stage_name framework.technique_id framework.severity acme_output_guard_action agent.id
+| table _time stage_num stage_name framework.technique_id framework.severity acme_output_guard_action gen_ai_agent_id
 | sort stage_num</code></pre>
       </html>
     </panel>

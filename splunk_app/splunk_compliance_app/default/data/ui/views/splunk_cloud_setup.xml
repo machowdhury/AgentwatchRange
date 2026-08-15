@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dashboard version="1.1">
   <label>Splunk Cloud &amp; External Setup Guide</label>
-  <description>Step-by-step instructions for installing this app on Splunk Cloud or Splunk Enterprise when AgentWatch Range runs without the local Splunk container.</description>
+  <description>Step-by-step instructions for installing this app on Splunk Cloud or Splunk Enterprise when AgentWatch Range runs without the local Docker Splunk container.</description>
 
   <row>
     <panel>
       <html>
-        <![CDATA[
         <div class="dashboard-body">
           <h2>AgentWatch Range → Splunk Cloud Installation</h2>
           <p>Use this guide when your telemetry lands in <strong>Splunk Cloud</strong> or an external <strong>Splunk Enterprise</strong> instance instead of the local Docker Splunk container.</p>
@@ -15,7 +14,7 @@
           <ol>
             <li>On your AgentWatch Range host, build the install package:<br/>
               <code>./scripts/package_splunk_app.sh</code></li>
-            <li>Download <code>dist/acme_genai_compliance-2.4.0.tar.gz</code></li>
+            <li>Download <code>dist/acme_genai_compliance-2.9.0.tar.gz</code></li>
             <li>In Splunk Cloud: <strong>Apps → Browse more apps → Upload app</strong> (or ask your Splunk Cloud admin)</li>
             <li>In Splunk Enterprise: <strong>Apps → Manage Apps → Install app from file</strong></li>
           </ol>
@@ -67,7 +66,7 @@ index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 20
 
           <h3>Splunk Cloud &amp; Enterprise Compatibility</h3>
           <ul>
-            <li><strong>Splunk Cloud:</strong> upload <code>acme_genai_compliance-2.4.0.tar.gz</code> — private apps may require admin approval. See <a href="https://dev.splunk.com/enterprise/docs/releaseapps/cloudvetting/" target="_blank" rel="noopener noreferrer">Splunk Cloud vetting guide</a>.</li>
+            <li><strong>Splunk Cloud:</strong> upload <code>acme_genai_compliance-2.9.0.tar.gz</code> — private apps may require admin approval. See <a href="https://dev.splunk.com/enterprise/docs/releaseapps/cloudvetting/" target="_blank" rel="noopener noreferrer">Splunk Cloud vetting guide</a>.</li>
             <li><strong>Splunk Enterprise:</strong> same package — <code>splunk install app … -update 1</code></li>
             <li>This app uses <strong>pure SPL + CSV lookups</strong> — no <code>bin/</code> scripts, no MLTK required for core dashboards.</li>
             <li>Colors and contrast follow the <a href="https://splunkui.splunk.com/DesignSystem/Accessibility/Color" target="_blank" rel="noopener noreferrer">Splunk UI Design System</a> (severity palette + text labels).</li>
@@ -84,7 +83,6 @@ index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 20
             <li>Enable searches you want (start with <em>Kill-Chain Detection: Multi-Stage Attack</em>)</li>
           </ol>
         </div>
-        ]]>
       </html>
     </panel>
   </row>
@@ -108,7 +106,7 @@ index=acme_agentic_telemetry sourcetype="otel:agentic:json" | head 20
       <title>AcmeSentinel HARD_DENY Events (24h)</title>
       <single>
         <search>
-          <query>`acme_genai_index` acme_output_guard.action=HARD_DENY OR acme_output_guard_blocked=true | stats count</query>
+          <query>`acme_genai_index` acme_output_guard_action=HARD_DENY OR acme_output_guard_blocked=true | stats count</query>
           <earliest>-24h@h</earliest>
           <latest>now</latest>
         </search>

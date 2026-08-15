@@ -96,7 +96,7 @@ def _hunt_spl(technique: TechniqueEntry) -> str:
 def _hunt_steps(technique: TechniqueEntry) -> List[str]:
     return [
         f"Establish scope: `acme_genai_index` technique_id={technique.technique_id} over your investigation window.",
-        "Pivot entities: | stats count values(incident_id) as incidents by agent.id, session_id.",
+        "Pivot entities: | stats count values(incident_id) as incidents by gen_ai_agent_id, session_id.",
         f"Validate detection signal: search for '{technique.detection_signal}' in raw events.",
         f"Control efficacy: filter acme_output_guard_action={technique.acme_output_guard_action or 'HARD_DENY'} and acme_input_guard_blocked.",
         "Chain context: correlate incident_id and parent_trace_id with kill-chain timeline dashboard.",
