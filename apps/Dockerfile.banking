@@ -16,6 +16,7 @@ COPY apps/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY apps/app_runtime.py .
+COPY apps/templates/ ./templates/
 COPY apps/agents/ ./agents/
 COPY apps/framework/ ./framework/
 COPY scripts/baseline_hec_service.py ./scripts/baseline_hec_service.py

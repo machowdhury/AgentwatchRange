@@ -50,6 +50,12 @@ from framework.chain_engine import KILL_CHAINS, KILL_CHAIN_MAP
 
 logger = logging.getLogger("acme.dataset_exporter")
 
+
+def _splunk_tls_verify() -> bool:
+    """When SPLUNK_HEC_TLS_SKIP_VERIFY is true, disable TLS verification (local self-signed Splunk)."""
+    skip = os.environ.get("SPLUNK_HEC_TLS_SKIP_VERIFY", "true").lower()
+    return skip not in ("true", "1", "yes")
+
 # =============================================================================
 # HuggingFace DATASET SCHEMA
 # Matches emmanuelgjr/genai-incidents exactly
@@ -300,7 +306,7 @@ def export_splunk_events_to_jsonl(
             search_url,
             auth=(splunk_username, splunk_password),
             data={"search": search_query, "output_mode": "json", "exec_mode": "normal"},
-            verify=False,
+            verify=_splunk_tls_verify(),
             timeout=30,
         )
         if r.status_code != 201:
@@ -316,7 +322,7 @@ def export_splunk_events_to_jsonl(
                 status_url,
                 auth=(splunk_username, splunk_password),
                 params={"output_mode": "json"},
-                verify=False,
+                verify=_splunk_tls_verify(),
                 timeout=10,
             ).json()
             if status["entry"][0]["content"]["dispatchState"] in ("DONE", "FAILED"):
@@ -329,7 +335,7 @@ def export_splunk_events_to_jsonl(
             results_url,
             auth=(splunk_username, splunk_password),
             params={"output_mode": "json", "count": max_results},
-            verify=False,
+            verify=_splunk_tls_verify(),
             timeout=30,
         ).json()
 

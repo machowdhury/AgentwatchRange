@@ -7,7 +7,7 @@
 flask==3.0.3
 
 # HTTP client — Ollama API calls + inter-service communication
-requests==2.31.0
+requests==2.32.3
 
 # OpenTelemetry — Core SDK
 opentelemetry-api==1.24.0
