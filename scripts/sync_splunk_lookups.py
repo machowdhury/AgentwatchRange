@@ -44,6 +44,9 @@ def export_playbooks_lookup() -> Path:
         "risk_statement",
         "threat_hunt_steps",
         "threat_hunt_spl",
+        "learning_tier",
+        "learning_tier_label",
+        "redundant_with",
     ]
 
     with out.open("w", newline="", encoding="utf-8") as fh:
@@ -70,6 +73,9 @@ def export_playbooks_lookup() -> Path:
                 "risk_statement": pb.risk_statement,
                 "threat_hunt_steps": " || ".join(pb.threat_hunt_steps),
                 "threat_hunt_spl": pb.threat_hunt_spl,
+                "learning_tier": pb.learning_tier,
+                "learning_tier_label": pb.learning_tier_label,
+                "redundant_with": pb.redundant_with,
             })
     return out
 
@@ -93,6 +99,7 @@ def enrich_framework_lookup() -> Path:
         "description", "impact", "defenseclaw_action", "galileo_check",
         "detection_signal", "splunk_spl_template", "real_world_incident",
         "quality_tier", "execution_mode", "is_top_10",
+        "learning_tier", "redundant_with",
     ]
 
     if src.is_file():
@@ -131,6 +138,8 @@ def enrich_framework_lookup() -> Path:
             "quality_tier": entry.quality_tier,
             "execution_mode": pb.execution_mode if pb else row.get("execution_mode", "SIMULATED"),
             "is_top_10": str(pb.is_top_10).lower() if pb else row.get("is_top_10", "false"),
+            "learning_tier": str(entry.learning_tier),
+            "redundant_with": entry.redundant_with or "",
         })
 
     with src.open("w", newline="", encoding="utf-8") as fh:

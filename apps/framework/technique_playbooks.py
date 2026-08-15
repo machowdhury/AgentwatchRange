@@ -76,6 +76,9 @@ class TechniquePlaybook:
     owasp_llm: List[str] = field(default_factory=list)
     severity: str = "High"
     cvss_score: float = 7.0
+    learning_tier: int = 4
+    learning_tier_label: str = "Tier 4 — Coverage"
+    redundant_with: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -215,6 +218,8 @@ def build_playbook(technique_id: str) -> Optional[TechniquePlaybook]:
 
     mode = _execution_mode(technique, is_top_10)
 
+    from framework.learning_tiers import tier_badge
+
     return TechniquePlaybook(
         technique_id=technique.technique_id,
         technique_name=technique.technique_name,
@@ -225,6 +230,9 @@ def build_playbook(technique_id: str) -> Optional[TechniquePlaybook]:
         payload=_generate_payload(technique),
         scenario_week=week,
         is_top_10=is_top_10,
+        learning_tier=technique.learning_tier,
+        learning_tier_label=tier_badge(technique.learning_tier),
+        redundant_with=technique.redundant_with or "",
         practitioner_narrative=(
             f"Teach practitioners how {technique.technique_name} manifests in agentic banking workflows. "
             f"Map to OWASP {', '.join(technique.owasp_llm) or 'N/A'} and hunt using the provided SPL."
@@ -278,3 +286,9 @@ def _count_by(key_fn, playbooks: List[TechniquePlaybook]) -> dict:
         key = key_fn(playbook)
         counts[key] = counts.get(key, 0) + 1
     return counts
+
+
+# Apply curriculum tiers once registry and playbooks module are loaded
+from framework.learning_tiers import apply_learning_tiers_to_registry  # noqa: E402
+
+apply_learning_tiers_to_registry(TECHNIQUE_REGISTRY)

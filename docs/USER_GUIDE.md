@@ -10,6 +10,7 @@ Run the lab from the **Attack Panel**, generate telemetry, hunt in Splunk, and *
 
 **New here?** Complete [Prerequisites](#prerequisites), verify [baseline in Splunk](../README.md#step-4--verify-telemetry-before-any-attack-3-min), then read:
 
+- **[Learning Path (Tiers 0–6)](LEARNING_PATH.md)** — structured curriculum: beginner → advanced → compliance → capstone  
 - **[Attack Panel tab guide](ATTACK_PANEL_GUIDE.md)** — what each tab means, OUTCOME, SPL + dashboard per scenario  
 - **[Workshop paths](#workshop-paths--where-to-start-what-to-run-where-to-end)** — guided button sequences
 
@@ -344,6 +345,20 @@ The Workshop is the **on-ramp**. For **every tab, scenario, chain, and SPL query
 Use this map to decide what to explore next and **why** each capability exists.
 
 ### Learning progression
+
+Follow **[LEARNING_PATH.md](LEARNING_PATH.md)** for tier-ordered curriculum (Tier 0 orientation → Tier 6 capstone). The map below is the same journey by Attack Panel tab:
+
+```text
+Tier 0 — Orientation (CONCEPTS + baseline Splunk)
+    ↓
+Tier 1–3 — Top 10 Scenarios + Threat Chains (guided surfaces)
+    ↓
+Tier 4 — All 51 Techniques bulk run (compliance evidence)
+    ↓
+Tier 5 — Cisco + MLTK overlay (optional)
+    ↓
+Tier 6 — Workshop capstone paths
+```
 
 ```text
 Workshop (guided paths)

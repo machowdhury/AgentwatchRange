@@ -106,11 +106,15 @@ Six **2026 emerging** scenarios were appended to the technique registry (Top 10 
 
 ---
 
-## 2. All 45 Techniques
+## 2. All 51 Techniques (Tier 4 — Coverage & Compliance)
 
 ### What this tab means
 
-The **MITRE ATLAS technique registry** — broader than the Top 10 demos. Each card is one `technique_id` (e.g. `AML.T0000`).
+The **MITRE ATLAS technique registry** (45 original + 6 emerging) — broader than the Top 10 demos. Each card is one `technique_id` (e.g. `AML.T0000`).
+
+**Important:** This tab is a **coverage/compliance campaign**, not 51 individual walkthroughs. Run it in bulk to populate the **Technique Coverage Matrix** and **Control Attestation** dashboards with NIST/OWASP/MITRE evidence. For learning individual techniques, complete **Tiers 1–3** in [LEARNING_PATH.md](LEARNING_PATH.md) first (Top 10 + Threat Chains).
+
+The Attack Panel shows a **tier badge** on each card (sourced from `learning_tier` in the taxonomy). See [TECHNIQUE_AUDIT.md](TECHNIQUE_AUDIT.md) for which SIMULATED entries are breadth-only (`redundant_with`).
 
 | Mode | Badge color | What happens |
 |------|-------------|--------------|
@@ -118,14 +122,14 @@ The **MITRE ATLAS technique registry** — broader than the Top 10 demos. Each c
 | **SIMULATED** | Orange | Enriched OTel event **without** live model harm (recon, supply chain, etc.) |
 | **HYBRID** | Mixed | Live stage + simulated enrichment |
 
-### OUTCOME when you run All 45
+### OUTCOME when you run All 51
 
 | Action | OUTCOME |
 |--------|---------|
 | **EXECUTE** (one card) | One `technique_id` event in Splunk; terminal shows LIVE result or SIMULATED confirmation |
-| **RUN ALL 45 TECHNIQUES** | 45 techniques over ~10–20 min; Coverage Matrix fills in; mix of LIVE + SIMULATED rows |
+| **RUN ALL 51 TECHNIQUES** | Full registry over ~10–20 min; Coverage Matrix fills in; mix of LIVE + SIMULATED rows |
 
-**Splunk OUTCOME:** Events with `technique_id=AML.T*`, `framework.kill_chain_stage`, `cvss_score`, and mode in `testbed_mode` or technique metadata.
+**Splunk OUTCOME:** Events with `technique_id=AML.T*`, `framework.kill_chain_stage`, `cvss_score`, and three-state matrix status (NOT_ATTEMPTED / ATTEMPTED_NOT_DETECTED / DETECTED).
 
 ### Validation
 
@@ -136,9 +140,9 @@ The **MITRE ATLAS technique registry** — broader than the Top 10 demos. Each c
 | table _time technique_id testbed_mode workflow.blocked gen_ai.agent.name
 ```
 
-**After RUN ALL 45 (preferred — open dashboard):**
+**After RUN ALL 51 (preferred — open dashboard):**
 
-1. **GenAI Compliance Monitor → Technique Coverage** — OBSERVED % increases; NOT_OBSERVED backlog shrinks.
+1. **GenAI Compliance Monitor → Technique Coverage** — coverage % increases; gap states populate.
 2. Or Search:
 
 ```spl
