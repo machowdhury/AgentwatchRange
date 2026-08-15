@@ -193,6 +193,13 @@ services:
   splunk:
     image: ${SPLUNK_IMAGE:-splunk/splunk:10.2}
     container_name: acme_splunk
+    ulimits:
+      nofile:
+        soft: 64000
+        hard: 64000
+      nproc:
+        soft: 8192
+        hard: 8192
     profiles:
       - local
     ports:
