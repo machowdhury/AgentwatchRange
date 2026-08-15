@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run Phase 10.2–10.3 baseline HEC loop (vendorsim + thirdparty + registry)."""
+"""Run Phase 10.2–10.3 baseline HEC loop (sim + thirdparty + registry)."""
 from __future__ import annotations
 
 import os

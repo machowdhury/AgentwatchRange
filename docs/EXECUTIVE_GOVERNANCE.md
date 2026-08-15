@@ -25,7 +25,7 @@ Dashboard Studio view: **Executive AI Governance** (`executive_governance.json`)
 
 ## EU AI Act column
 
-`framework_compliance_crosswalk.csv` includes `eu_ai_act_risk_tier` (High-Risk / Limited) for vendor-sim cross-app mappings. Enriched on vendor-sim events via `` `acme_vendorsim_crosswalk_enrich` ``.
+`framework_compliance_crosswalk.csv` includes `eu_ai_act_risk_tier` (High-Risk / Limited) for sim cross-app mappings. Enriched on sim events via `` `acme_sim_crosswalk_enrich` ``.
 
 ## Validation SPL
 

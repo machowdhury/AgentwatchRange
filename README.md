@@ -302,7 +302,7 @@ External Node.js threat-modeling app, run separately from Docker Compose — see
 
 ### Lab-original (not third-party)
 
-**AcmeGate** and **AcmeSentinel** (regex input/output guards) and the synthetic vendor-sim / third-party-sim telemetry schemas are this project's own code — not affiliated with any vendor.
+**AcmeGate** and **AcmeSentinel** (regex input/output guards) and the synthetic vendor-style and third-party telemetry schemas are this project's own code — not affiliated with any vendor.
 
 Full license table and attribution: [NOTICE.md](NOTICE.md).
 

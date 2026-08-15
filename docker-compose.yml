@@ -216,7 +216,7 @@ services:
       start_period: 120s
 
   # ---------------------------------------------------------------------------
-  # BASELINE HEC — benign vendorsim + thirdparty + registry snapshots (Phase 10)
+  # BASELINE HEC — benign simulated telemetry (sim + thirdparty + registry) (Phase 10)
   # Enable with: docker compose --profile baseline up -d
   # ---------------------------------------------------------------------------
   baseline_hec:
@@ -234,7 +234,7 @@ services:
       - SPLUNK_HEC_ENDPOINT=${SPLUNK_HEC_ENDPOINT:-http://splunk:8088/services/collector/event}
       - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
       - SPLUNK_HEC_INDEX=${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}
-      - SPLUNK_VENDORSIM_INDEX=security
+      - SPLUNK_SIM_INDEX=security
       - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
       - BASELINE_HEC_INTERVAL_MIN_SEC=${BASELINE_HEC_INTERVAL_MIN_SEC:-120}
       - BASELINE_HEC_INTERVAL_MAX_SEC=${BASELINE_HEC_INTERVAL_MAX_SEC:-300}

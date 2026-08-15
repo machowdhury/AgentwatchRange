@@ -16,7 +16,7 @@ from framework.agent_registry import build_registry_snapshot
 
 logger = logging.getLogger("acme.baseline_hec")
 
-VENDORSIM_AGENTS = ("Customer Intake", "Document Extraction", "Credit Risk", "Compliance Verification")
+SIM_AGENTS = ("Customer Intake", "Document Extraction", "Credit Risk", "Compliance Verification")
 THIRDPARTY_AGENTS = ("tp-agent-loan-001", "tp-agent-risk-002", "tp-agent-doc-003")
 
 
@@ -28,7 +28,7 @@ def _hec_config() -> Dict[str, str]:
         ),
         "token": os.environ.get("SPLUNK_HEC_TOKEN", "acme-hec-token-0000-1111-2222-3333"),
         "index_primary": os.environ.get("SPLUNK_HEC_INDEX", "acme_agentic_telemetry"),
-        "index_vendorsim": os.environ.get("SPLUNK_VENDORSIM_INDEX", "security"),
+        "index_sim": os.environ.get("SPLUNK_SIM_INDEX", "security"),
     }
 
 
@@ -56,9 +56,9 @@ def send_hec(event: dict, sourcetype: str, index: str, source: str) -> None:
             raise RuntimeError(f"HEC HTTP {resp.status}")
 
 
-def emit_benign_vendorsim() -> None:
+def emit_benign_sim() -> None:
     cfg = _hec_config()
-    agent = random.choice(VENDORSIM_AGENTS)
+    agent = random.choice(SIM_AGENTS)
     event = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "agent_name": agent,
@@ -72,7 +72,7 @@ def emit_benign_vendorsim() -> None:
         "gen_ai.usage.output_tokens": random.randint(30, 120),
         "testbed_mode": "BASELINE_TRAFFIC",
     }
-    send_hec(event, "acme:agentic:vendorsim:json", cfg["index_vendorsim"], "baseline_hec/vendorsim")
+    send_hec(event, "acme:agentic:sim:json", cfg["index_sim"], "baseline_hec/sim")
 
 
 def emit_benign_thirdparty() -> None:
@@ -98,10 +98,10 @@ def emit_registry_snapshot() -> None:
 
 
 def emit_all() -> Dict[str, Any]:
-    emit_benign_vendorsim()
+    emit_benign_sim()
     emit_benign_thirdparty()
     emit_registry_snapshot()
-    return {"status": "ok", "emitted": ["vendorsim", "thirdparty", "registry"]}
+    return {"status": "ok", "emitted": ["sim", "thirdparty", "registry"]}
 
 
 def run_loop(
@@ -114,7 +114,7 @@ def run_loop(
     logger.info("[BaselineHEC] loop started | interval=%s–%ss", lo, hi)
     while True:
         try:
-            emit_benign_vendorsim()
+            emit_benign_sim()
             emit_benign_thirdparty()
             tick += 1
             if tick % registry_every_n == 0:

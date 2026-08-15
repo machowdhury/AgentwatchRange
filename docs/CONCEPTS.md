@@ -153,7 +153,7 @@ This lab is meant to **demonstrate the telemetry and workflow** you would get wi
 
 Agentic apps will **never** agree on a native schema. The value of a SIEM here is not collecting more logs — it is **normalizing heterogeneous agentic telemetry** into one framework-mappable model (`norm_*` fields in `props.conf`), so compliance and detection logic does not get rewritten per app.
 
-Open **GenAI Compliance Monitor → Cross-App Normalization** after Tier 3 to compare raw vs normalized events across `otel:agentic:json`, `acme:agentic:vendorsim:json`, `acme:agentic:thirdparty:json`, and inventory snapshots in `acme:agentic:registry:json`.
+Open **GenAI Compliance Monitor → Cross-App Normalization** after Tier 3 to compare raw vs normalized events across `otel:agentic:json`, `acme:agentic:sim:json`, `acme:agentic:thirdparty:json`, and inventory snapshots in `acme:agentic:registry:json`.
 
 **Inventory vs events:** Agentic telemetry is not only heterogeneous in field names — it is heterogeneous in *data model*. Transaction streams (`otel:agentic:json`) differ from periodic inventory snapshots (`acme:agentic:registry:json`). Splunk must normalize both for governance dashboards (Phase 11).
 
@@ -165,7 +165,7 @@ Benign traffic runs through the **real** banking pipeline (`testbed_mode=BASELIN
 |-----------|---------|
 | In-process `traffic_simulator` (default on banking app) | OTel benign loan requests every 90–240s |
 | `scripts/baseline_traffic_generator.py` | External HTTP client to banking API |
-| `docker compose --profile baseline --profile local up` | HEC trickle for vendorsim, thirdparty, registry |
+| `docker compose --profile baseline --profile local up` | HEC trickle for sim, thirdparty, registry |
 
 Filter attacks: `` NOT testbed_mode=BASELINE_TRAFFIC ``
 
@@ -179,7 +179,7 @@ Filter attacks: `` NOT testbed_mode=BASELINE_TRAFFIC ``
 | What does the Splunk app do? | **Read-only:** dashboards, lookups, scheduled searches on that index. |
 | Does Splunk run Ollama or agents? | **No.** |
 | Local vs Cloud? | **Local:** Splunk container in compose. **Cloud/Enterprise:** you point HEC env vars at your stack; no Splunk container. |
-| Two Splunk apps in repo? | **Primary:** `splunk_compliance_app` (`acme_genai_compliance`). **Legacy optional:** `App-Agentic-Compliance` for synthetic `acme:agentic:vendorsim:json` vendor-sim telemetry. Use the primary one. |
+| Two Splunk apps in repo? | **Primary:** `splunk_compliance_app` (`acme_genai_compliance`). **Legacy optional:** `App-Agentic-Compliance` for synthetic `acme:agentic:sim:json` telemetry. Use the primary one. |
 
 **Three places must agree on HEC settings** or you will see no events: `.env`, `docker-compose.yml` environment injection into the collector, and Splunk’s HEC token configuration (index + sourcetype permissions).
 

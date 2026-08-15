@@ -16,7 +16,7 @@ This lab integrates or references the following **real** third-party software. A
 |-----------|-------------|
 | **AcmeGate** | Lab-original Python regex input middleware (`apps/agents/llm_client.py`) |
 | **AcmeSentinel** | Lab-original Python regex output middleware (same module) |
-| **Vendor-sim telemetry** | Fully synthetic `acme:agentic:vendorsim:json` — not real Cisco AI Defense data |
+| **Simulated vendor-style telemetry** | Fully synthetic `acme:agentic:sim:json` — not real Cisco AI Defense data |
 | **Third-party sim telemetry** | Synthetic `acme:agentic:thirdparty:json` from `scripts/emit_thirdparty_telemetry.py` |
 
 AcmeGate and AcmeSentinel are **not** affiliated with Cisco DefenseClaw or any vendor product. Field names were renamed in Phase 6 to avoid implying vendor authorship.

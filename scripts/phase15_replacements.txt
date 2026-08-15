@@ -1,0 +1,21 @@
+acme:agentic:vendorsim:json|||acme:agentic:sim:json
+acme_vendorsim_crosswalk_enrich|||acme_sim_crosswalk_enrich
+acme_vendorsim_token_normalize|||acme_sim_token_normalize
+acme_vendorsim_index|||acme_sim_index
+agentwatch_vendorsim_hec|||agentwatch_sim_hec
+SPLUNK_VENDORSIM_INDEX|||SPLUNK_SIM_INDEX
+VENDORSIM_AGENTS|||SIM_AGENTS
+emit_benign_vendorsim|||emit_benign_sim
+index_vendorsim|||index_sim
+vendorsim_objective|||sim_objective
+vendorsim_technique|||sim_technique
+vendorsim_subtechnique|||sim_subtechnique
+Vendor-Sim Compliance Matrix|||Simulated Telemetry Compliance Matrix
+Vendor-Sim Compliance (Legacy)|||Simulated Telemetry Compliance (Legacy)
+Vendor-Sim Objective|||Sim Objective
+Vendor-Sim Technique|||Sim Technique
+Vendor-Sim Subtechnique|||Sim Subtechnique
+Vendor-sim telemetry|||Simulated telemetry
+"vendor_sim"|||"sim"
+"vendorsim"|||"sim"
+vendorsim|||sim

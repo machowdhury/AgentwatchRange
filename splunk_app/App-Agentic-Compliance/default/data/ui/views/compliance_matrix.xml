@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dashboard version="1.1" theme="dark">
-  <label>Vendor-Sim Compliance Matrix</label>
-  <description>Simulated vendor-grade AI security telemetry — illustrates the shape of a commercial AI security platform's output. Fully synthetic lab data, not real Cisco AI Defense. Uses sourcetype acme:agentic:vendorsim:json.</description>
+  <label>Simulated Telemetry Compliance Matrix</label>
+  <description>Simulated vendor-grade AI security telemetry — illustrates the shape of a commercial AI security platform's output. Fully synthetic lab data, not real Cisco AI Defense. Uses sourcetype acme:agentic:sim:json.</description>
 
   <init>
     <search>
@@ -34,7 +34,7 @@
       <title>POLICY_HARD_DENY Interventions</title>
       <gauge>
         <search>
-          <query>`acme_vendorsim_index` $global_time$ policy_action="POLICY_HARD_DENY"
+          <query>`acme_sim_index` $global_time$ policy_action="POLICY_HARD_DENY"
 | stats count AS deny_count</query>
           <earliest>$global_time.earliest$</earliest>
           <latest>$global_time.latest$</latest>
@@ -48,8 +48,8 @@
       <title>Normalization variances (unmapped framework rows)</title>
       <gauge>
         <search>
-          <query>`acme_vendorsim_index` $global_time$
-| `acme_vendorsim_crosswalk_enrich`
+          <query>`acme_sim_index` $global_time$
+| `acme_sim_crosswalk_enrich`
 | eval is_variance=if(isnull(framework_severity) OR framework_severity="" OR (isnotnull(finding_type) AND finding_type="UNKNOWN"), 1, 0)
 | stats sum(is_variance) AS variance_count</query>
           <earliest>$global_time.earliest$</earliest>
@@ -63,11 +63,11 @@
 
   <row>
     <panel>
-      <title>Runtime threats by vendor-sim objective boundary</title>
+      <title>Runtime threats by sim objective boundary</title>
       <chart>
         <search>
-          <query>`acme_vendorsim_index` earliest=-7d@d latest=now
-| eval objective_boundary=coalesce(vendorsim_objective, 'cisco_threat_taxonomy.objective', "UNMAPPED")
+          <query>`acme_sim_index` earliest=-7d@d latest=now
+| eval objective_boundary=coalesce(sim_objective, 'cisco_threat_taxonomy.objective', "UNMAPPED")
 | stats count AS threat_count by objective_boundary
 | sort -threat_count</query>
           <earliest>-7d@d</earliest>
@@ -80,15 +80,15 @@
 
   <row>
     <panel>
-      <title>Compliance ledger — vendor-sim x framework crosswalk</title>
+      <title>Compliance ledger — sim × framework crosswalk</title>
       <table>
         <search>
-          <query>`acme_vendorsim_index` $global_time$
-| `acme_vendorsim_crosswalk_enrich`
-| `acme_vendorsim_token_normalize`
+          <query>`acme_sim_index` $global_time$
+| `acme_sim_crosswalk_enrich`
+| `acme_sim_token_normalize`
 | eval event_time=coalesce(cisco_event_timestamp, otel_event_time, strftime(_time, "%Y-%m-%dT%H:%M:%S%z"))
 | table event_time event_id transaction_id agent_name finding_type policy_action threat_category lookup_objective lookup_technique lookup_subtechnique owasp_classification mitre_atlas_id framework_severity input_tokens output_tokens total_tokens matched_indicator scan_target
-| rename event_time AS "Event Time" event_id AS "Event ID" transaction_id AS "Transaction ID" agent_name AS "Agent" finding_type AS "Finding Type" policy_action AS "Policy Action" threat_category AS "Threat Category" lookup_objective AS "Vendor-Sim Objective" lookup_technique AS "Vendor-Sim Technique" lookup_subtechnique AS "Vendor-Sim Subtechnique" owasp_classification AS "OWASP LLM Class" mitre_atlas_id AS "MITRE ATLAS ID" framework_severity AS "Framework Severity" input_tokens AS "Input Tokens" output_tokens AS "Output Tokens" total_tokens AS "Total Tokens" matched_indicator AS "Matched Indicator" scan_target AS "Scan Target"
+| rename event_time AS "Event Time" event_id AS "Event ID" transaction_id AS "Transaction ID" agent_name AS "Agent" finding_type AS "Finding Type" policy_action AS "Policy Action" threat_category AS "Threat Category" lookup_objective AS "Sim Objective" lookup_technique AS "Sim Technique" lookup_subtechnique AS "Sim Subtechnique" owasp_classification AS "OWASP LLM Class" mitre_atlas_id AS "MITRE ATLAS ID" framework_severity AS "Framework Severity" input_tokens AS "Input Tokens" output_tokens AS "Output Tokens" total_tokens AS "Total Tokens" matched_indicator AS "Matched Indicator" scan_target AS "Scan Target"
 | sort - "Event Time"</query>
           <earliest>$global_time.earliest$</earliest>
           <latest>$global_time.latest$</latest>
@@ -104,8 +104,8 @@
       <title>GenAI token forecast (CTSM) — 14d window intentional override</title>
       <chart>
         <search>
-          <query>`acme_vendorsim_index` earliest=-14d@d latest=now
-| `acme_vendorsim_token_normalize`
+          <query>`acme_sim_index` earliest=-14d@d latest=now
+| `acme_sim_token_normalize`
 | timechart span=1h sum(total_tokens) AS total_tokens sum(input_tokens) AS input_tokens sum(output_tokens) AS output_tokens
 | fit MLTKContainer algo=ctsm_forecast total_tokens holdback=24 period=24 future_timespan=48 into forecast_total_tokens</query>
           <earliest>-14d@d</earliest>

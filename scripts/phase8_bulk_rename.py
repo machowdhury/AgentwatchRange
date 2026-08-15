@@ -15,7 +15,7 @@ TEXT_EXT = {
 
 # Longest / most specific first. Do NOT touch orchestrator/orchestration tokens.
 REPLACEMENTS = [
-    ("orchestra_acme_aidefense_hec", "agentwatch_vendorsim_hec"),
+    ("orchestra_acme_aidefense_hec", "agentwatch_sim_hec"),
     ("orchestra-acme-otel", "agentwatch-otel"),
     ("OrchestraACME DevSecOps", "AgentWatch Range DevSecOps"),
     ("OrchestraACME / AgentWatch Range", "AgentWatch Range"),

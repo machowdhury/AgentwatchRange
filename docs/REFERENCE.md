@@ -234,7 +234,7 @@ python3 scripts/sync_splunk_lookups.py
 ./scripts/package_splunk_app.sh   # outputs dist/acme_genai_compliance-*.tar.gz
 ```
 
-**Legacy (optional):** `splunk_app/App-Agentic-Compliance/` — vendor-sim crosswalk for `acme:agentic:vendorsim:json` events
+**Legacy (optional):** `splunk_app/App-Agentic-Compliance/` — sim crosswalk for `acme:agentic:sim:json` events
 
 ---
 
@@ -539,14 +539,14 @@ docker compose -f docker-compose.yml -f docker-compose.external.yml up --build -
 
 ### Lookup Enrichment
 
-The **legacy** `App-Agentic-Compliance` app joins vendor-sim events to `framework_compliance_crosswalk.csv` on:
+The **legacy** `App-Agentic-Compliance` app joins sim events to `framework_compliance_crosswalk.csv` on:
 
-- `vendorsim_objective`
-- `vendorsim_technique`
-- `vendorsim_subtechnique`
+- `sim_objective`
+- `sim_technique`
+- `sim_subtechnique`
 - `agent_name`
 
-This adds `owasp_classification`, `mitre_atlas_id`, and `severity` to each event. The primary `splunk_compliance_app` uses the `` `acme_vendorsim_crosswalk_enrich` `` macro for the same join at search time.
+This adds `owasp_classification`, `mitre_atlas_id`, and `severity` to each event. The primary `splunk_compliance_app` uses the `` `acme_sim_crosswalk_enrich` `` macro for the same join at search time.
 
 ---
 

@@ -62,7 +62,7 @@ ACME_INPUT_GUARD_ENABLED=false
 
 1. **Real commercial overlay** — `docker-compose.cisco.yml` (Cisco AI Defense platform, Foundation-Sec-8B, CTSM).
 2. **Real open-source tools (optional Phase 7)** — DefenseClaw, MCP Scanner, Skill Scanner from [github.com/cisco-ai-defense](https://github.com/cisco-ai-defense).
-3. **Lab vendor-simulation dashboard** — `acme:agentic:vendorsim:json` in `App-Agentic-Compliance` — fully synthetic, not real Cisco data.
+3. **Lab simulated-telemetry dashboard** — `acme:agentic:sim:json` in `App-Agentic-Compliance` — fully synthetic, not real Cisco data.
 
 **AcmeGate** and **AcmeSentinel** (this lab's regex middleware) are unrelated to all three. See [NOTICE.md](../NOTICE.md).
 

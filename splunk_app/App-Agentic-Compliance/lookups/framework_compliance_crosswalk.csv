@@ -1,4 +1,4 @@
-agent_name,vendorsim_objective,vendorsim_technique,vendorsim_subtechnique,owasp_classification,mitre_atlas_id,severity,eu_ai_act_risk_tier
+agent_name,sim_objective,sim_technique,sim_subtechnique,owasp_classification,mitre_atlas_id,severity,eu_ai_act_risk_tier
 Customer Intake,TA0040,T0010,T0010.001,LLM03:2025 Training Data Poisoning,ATLAS:T0010,medium,Limited
 Document Extraction,TA0040,T0010,T0010.002,LLM04:2025 Data and Model Poisoning,ATLAS:T0020,medium,Limited
 Credit Risk,TA0040,T0059,T0059.001,LLM04:2025 Data and Model Poisoning,ATLAS:T0059,high,High-Risk

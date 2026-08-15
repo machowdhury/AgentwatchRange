@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dashboard version="1.1" theme="dark">
   <label>Cross-App Agentic Normalization</label>
-  <description>Phase 6 teaching module — heterogeneous agentic telemetry (OTel GenAI, vendor-sim, third-party sim) normalized to one CIM-style field set. Agentic apps will never agree on a native schema; Splunk's value is normalizing them into one framework-mappable model.</description>
+  <description>Phase 6 teaching module — heterogeneous agentic telemetry (OTel GenAI, sim, third-party) normalized to one CIM-style field set. Agentic apps will never agree on a native schema; Splunk's value is normalizing them into one framework-mappable model.</description>
 
   <fieldset submitButton="false">
     <input type="time" token="global_time">
@@ -20,7 +20,7 @@
         <p>Real environments run <b>multiple agentic stacks</b> with incompatible field names. This lab ships three deliberate conventions:</p>
         <ul>
           <li><code>otel:agentic:json</code> — primary OTel GenAI pipeline (<code>gen_ai.usage.input_tokens</code>, <code>acme_output_guard.action</code>)</li>
-          <li><code>acme:agentic:vendorsim:json</code> — synthetic vendor-platform shape (<code>vendorsim_objective</code>, <code>agent_name</code>)</li>
+          <li><code>acme:agentic:sim:json</code> — synthetic vendor-platform shape (<code>sim_objective</code>, <code>agent_name</code>)</li>
           <li><code>acme:agentic:registry:json</code> — agent inventory snapshots (<code>agent_status</code>, <code>trust_score</code>)</li>
         </ul>
         <p>Normalization lives in <code>props.conf</code> calculated fields (<code>norm_*</code>) — not per-dashboard <code>coalesce()</code> chains. One query below works across all three.</p>
@@ -34,7 +34,7 @@
       <table>
         <search>
           <query>`acme_agentic_all_sources` $global_time$
-| eval source_app=case(sourcetype="otel:agentic:json", "primary_otel", sourcetype="acme:agentic:vendorsim:json", "vendor_sim", sourcetype="acme:agentic:thirdparty:json", "third_party", 1=1, "other")
+| eval source_app=case(sourcetype="otel:agentic:json", "primary_otel", sourcetype="acme:agentic:sim:json", "sim", sourcetype="acme:agentic:thirdparty:json", "third_party", 1=1, "other")
 | head 15
 | table _time source_app sourcetype gen_ai.agent.name agent.id agent_name agent_id acme_output_guard.action policy_action policy_result threat_label gen_ai.usage.input_tokens gen_ai_input_tokens token_count_in</query>
           <earliest>$global_time.earliest$</earliest>
@@ -50,7 +50,7 @@
       <table>
         <search>
           <query>`acme_agentic_all_sources` $global_time$
-| eval source_app=case(sourcetype="otel:agentic:json", "primary_otel", sourcetype="acme:agentic:vendorsim:json", "vendor_sim", sourcetype="acme:agentic:thirdparty:json", "third_party", 1=1, "other")
+| eval source_app=case(sourcetype="otel:agentic:json", "primary_otel", sourcetype="acme:agentic:sim:json", "sim", sourcetype="acme:agentic:thirdparty:json", "third_party", 1=1, "other")
 | stats count avg(norm_input_tokens) AS avg_in avg(norm_output_tokens) AS avg_out values(norm_action) AS actions by source_app norm_agent_identity norm_signature
 | sort source_app -count</query>
           <earliest>$global_time.earliest$</earliest>
@@ -66,7 +66,7 @@
       <chart>
         <search>
           <query>`acme_agentic_all_sources` $global_time$
-| eval source_app=case(sourcetype="otel:agentic:json", "primary_otel", sourcetype="acme:agentic:vendorsim:json", "vendor_sim", sourcetype="acme:agentic:thirdparty:json", "third_party", 1=1, "other")
+| eval source_app=case(sourcetype="otel:agentic:json", "primary_otel", sourcetype="acme:agentic:sim:json", "sim", sourcetype="acme:agentic:thirdparty:json", "third_party", 1=1, "other")
 | stats count sum(norm_mapped) AS mapped by source_app
 | eval coverage_pct=round(100*mapped/count,1)
 | table source_app count mapped coverage_pct</query>

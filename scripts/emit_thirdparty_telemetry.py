@@ -3,7 +3,7 @@
 Emit synthetic third-party agentic telemetry (acme:agentic:thirdparty:json) via HEC.
 
 Demonstrates a deliberately different field convention from otel:agentic:json and
-acme:agentic:vendorsim:json for Phase 6 cross-app normalization lessons.
+acme:agentic:sim:json for Phase 6 cross-app normalization lessons.
 """
 from __future__ import annotations
 
