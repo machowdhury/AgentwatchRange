@@ -87,11 +87,30 @@ if [[ -z "$COMPLIANCE_TARBALL" ]]; then
     COMPLIANCE_TARBALL="$(ls -1 dist/acme_genai_compliance-*.tar.gz 2>/dev/null | sort -V | tail -1)"
   fi
 fi
+echo "[install] Using compliance package: ${COMPLIANCE_TARBALL}"
 if [[ ! -f "$COMPLIANCE_TARBALL" ]]; then
   echo "[install] ERROR: compliance tarball not found: ${COMPLIANCE_TARBALL}" >&2
   exit 1
 fi
 install_tarball_app "$COMPLIANCE_TARBALL" "$COMPLIANCE_APP_ID" "GenAI Compliance Monitor"
+
+echo "[install] Verifying deployed compliance app..."
+docker exec "$SPLUNK_CONTAINER" bash -c "
+  set -e
+  APP='${APPS_ROOT}/${COMPLIANCE_APP_ID}'
+  VER=\$(grep -E '^version' \"\${APP}/default/app.conf\" | head -1 | tr -d ' ')
+  echo \"  app.conf: \${VER}\"
+  if [[ -f \"\${APP}/default/data/ui/views/executive_governance.xml\" ]]; then
+    echo '  executive_governance.xml: present'
+  else
+    echo '  WARNING: executive_governance.xml missing' >&2
+  fi
+  if grep -q 'layout_tier0' \"\${APP}/default/data/ui/views/exercise_runner.json\" 2>/dev/null; then
+    echo '  exercise_runner.json: tabbed (Phase 17.2+)'
+  else
+    echo '  WARNING: exercise_runner.json looks like pre-17.2 (no tier tabs)' >&2
+  fi
+"
 
 echo "[install] Restarting Splunk..."
 docker exec -u splunk "$SPLUNK_CONTAINER" "$SPLUNK_BIN" restart
