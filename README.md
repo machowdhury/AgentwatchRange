@@ -1,9 +1,5 @@
 # AgentWatch Range
 
-> **Previously named OrchestraACME.** This project is now **AgentWatch Range** at [github.com/machowdhury/AgentwatchRange](https://github.com/machowdhury/AgentwatchRange). The **ACME Bank** fictional scenario used throughout the labs is unrelated to the old project name and remains unchanged.
-
-> **Last updated:** 2026-08-15 · **Docs version:** 2.4.0
-
 **A Docker-based agentic AI security range for red-teaming, runtime defense, and compliance monitoring.**
 
 ACME Bank deployed four AI agents to speed up loan approvals. Six weeks later, their compliance officer got an email she didn't expect — not from a firewall breach, but from poisoned tool metadata and drifting session memory. This lab lets you attack that same pipeline (live Ollama LLM), see runtime controls block or allow attacks, and prove outcomes in Splunk.
