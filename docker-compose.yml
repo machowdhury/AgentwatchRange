@@ -214,3 +214,32 @@ services:
       timeout: 10s
       retries: 10
       start_period: 120s
+
+  # ---------------------------------------------------------------------------
+  # BASELINE HEC — benign vendorsim + thirdparty + registry snapshots (Phase 10)
+  # Enable with: docker compose --profile baseline up -d
+  # ---------------------------------------------------------------------------
+  baseline_hec:
+    build:
+      context: .
+      dockerfile: apps/Dockerfile.banking
+    container_name: acme_baseline_hec
+    profiles:
+      - baseline
+      - local
+    networks:
+      - acme_mesh
+    command: ["python", "scripts/baseline_hec_service.py"]
+    environment:
+      - SPLUNK_HEC_ENDPOINT=${SPLUNK_HEC_ENDPOINT:-http://splunk:8088/services/collector/event}
+      - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN:-acme-hec-token-0000-1111-2222-3333}
+      - SPLUNK_HEC_INDEX=${SPLUNK_HEC_INDEX:-acme_agentic_telemetry}
+      - SPLUNK_VENDORSIM_INDEX=security
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
+      - BASELINE_HEC_INTERVAL_MIN_SEC=${BASELINE_HEC_INTERVAL_MIN_SEC:-120}
+      - BASELINE_HEC_INTERVAL_MAX_SEC=${BASELINE_HEC_INTERVAL_MAX_SEC:-300}
+      - BASELINE_REGISTRY_EVERY_N=${BASELINE_REGISTRY_EVERY_N:-5}
+    depends_on:
+      splunk:
+        condition: service_healthy
+    restart: unless-stopped

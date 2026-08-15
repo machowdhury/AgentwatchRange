@@ -332,7 +332,12 @@ def call_ollama(
             "incident_id": str,
         }
     """
-    incident_id = incident_id or f"ACME-INC-{uuid.uuid4().hex[:8].upper()}"
+    is_baseline = testbed_mode == "BASELINE_TRAFFIC"
+    if is_baseline:
+        effective_incident = incident_id or session_id
+    else:
+        effective_incident = incident_id or f"ACME-INC-{uuid.uuid4().hex[:8].upper()}"
+    incident_id = effective_incident
 
     from framework.workflow_guard import run_workflow_guards
     from framework.control_validator import evaluate_controls, control_summary, control_otel_fields
@@ -555,10 +560,7 @@ def call_ollama(
             "acme_output_guard_blocked":      str(acme_output_guard_blocked).lower(),
             # Context
             "session.id":               session_id,
-            "incident_id":              incident_id,
             "trace_id":                 trace_id_hex,
-            "technique_id":             technique_id,
-            "framework.technique_id":   technique_id,
             "testbed_mode":             testbed_mode,
             "campaign_week":            str(campaign_week) if campaign_week else "",
             # Preview of input/output (first 200 chars for forensics)
@@ -567,6 +569,11 @@ def call_ollama(
             "timestamp_iso":            datetime.datetime.utcnow().isoformat() + "Z",
             **workflow.otel_fields,
         }
+        if not is_baseline:
+            log_body["incident_id"] = incident_id
+        if technique_id:
+            log_body["technique_id"] = technique_id
+            log_body["framework.technique_id"] = technique_id
 
         controls = evaluate_controls(log_body, campaign_week or None)
         log_body.update(control_otel_fields(controls))

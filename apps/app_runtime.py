@@ -464,6 +464,12 @@ def evaluate_control_evidence():
     return jsonify(control_summary(evaluations))
 
 
+@app.route("/api/v1/registry/snapshot", methods=["GET"])
+def registry_snapshot():
+    from framework.agent_registry import build_registry_snapshot
+    return jsonify({"agents": build_registry_snapshot()})
+
+
 register_framework_routes(app)
 register_chain_routes(app)
 register_cisco_routes(app)
