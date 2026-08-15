@@ -1007,5 +1007,7 @@ http://localhost:5000 — normal loan processing UI.
 ## Learn more
 
 - [THREAT_SURFACES.md](THREAT_SURFACES.md) — surfaces vs prompts; framework crosswalk
-- [README.md](../README.md) — architecture, workflow guard modules, honest limits
+- [CONCEPTS.md](CONCEPTS.md) — architecture, transparency, honest limits
+- [REFERENCE.md](REFERENCE.md) — install, env vars, troubleshooting
+- [README.md](../README.md) — golden path
 - [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) — Splunk install

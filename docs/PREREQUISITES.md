@@ -2,7 +2,7 @@
 
 Complete this checklist **before** `docker compose up` or the workshop. Use it on **laptop**, **Ubuntu cloud VM**, or **Splunk Cloud + lab VM** deployments.
 
-**Related:** [README.md](../README.md) · [WORKSHOP.md](WORKSHOP.md) Level 0 · [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) · [splunk_app/INSTALL.md](../splunk_app/INSTALL.md)
+**Related:** [README.md](../README.md) (golden path) · [CONCEPTS.md](CONCEPTS.md) · [REFERENCE.md](REFERENCE.md) · [WORKSHOP.md](WORKSHOP.md) Level 0 · [CLOUD_VM_DEPLOYMENT.md](CLOUD_VM_DEPLOYMENT.md) · [splunk_app/INSTALL.md](../splunk_app/INSTALL.md)
 
 ---
 

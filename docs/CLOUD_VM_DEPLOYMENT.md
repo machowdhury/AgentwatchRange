@@ -364,5 +364,7 @@ Continue with [WORKSHOP.md](WORKSHOP.md) Level 1.
 | [WORKSHOP.md](WORKSHOP.md) | Workshop curriculum |
 | [splunk_app/INSTALL.md](../splunk_app/INSTALL.md) | Splunk Cloud / Enterprise app install |
 | [.env.example](../.env.example) | HEC and Splunk mode variables |
-| [README.md](../README.md) | Architecture and quick start |
+| [README.md](../README.md) | Golden path |
+| [CONCEPTS.md](CONCEPTS.md) | Architecture |
+| [REFERENCE.md](REFERENCE.md) | Install and env vars |
 | [scripts/splunk_local_bootstrap.sh](../scripts/splunk_local_bootstrap.sh) | One-time local HEC + index setup |

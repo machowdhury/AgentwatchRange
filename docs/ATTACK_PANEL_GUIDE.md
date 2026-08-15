@@ -386,5 +386,6 @@ Standard Workshop queries + open **Technique Coverage** after **RUN ALL 45** com
 
 - [USER_GUIDE.md](USER_GUIDE.md) — workshop maturity lifecycle, facilitator notes  
 - [WORKSHOP.md](WORKSHOP.md) — full curriculum, hunt questions Q101–Q503  
-- [README.md](../README.md) — install from scratch, baseline before first attack  
+- [README.md](../README.md) — golden path and baseline verification
+- [REFERENCE.md](REFERENCE.md) — detailed install and troubleshooting  
 - [THREAT_SURFACES.md](THREAT_SURFACES.md) — eight agentic surfaces explained
