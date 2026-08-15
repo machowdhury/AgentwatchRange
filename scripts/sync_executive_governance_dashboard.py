@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Generate Executive AI Governance dashboards (Classic XML + Dashboard Studio JSON).
+Generate Executive AI Governance dashboards (Dashboard Studio + Classic fallback).
 
-- executive_governance.xml       — Classic Simple XML; registered as nav view on all Splunk versions
-- executive_governance_studio.json — Dashboard Studio; Splunk 10+ (separate nav item)
+- executive_governance.json         — Dashboard Studio; nav default on Splunk 10+
+- executive_governance_classic.xml  — Classic Simple XML fallback (nav optional)
 
 Run from repo root: python3 scripts/sync_executive_governance_dashboard.py
 """
@@ -16,10 +16,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VIEWS = ROOT / "splunk_app" / "splunk_compliance_app" / "default" / "data" / "ui" / "views"
-OUT_XML = VIEWS / "executive_governance.xml"
-OUT_STUDIO = VIEWS / "executive_governance_studio.json"
-# Remove legacy name that 404s when Splunk cannot register JSON as executive_governance.
-OUT_LEGACY_JSON = VIEWS / "executive_governance.json"
+OUT_JSON = VIEWS / "executive_governance.json"
+OUT_CLASSIC = VIEWS / "executive_governance_classic.xml"
+# Legacy filenames removed on sync (pre-2.11.1 dual-dashboard layout).
+LEGACY_XML = VIEWS / "executive_governance.xml"
+LEGACY_STUDIO = VIEWS / "executive_governance_studio.json"
 
 W = 1440
 
@@ -99,8 +100,8 @@ def build_xml() -> str:
   <row>
     <panel>
       <html>
-        <h3>Executive AI Governance — AgentWatch Range</h3>
-        <p>Classic dashboard (always available). For Dashboard Studio layout on Splunk 10+, open <strong>Executive AI Governance (Studio)</strong> in the nav.</p>
+        <h3>Executive AI Governance — AgentWatch Range (Classic)</h3>
+        <p>Classic Simple XML fallback. The default landing page is <strong>Executive AI Governance</strong> (Dashboard Studio) on Splunk 10+.</p>
         <p><strong>Drill-down:</strong>
           <a href="/app/acme_genai_compliance/nist_rmf_compliance">NIST AI RMF</a> ·
           <a href="/app/acme_genai_compliance/exercise_runner">Exercise Runner</a>
@@ -263,8 +264,8 @@ def build_studio_json() -> dict:
         {"item": "viz_hitl", "type": "block", "position": {"x": 0, "y": 1130, "w": W, "h": 320}},
     ]
     return {
-        "title": "Executive AI Governance (Studio)",
-        "description": "Dashboard Studio view — Splunk 10+ recommended.",
+        "title": "Executive AI Governance",
+        "description": "CISO and auditor front door — framework readiness, regulatory control gap, portfolio risk, agent inventory, and guardrail efficacy.",
         "inputs": {
             "input_time": {
                 "type": "input.timerange",
@@ -289,7 +290,7 @@ def build_studio_json() -> dict:
             "viz_header": {
                 "type": "splunk.markdown",
                 "options": {
-                    "markdown": "### Executive AI Governance (Dashboard Studio)\n\nSplunk 10+ Studio layout with the same SPL as the Classic landing dashboard."
+                    "markdown": "### Executive AI Governance — AgentWatch Range\n\nCISO and auditor front door — framework readiness, regulatory control gap, portfolio risk, agent inventory, and guardrail efficacy.\n\n**Drill-down:** [NIST AI RMF](/app/acme_genai_compliance/nist_rmf_compliance) · [Exercise Runner](/app/acme_genai_compliance/exercise_runner)"
                 },
             },
             "viz_readiness": {
@@ -365,15 +366,15 @@ def build_studio_json() -> dict:
 
 def main() -> None:
     VIEWS.mkdir(parents=True, exist_ok=True)
-    OUT_XML.write_text(build_xml(), encoding="utf-8")
-    OUT_STUDIO.write_text(json.dumps(build_studio_json(), indent=2) + "\n", encoding="utf-8")
-    if OUT_LEGACY_JSON.is_file():
-        OUT_LEGACY_JSON.unlink()
-    json.loads(OUT_STUDIO.read_text(encoding="utf-8"))
-    print(f"Wrote {OUT_XML} (Classic — nav default executive_governance)")
-    print(f"Wrote {OUT_STUDIO} (Dashboard Studio — nav executive_governance_studio)")
-    if OUT_LEGACY_JSON.is_file():
-        print(f"Removed legacy {OUT_LEGACY_JSON}")
+    OUT_JSON.write_text(json.dumps(build_studio_json(), indent=2) + "\n", encoding="utf-8")
+    OUT_CLASSIC.write_text(build_xml(), encoding="utf-8")
+    for legacy in (LEGACY_XML, LEGACY_STUDIO):
+        if legacy.is_file():
+            legacy.unlink()
+            print(f"Removed legacy {legacy.name}")
+    json.loads(OUT_JSON.read_text(encoding="utf-8"))
+    print(f"Wrote {OUT_JSON.name} (Dashboard Studio — nav default executive_governance)")
+    print(f"Wrote {OUT_CLASSIC.name} (Classic fallback — nav executive_governance_classic)")
 
 
 if __name__ == "__main__":

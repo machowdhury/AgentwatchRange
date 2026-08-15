@@ -12,8 +12,8 @@
   <row>
     <panel>
       <html>
-        <h3>Executive AI Governance — AgentWatch Range</h3>
-        <p>Classic dashboard (always available). For Dashboard Studio layout on Splunk 10+, open <strong>Executive AI Governance (Studio)</strong> in the nav.</p>
+        <h3>Executive AI Governance — AgentWatch Range (Classic)</h3>
+        <p>Classic Simple XML fallback. The default landing page is <strong>Executive AI Governance</strong> (Dashboard Studio) on Splunk 10+.</p>
         <p><strong>Drill-down:</strong>
           <a href="/app/acme_genai_compliance/nist_rmf_compliance">NIST AI RMF</a> ·
           <a href="/app/acme_genai_compliance/exercise_runner">Exercise Runner</a>
