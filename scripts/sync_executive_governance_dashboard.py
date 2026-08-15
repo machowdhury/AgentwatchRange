@@ -2,8 +2,8 @@
 """
 Generate Executive AI Governance dashboards (Dashboard Studio + Classic fallback).
 
-- executive_governance.json         — Dashboard Studio; nav default on Splunk 10+
-- executive_governance_classic.xml  — Classic Simple XML fallback (nav optional)
+- executive_governance.xml          — Dashboard Studio v2 XML wrapper (nav default on Splunk 10+)
+- executive_governance_classic.xml — Classic Simple XML fallback (nav optional)
 
 Run from repo root: python3 scripts/sync_executive_governance_dashboard.py
 """
@@ -11,15 +11,19 @@ Run from repo root: python3 scripts/sync_executive_governance_dashboard.py
 from __future__ import annotations
 
 import json
+import sys
 import xml.sax.saxutils as xml_escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from splunk_studio_xml import wrap_studio_dashboard_xml
+
 VIEWS = ROOT / "splunk_app" / "splunk_compliance_app" / "default" / "data" / "ui" / "views"
-OUT_JSON = VIEWS / "executive_governance.json"
+OUT_STUDIO_XML = VIEWS / "executive_governance.xml"
 OUT_CLASSIC = VIEWS / "executive_governance_classic.xml"
-# Legacy filenames removed on sync (pre-2.11.1 dual-dashboard layout).
-LEGACY_XML = VIEWS / "executive_governance.xml"
+# Legacy filenames removed on sync.
+LEGACY_JSON = VIEWS / "executive_governance.json"
 LEGACY_STUDIO = VIEWS / "executive_governance_studio.json"
 
 W = 1440
@@ -366,14 +370,18 @@ def build_studio_json() -> dict:
 
 def main() -> None:
     VIEWS.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(json.dumps(build_studio_json(), indent=2) + "\n", encoding="utf-8")
+    studio = build_studio_json()
+    OUT_STUDIO_XML.write_text(
+        wrap_studio_dashboard_xml(studio["title"], studio["description"], studio),
+        encoding="utf-8",
+    )
     OUT_CLASSIC.write_text(build_xml(), encoding="utf-8")
-    for legacy in (LEGACY_XML, LEGACY_STUDIO):
+    for legacy in (LEGACY_JSON, LEGACY_STUDIO):
         if legacy.is_file():
             legacy.unlink()
             print(f"Removed legacy {legacy.name}")
-    json.loads(OUT_JSON.read_text(encoding="utf-8"))
-    print(f"Wrote {OUT_JSON.name} (Dashboard Studio — nav default executive_governance)")
+    json.loads(json.dumps(studio))
+    print(f"Wrote {OUT_STUDIO_XML.name} (Dashboard Studio v2 — nav default executive_governance)")
     print(f"Wrote {OUT_CLASSIC.name} (Classic fallback — nav executive_governance_classic)")
 
 
