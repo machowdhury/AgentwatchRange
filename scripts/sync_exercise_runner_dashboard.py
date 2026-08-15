@@ -57,6 +57,25 @@ def _layout_item(item: str, y: int, h: int) -> dict:
     }
 
 
+def _button_input(label: str, token: str, *, value: str = "1") -> dict:
+    """
+    Dashboard Studio input.button (Splunk 10.2 builder schema).
+
+    Verified shape: options.label for visible text; drilldown.setToken on click.
+    Buttons do NOT use options.items (that is input.dropdown — causes generic "BUTTON" UI).
+    """
+    return {
+        "type": "input.button",
+        "options": {"label": label},
+        "eventHandlers": [
+            {
+                "type": "drilldown.setToken",
+                "options": {"tokens": [{"token": token, "value": value}]},
+            }
+        ],
+    }
+
+
 def _token(technique_id: str) -> str:
     return technique_id.replace(".", "_")
 
@@ -135,24 +154,8 @@ def _add_technique_cell(
             ],
         },
     }
-    inputs[f"input_run_{tok}"] = {
-        "type": "input.button",
-        "title": f"Run {tid}",
-        "options": {
-            "token": run_token,
-            "defaultValue": "0",
-            "items": [{"label": "▶ Run this cell", "value": "1"}],
-        },
-    }
-    inputs[f"input_reveal_{tok}"] = {
-        "type": "input.button",
-        "title": f"Reveal explanation for {tid}",
-        "options": {
-            "token": reveal_token,
-            "defaultValue": "0",
-            "items": [{"label": "Reveal explanation", "value": "1"}],
-        },
-    }
+    inputs[f"input_run_{tok}"] = _button_input("▶ Run this cell", run_token)
+    inputs[f"input_reveal_{tok}"] = _button_input("Reveal explanation", reveal_token)
 
     data_sources[f"ds_pred_{tok}"] = {
         "type": "ds.search",
@@ -312,15 +315,7 @@ def _tier0_layout(
         "dataSources": {"primary": "ds_tier0_baseline"},
         "options": {"count": 10},
     }
-    inputs["input_run_tier0"] = {
-        "type": "input.button",
-        "title": "Run baseline check",
-        "options": {
-            "token": "run_tier0",
-            "defaultValue": "1",
-            "items": [{"label": "▶ Run baseline SPL", "value": "1"}],
-        },
-    }
+    inputs["input_run_tier0"] = _button_input("▶ Run baseline SPL", "run_tier0")
     y = 0
     for item, h in [
         ("viz_tier0_intro", 320),
@@ -357,15 +352,7 @@ def _tier5_layout(
     for label, tid in [("Tier 1 example (AML.T0015)", "AML.T0015"), ("Tier 2 example (AML.T0050)", "AML.T0050")]:
         tok = _token(tid)
         run_token = f"run_t5_{tok}"
-        inputs[f"input_run_t5_{tok}"] = {
-            "type": "input.button",
-            "title": f"Run comparison for {tid}",
-            "options": {
-                "token": run_token,
-                "defaultValue": "0",
-                "items": [{"label": f"▶ Run {tid}", "value": "1"}],
-            },
-        }
+        inputs[f"input_run_t5_{tok}"] = _button_input(f"▶ Run {tid}", run_token)
         data_sources[f"ds_t5_{tok}"] = {
             "type": "ds.search",
             "name": f"Tier 5 comparison {tid}",
