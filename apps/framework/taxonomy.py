@@ -30,6 +30,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 import json
+import os
 
 import yaml
 
@@ -87,7 +88,7 @@ class TechniqueEntry:
     references: List[str] = field(default_factory=list)
     real_world_incident: str = ""    # Known real incident if applicable
     quality_tier: str = "reviewed"   # reviewed | community | synthetic
-    learning_tier: int = 4           # 0–6 curriculum tier (see learning_tiers.py)
+    learning_tier: int = -1          # 0–6 curriculum tier; -1 = unset (must come from YAML)
     redundant_with: str = ""         # nullable technique_id if SIMULATED breadth-only
 
     def to_dict(self) -> dict:
@@ -153,6 +154,23 @@ def _load_framework_registries() -> dict:
     return _load_yaml_file("framework_registries.yaml")
 
 
+def assert_learning_tier_distribution(registry: List[TechniqueEntry]) -> None:
+    """Fail loudly if learning tiers look like an un-mutated registry default."""
+    tiers = [entry.learning_tier for entry in registry]
+    unique = set(tiers)
+    if len(unique) <= 1:
+        raise ValueError(
+            "learning_tier regression: all techniques share the same tier "
+            f"({next(iter(unique)) if unique else 'none'}). "
+            "Regenerate technique_registry.yaml via scripts/sync_technique_registry_yaml.py"
+        )
+    if any(t < 0 for t in tiers):
+        raise ValueError(
+            "learning_tier regression: one or more techniques have unset tier (-1). "
+            "Regenerate technique_registry.yaml via scripts/sync_technique_registry_yaml.py"
+        )
+
+
 # =============================================================================
 # REGISTRIES (loaded from YAML)
 # =============================================================================
@@ -164,6 +182,10 @@ NIST_AI_RMF_FUNCTIONS: Dict[str, dict] = _framework_data.get("nist_ai_rmf_functi
 OWASP_LLM_REGISTRY: Dict[str, dict] = _framework_data.get("owasp_llm_registry", {})
 OWASP_ASI_REGISTRY: Dict[str, dict] = _framework_data.get("owasp_asi_registry", {})
 TECHNIQUE_REGISTRY: List[TechniqueEntry] = _load_technique_registry()
+
+if os.environ.get("TAXONOMY_ASSERT_LEARNING_TIERS", "1") != "0":
+    assert_learning_tier_distribution(TECHNIQUE_REGISTRY)
+
 
 # =============================================================================
 # LOOKUP HELPERS

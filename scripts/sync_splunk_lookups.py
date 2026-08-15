@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "apps"))
 
 from framework.technique_playbooks import get_all_playbooks  # noqa: E402
-from framework.taxonomy import TECHNIQUE_REGISTRY  # noqa: E402
+from framework.taxonomy import TECHNIQUE_REGISTRY, assert_learning_tier_distribution  # noqa: E402
 
 LOOKUP_DIR = ROOT / "splunk_app" / "splunk_compliance_app" / "lookups"
 
@@ -150,6 +150,7 @@ def enrich_framework_lookup() -> Path:
 
 
 def main() -> None:
+    assert_learning_tier_distribution(TECHNIQUE_REGISTRY)
     LOOKUP_DIR.mkdir(parents=True, exist_ok=True)
     playbooks_path = export_playbooks_lookup()
     framework_path = enrich_framework_lookup()
