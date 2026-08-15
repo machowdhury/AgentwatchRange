@@ -21,7 +21,7 @@
         <ul>
           <li><code>otel:agentic:json</code> — primary OTel GenAI pipeline (<code>gen_ai.usage.input_tokens</code>, <code>acme_output_guard.action</code>)</li>
           <li><code>acme:agentic:vendorsim:json</code> — synthetic vendor-platform shape (<code>vendorsim_objective</code>, <code>agent_name</code>)</li>
-          <li><code>acme:agentic:thirdparty:json</code> — homegrown stack sim (<code>token_count_in</code>, <code>agent_id</code>, <code>threat_label</code>)</li>
+          <li><code>acme:agentic:registry:json</code> — agent inventory snapshots (<code>agent_status</code>, <code>trust_score</code>)</li>
         </ul>
         <p>Normalization lives in <code>props.conf</code> calculated fields (<code>norm_*</code>) — not per-dashboard <code>coalesce()</code> chains. One query below works across all three.</p>
       </html>

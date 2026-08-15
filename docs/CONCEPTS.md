@@ -153,7 +153,21 @@ This lab is meant to **demonstrate the telemetry and workflow** you would get wi
 
 Agentic apps will **never** agree on a native schema. The value of a SIEM here is not collecting more logs — it is **normalizing heterogeneous agentic telemetry** into one framework-mappable model (`norm_*` fields in `props.conf`), so compliance and detection logic does not get rewritten per app.
 
-Open **GenAI Compliance Monitor → Cross-App Normalization** after Tier 3 to compare raw vs normalized events across `otel:agentic:json`, `acme:agentic:vendorsim:json`, and `acme:agentic:thirdparty:json`.
+Open **GenAI Compliance Monitor → Cross-App Normalization** after Tier 3 to compare raw vs normalized events across `otel:agentic:json`, `acme:agentic:vendorsim:json`, `acme:agentic:thirdparty:json`, and inventory snapshots in `acme:agentic:registry:json`.
+
+**Inventory vs events:** Agentic telemetry is not only heterogeneous in field names — it is heterogeneous in *data model*. Transaction streams (`otel:agentic:json`) differ from periodic inventory snapshots (`acme:agentic:registry:json`). Splunk must normalize both for governance dashboards (Phase 11).
+
+### Continuous baseline traffic (Phase 10)
+
+Benign traffic runs through the **real** banking pipeline (`testbed_mode=BASELINE_TRAFFIC`), not `makeresults` SPL:
+
+| Mechanism | Purpose |
+|-----------|---------|
+| In-process `traffic_simulator` (default on banking app) | OTel benign loan requests every 90–240s |
+| `scripts/baseline_traffic_generator.py` | External HTTP client to banking API |
+| `docker compose --profile baseline --profile local up` | HEC trickle for vendorsim, thirdparty, registry |
+
+Filter attacks: `` NOT testbed_mode=BASELINE_TRAFFIC ``
 
 ### Splunk — full transparency on the integration
 

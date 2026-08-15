@@ -103,9 +103,15 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
+def _baseline_enabled() -> bool:
+    if os.environ.get("BASELINE_TRAFFIC_ENABLED") is not None:
+        return _env_bool("BASELINE_TRAFFIC_ENABLED", False)
+    return _env_bool("TRAFFIC_SIM_ENABLED", True)
+
+
 @dataclass
 class TrafficSimConfig:
-    enabled: bool = field(default_factory=lambda: _env_bool("TRAFFIC_SIM_ENABLED", True))
+    enabled: bool = field(default_factory=_baseline_enabled)
     interval_min_sec: int = field(
         default_factory=lambda: _env_int("TRAFFIC_SIM_INTERVAL_MIN_SEC", 90, 30)
     )
@@ -359,6 +365,6 @@ def stop() -> Dict[str, Any]:
 def maybe_autostart() -> None:
     cfg = TrafficSimConfig().normalized()
     if not cfg.enabled:
-        logger.info("[TrafficSim] disabled (TRAFFIC_SIM_ENABLED=false)")
+        logger.info("[TrafficSim] disabled (BASELINE_TRAFFIC_ENABLED/TRAFFIC_SIM_ENABLED=false)")
         return
     start()
