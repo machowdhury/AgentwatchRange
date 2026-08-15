@@ -12,7 +12,8 @@ splunk_app
 .env.*
 docker-compose*.yml
 config
-scripts
+scripts/*
+!scripts/baseline_hec_service.py
 prevbuild
 *.tar.gz
 .idea
